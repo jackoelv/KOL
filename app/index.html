@@ -6,86 +6,105 @@
 <link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
 </head>
 <body class="container">
-  <h1>KOL — Dapp</h1>
-  <p>You have <strong class="balance">loading...</strong> KOL</p>
-  <p>You is Supernode? <strong class="supernode">loading...</strong> KOL</p>
-  <p>You is Node? <strong class="node">loading...</strong> KOL</p>
+   <div style="text-align:center">
+  <h1>KOL ― Dapp</h1>
+  <p>我的钱包地址是： <strong class="myAddress">loading...</strong></p>
+  <p>你有 <strong class="balance">loading...</strong> 个KOL</p>
+  <p>是超级节点？ <strong class="supernode">loading...</strong></p>
+  <p>是节点？<strong class="node">loading...</strong></p>
+  </div>
+  <hr style="border:1px dotted #036" />
+      <p>
+        <strong>提示:</strong> 打开开发者工具查看执行情况。
+      </p>
+      <hr style="border:1px dotted #036" />
 
-  <h1>Send Coin</h1>
-
-  <label for="amount">Amount:</label>
+        <h1 style="text-align:center">执行情况如下&nbsp;:</h1>
+        <br>
+        <p id="status"></p>
+        <br>
+        <div id="address"></div>
+        <div class="table-responsive">
+          <div id="msg"></div>
+        </div>
+          <hr style="border:1px dotted #036" />
+  <h1>&nbsp;&nbsp;从当前账户发送KOL到</h1>
+<br>
+  <label for="amount">数量&nbsp;:</label>
   <input type="text" id="amount" placeholder="e.g. 95" />
-
-  <label for="receiver">To address:</label>
+<br>
+  <label for="receiver">接收地址&nbsp;:</label>
   <input
     type="text"
     id="receiver"
     placeholder="e.g. 0x93e66d9baea28c17d9fc393b53e3fbdd76899dae"
   />
-
-  <button onclick="App.sendCoin()">Send Coin</button>
-    <p id="status"></p>
-    <p>
-      <strong>提示:</strong> 打开开发者工具查看执行情况。
-    </p>
-    <h1>执行结果消息如下</h1>
-    <br>
-    <div id="address"></div>
-    <div class="table-responsive">
-      <div id="msg"></div>
-    </div>
-  <h1>设置节点</h1>
   <br>
-    <label>输入地址</label><input name="NODE" type="text" value="0xF9c53a3192640aC85Ea3A0f468fb3e37b388D061" />
-    <br>
+
+  <button onclick="App.sendCoin()" class="btn btn-primary">发送</button>
+<br>
+  <h1>&nbsp;&nbsp;设置节点</h1>
+  <br>
+    <label>输入地址:&nbsp;</label><input name="NODE" type="text" value="" placeholder="0xF9c53a3192640aC85Ea3A0f468fb3e37b388D061" />
+<br>
     <a href="#" onclick="App.setNode(1)" class="btn btn-primary">设为超级节点</a>
     <a href="#" onclick="App.setNode(2)" class="btn btn-primary">设为节点</a>
-    <br>
-  <h1>发起任务</h1>
-<br>请选择任务<br/>
+	<hr style="border:1px dotted #036" />
+
+  <h1>&nbsp;&nbsp;发起任务</h1>
+<br>请选择任务:<br/>
 
 <label>换超级节点</label><input name="MissionType" type="radio" value="1" />
+<br>
 <label>换节点</label><input name="MissionType" type="radio" value="2" />
+<br>
 <label>换管理员</label><input name="MissionType" type="radio" value="3" />
+<br>
 <label>任务发行</label><input name="MissionType" type="radio" value="4" />
+<br>
 <label>创始发行</label><input name="MissionType" type="radio" value="6" />
+<br>
 <label>回收销毁</label><input name="MissionType" type="radio" value="7" />
 <br>
-<label>任务名称</label><input name="MissionName" type="text" value="renwumingcheng" />
-<label>发行总量</label><input name="TotalAmount" type="text" value="7" />
-<label>旧地址</label><input name="OldNode" type="text" value="0xF9c53a3192640aC85Ea3A0f468fb3e37b388D061" />
-<label>新地址</label><input name="NewNode" type="text" value="0x2D56EcDCe8Fe8be4F28Ee2C997e4d5624DE7cEcc" />
+<label>任务名称 :&nbsp;</label><input name="MissionName" type="text" value="" placeholder="renwumingcheng" />
 <br>
-<a href="#" onclick="App.createMission()" class="btn btn-primary">发起任务按这里</a>
-
+<label>发行总量 :&nbsp;</label><input name="TotalAmount" type="text" value="" placeholder="0" />
 <br>
+<label>&nbsp;旧 地 址 :&nbsp;</label><input name="OldNode" type="text" value="" placeholder="0xF9c53a3192640aC85Ea3A0f468fb3e37b388D061" />
+<br>
+<label>&nbsp;&nbsp;新 地 址 :&nbsp;</label><input name="NewNode" type="text" value=""placeholder="0x2D56EcDCe8Fe8be4F28Ee2C997e4d5624DE7cEcc" />
+<br>
+<a href="#" onclick="App.createMission()" class="btn btn-primary">发起任务</a>
 
-  <h1>投票</h1>
+<hr style="border:1px dotted #036" />
+
+  <h1>&nbsp;&nbsp;投票</h1>
   <br>
 
-<label><input name="MissionId" type="text" value="7" />请输入任务ID </label>
+<label>请输入任务ID :&nbsp;<input name="MissionId" type="text" value="" placeholder="0" /></label>
 <br>
-<label><input name="Agree" type="radio" value="true" />同意 </label>
-<label><input name="Agree" type="radio" value="false" />反对 </label>
+<label>同意 <input name="Agree" type="radio" value="true" /></label>
+<label>反对 <input name="Agree" type="radio" value="false" /></label>
 <br>
-<a href="#" onclick="App.voteKol(1)" class="btn btn-primary">超级节点投票按这里</a>
+<a href="#" onclick="App.voteKol(1)" class="btn btn-primary">超级节点投票</a>
 ||||
-<a href="#" onclick="App.voteKol(2)" class="btn btn-primary">节点投票按这里</a>
-<br>
-  <h1>上传名单</h1>
+<a href="#" onclick="App.voteKol(2)" class="btn btn-primary">节点投票</a>
+<hr style="border:1px dotted #036" />
+  <h1>&nbsp;&nbsp;上传名单</h1>
   <br>
-  <label><input name="target" type="text" value="7" />请输入地址 </label>
-  <label><input name="targetAmount" type="text" value="7" />请输入数量 </label>
+  <label>请输入地址 :&nbsp;<input name="target" type="text" value="" placeholder="0" /></label>
   <br>
+  <label>请输入数量 :&nbsp;<input name="targetAmount" type="text" value="" placeholder="0" /></label>
   <br>
-  <a href="#" onclick="App.addOffering()" class="btn btn-primary">上传名单按这里</a>
+  <a href="#" onclick="App.addOffering()" class="btn btn-primary">上传名单</a>
+  <hr style="border:1px dotted #036" />
+  <h1>&nbsp;&nbsp;执行任务</h1>
   <br>
-  <h1>执行任务</h1>
+  <label>请输入任务 ID:&nbsp;</label><input name="excuteMissionId" type="text" value="" placeholder="0" /></label>
   <br>
-  <label>请输入任务ID</label><input name="excuteMissionId" type="text" value="7" />请输入任务ID </label>
-<a href="#" onclick="App.excute()" class="btn btn-primary">只能管理员来按这个按钮</a>
+<a href="#" onclick="App.excute()" class="btn btn-primary">管理员确认提交</a>
 
-
+<hr style="border:1px dotted #036" />
 
 </body>
 <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>

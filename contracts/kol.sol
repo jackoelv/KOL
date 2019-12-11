@@ -5,7 +5,7 @@ pragma solidity ^0.4.23;
  *             ╚═╝└  └  ┴└─┘┴┴ ┴┴─┘ └─┬─────────────────────┬─┘ ╚╩╝└─┘└─┘╚═╝┴ ┴ └─┘
  *   ┌────────────────────────────────┘                     └──────────────────────────────┐
  *   │    ┌─────────────────────────────────────────────────────────────────────────────┐  │
- *   └────┤ Dev:Jack Koe ├─────────────┤ Special for: KOL  ├───────────────┤ 20191203   ├──┘
+ *   └────┤ Dev:Jack Koe ├─────────────┤ Special for: KOL  ├───────────────┤ 20191211   ├──┘
  *        └─────────────────────────────────────────────────────────────────────────────┘
  */
 
@@ -118,13 +118,11 @@ contract StandardToken is ERC20, BasicToken {
     emit Transfer(_from, _to, _value);
     return true;
   }
-
   function approve(address _spender, uint256 _value) public returns (bool) {
     allowed[msg.sender][_spender] = _value;
     emit Approval(msg.sender, _spender, _value);
     return true;
   }
-
   function allowance(
     address _owner,
     address _spender
@@ -177,20 +175,9 @@ contract KOL is StandardToken{
     string public symbol = "KOL";
     uint256 public decimals = TOKEN_DECIMALS;
     uint256 public totalSupply = 21000000 *(10**uint256(TOKEN_DECIMALS));
-    uint256 public constant initialTotal = 21000000 *(10**uint256(TOKEN_DECIMALS));
+
     uint256 public totalSupplyed = 0;
     address public ethFundDeposit;
-
-    /* uint256 public constant totalSuperNodes = 21;
-    uint256 public constant totalNodes = 500;
-    uint256 public constant halfSuperNodes = 11;
-    uint256 public constant mostNodes = 335;
-    uint256 public constant halfNodes = 251;
-    uint256 public constant minSuperNodes = 15;
-    uint256 public constant minNodes = 101;
-
-    uint256 public constant half = 51;
-    uint256 public constant less = 33; */
 
     uint16 public constant totalSuperNodes = 21;
     uint16 public constant totalNodes = 500;
@@ -225,14 +212,15 @@ contract KOL is StandardToken{
 
 contract KOLVote is KOL {
 
-    uint256 public totalNodeSupply = 5000000 *(10**uint256(TOKEN_DECIMALS));
-    uint256 public totalUserSupply = 16000000 *(10**uint256(TOKEN_DECIMALS));
+    uint256 public constant totalNodeSupply = 5000000 *(10**uint256(TOKEN_DECIMALS));
+    uint256 public constant totalUserSupply = 16000000 *(10**uint256(TOKEN_DECIMALS));
     uint256 public nodeSupplyed = 0;
     uint256 public userSupplyed = 0;
 
     uint256 public superNodesNum = 0;
     uint256 public nodesNum = 0;
     uint256 public dealTime =  3 days;
+    uint256 public missionId = 0;
 
     mapping(address => bool) private isSuperNode;
     mapping(address => bool) private isNode;
@@ -244,8 +232,6 @@ contract KOLVote is KOL {
     event RecycleTokens(uint256 _missionId,uint256 _totalAmount);
     event NodeChanged(uint16 _type,address _oldNode,address _newNode);
     event MissionLaunched(bytes32 _name,uint256 _missionId,address _whoLaunch);
-
-
     event Burn(address indexed burner, uint256 value);
 
     function burn(uint256 _value) internal {
@@ -295,8 +281,6 @@ contract KOLVote is KOL {
     /*       KOL Vote Code Begin here                  */
     /***************************************************/
 
-    uint256 public missionId = 0;
-
     struct KolMission{
       address oldNode;
       address newNode;
@@ -312,7 +296,6 @@ contract KOLVote is KOL {
       bool superPassed;
       bool nodePassed;
       bool done;
-
     }
     mapping (uint256 => KolMission) private missionList;
 
@@ -324,9 +307,7 @@ contract KOLVote is KOL {
 
     mapping(uint256 => KolOffering[]) private offeringList;
 
-    //创建一个项目任务，super来投票。
-    //_type 1,换超级节点；2，换节点；3，换Owner；4，发起项目任务；6，创世发行；7,销毁管理员账户地址指定数量的币。
-    //换节点和超级节点，管理员投票通过直接换，做任务需要管理员做最后的发行审核。
+    //_type:1,change supernode;2,change node;3,changeowner;4,mission launched;6,creation issuing;7,recycle token from owner
     function createKolMission(uint16 _type,bytes32 _name,uint256 _totalAmount,address _oldNode,address _newNode) onlyNodes public {
         bytes32 iName = _name;
         if (_type == 2){
@@ -337,15 +318,13 @@ contract KOLVote is KOL {
         }else if (_type == 1){
           require(isNode[msg.sender]);
           iName = "CHANGE SUPER NODE";
+        }else if ((_type ==4)){
+          require((_totalAmount + userSupplyed) <= totalUserSupply);
         }else if (_type ==6){
           require((_totalAmount + nodeSupplyed) <= totalNodeSupply);
           iName = "CREATION ISSUING";
         }else if (_type ==7){
           iName = "RECYCLE TOKEN FROM OWNER";
-        }
-
-        if ((_type == 4) || (_type == 6)){
-          require((_totalAmount.add(totalSupplyed))<=initialTotal);
         }
         missionList[missionId] = KolMission(_oldNode,
                                             _newNode,
@@ -366,7 +345,6 @@ contract KOLVote is KOL {
         emit MissionLaunched(iName,missionId-1,msg.sender);
     }
     function addKolOffering(uint256 _missionId,address _target,uint256 _targetAmount) onlyNodes public{
-      //创建一个名单，挂在mission上面。
       require(missionList[_missionId].superPassed);
       require(!missionList[_missionId].done);
       if (missionList[_missionId].name == "CREATION ISSUING"){
@@ -386,10 +364,9 @@ contract KOLVote is KOL {
         }
 
     }
-    //投票通过自动执行的任务
+    //once voting passed,excute auto;
     function excuteAuto(uint256 _missionId) private {
       if ((missionList[_missionId].name == "CHANGE NODE") && missionList[_missionId].superPassed){
-        //投票通过直接换
         require(isNode[missionList[_missionId].oldNode]);
         require(!isSuperNode[missionList[_missionId].newNode]);
         isNode[missionList[_missionId].oldNode] = false;
@@ -413,7 +390,7 @@ contract KOLVote is KOL {
         missionList[_missionId].done = true;
       }
     }
-    //_type :1,超级节点投票；2，节点投票，
+    //_type,1,supernode;2,node
     function voteMission(uint16 _type,uint256 _missionId,bool _agree) onlyNodes public{
       require(!Voter[msg.sender][_missionId]);
       require(!missionList[_missionId].done);
@@ -421,7 +398,7 @@ contract KOLVote is KOL {
       uint16 minSuperNodesNum = minSuperNodes;
       uint16 passNodes = halfNodes;
       uint16 passSuperNodes = halfSuperNodes;
-      uint rate = half;
+      uint16 rate = half;
       if (missionList[_missionId].name == "CHANGE OWNER") {
         rate = most;
         minNodesNum = totalNodes;
@@ -431,6 +408,7 @@ contract KOLVote is KOL {
         minSuperNodesNum = minSuperNodes;
         passSuperNodes = halfSuperNodes;
       }else if (missionList[_missionId].name == "CHANGE SUPER NODE"){
+        rate = less;
         minNodesNum = minNodes;
         passNodes = halfNodes;
       }else if (missionList[_missionId].name == "CREATION ISSUING"){
@@ -444,16 +422,13 @@ contract KOLVote is KOL {
       }
 
       if (_type == 1){
-        //超级节点参与投票
         require(isSuperNode[msg.sender]);
       }else if (_type ==2){
-        //节点参与投票
         require(isNode[msg.sender]);
       }
 
       if(now > missionList[_missionId].endTime){
         if ( _type == 1 ){
-          //超级节点投票
           if (
             (missionList[_missionId].agreeSuperNodes + missionList[_missionId].refuseSuperNodes)>=minSuperNodesNum
             &&
@@ -475,10 +450,8 @@ contract KOLVote is KOL {
       }else{
         if(_agree == true){
           if (_type == 1){
-            //超级节点投票
             missionList[_missionId].agreeSuperNodes++;
           }else if(_type == 2){
-            //节点投票
             missionList[_missionId].agreeNodes++;
           }
         }
@@ -507,8 +480,7 @@ contract KOLVote is KOL {
       Voter[msg.sender][_missionId] = true;
       excuteAuto(_missionId);
     }
-    //执行投票任务
-    //_type:4任务通过，5按名单做币的发行；7，从Owner地址回收Token；
+
     function excuteVote(uint256 _missionId) onlyOwner public {
       require(!missionList[_missionId].done);
       require(uint256(now) < (missionList[_missionId].endTime + uint256(dealTime)));
@@ -516,7 +488,7 @@ contract KOLVote is KOL {
       require(missionList[_missionId].superPassed);
       require(missionList[_missionId].nodePassed);
       require(missionList[_missionId].totalAmount == missionList[_missionId].offeringAmount);
-      require((missionList[_missionId].totalAmount.add(totalSupplyed))<=initialTotal);
+      require((missionList[_missionId].totalAmount.add(totalSupplyed))<=totalNodeSupply.add(totalUserSupply));
 
       if (missionList[_missionId].name == "CREATION ISSUING"){
         require((nodeSupplyed.add(missionList[_missionId].totalAmount))<=totalNodeSupply);

@@ -18,7 +18,6 @@ const App = {
         kolvote_artifacts.abi,
         deployedNetwork.address,
       );
-
       // get accounts
       const accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
@@ -29,21 +28,24 @@ const App = {
     }
   },
   setNode:async function(type){
+    this.setStatus("设置节点任务进行中... (请稍等)");
     const { setNode } = this.meta.methods;
     const { setSuperNode } = this.meta.methods;
     let address = $("input[name='NODE']").val();
+    console.log(address);
     if (type == 2){
-      await setNode(address).send({ from: this.account });
+      await setNode(address).send({ from: this.account});
+      this.setStatus("节点设置完毕");
     }else {
-      await setSuperNode(address).send({ from: this.account });
+      await setSuperNode(address).send({ from: this.account});
+      this.setStatus("超级节点设置完毕");
     }
   },
 
   createMission: async function(){
+    this.setStatus("任务发起进行中......");
     const { web3 } = this;
     const { createKolMission } = this.meta.methods;
-    this.setStatus("MISS CREATING......");
-
     let type = $('input:radio:checked').val();
     let nameo = $("input[name='MissionName']").val();
     let _name = web3.utils.fromAscii(nameo);
@@ -55,35 +57,35 @@ const App = {
     console.log(oldAddr);
     console.log(newAddr);
     await createKolMission(type,_name,_totalAmount,oldAddr,newAddr).send({ from: this.account });
-    this.setStatus("MISSION COMPLETED!");
+    this.setStatus("任务发起完毕!");
   },
 
   voteKol: async function(type){
+    this.setStatus("投票任务执行进行中......");
     let missionId = $("input[name='MissionId']").val();
     let agree = ( $("input[name='Agree']").val());
     const { voteMission } = this.meta.methods;
-    console.log(type);
-    console.log(missionId);
-    console.log(agree);
     await voteMission(type,missionId,agree).send({from: this.account});
+    this.setStatus("投票完毕！");
 
   },
   addOffering: async function(){
+    this.setStatus("增加名单进行中");
     const { web3 } = this;
     const { addKolOffering } = this.meta.methods;
     let missionId = $("input[name='MissionId']").val();
     let target = $("input[name='target']").val();
     let _targetAmount = $("input[name='target']").val();
     let targetAmount = web3.utils.toWei(_targetAmount,'ether');
-    console.log(missionId);
-    console.log(target);
-    console.log(targetAmount);
     await addKolOffering(missionId,target,targetAmount).send({ from: this.account });
+    this.setStatus("名单提交完毕");
   },
   excute: async function(){
+    this.setStatus("任务开始执行......");
     let missionId = $("input[name='excuteMissionId']").val();
     const { excuteVote } = this.meta.methods;
     await excuteVote(missionId).send({ from: this.account });
+    this.setStatus("任务执行完毕！");
   },
 
   refreshBalance: async function() {
@@ -94,7 +96,9 @@ const App = {
     const balance = await balanceOf(this.account).call();
     const supernode = await querySuperNode(this.account).call();
     const node = await queryNode(this.account).call();
+    const myAddress = this.account;
 
+    const addrElement = document.getElementsByClassName("myAddress")[0];
     const balanceElement = document.getElementsByClassName("balance")[0];
     const supernodeElement = document.getElementsByClassName("supernode")[0];
     const nodeElement = document.getElementsByClassName("node")[0];
@@ -102,23 +106,19 @@ const App = {
     balanceElement.innerHTML = balance;
     supernodeElement.innerHTML = supernode;
     nodeElement.innerHTML = node;
+    addrElement.innerHTML = myAddress;
 
 
   },
 
   sendCoin: async function() {
-    // console.log(web3);
+    this.setStatus("交易进行中... (请稍等)");
     const { web3 } = this;
     const amount = document.getElementById("amount").value;
     const receiver = document.getElementById("receiver").value;
-
-    this.setStatus("Initiating transaction... (please wait)");
-
     const { transfer } = this.meta.methods;
-
     await transfer(receiver, web3.utils.toWei(amount,'ether')).send({ from: this.account });
-
-    this.setStatus("Transaction complete!");
+    this.setStatus("交易完毕!");
     this.refreshBalance();
   },
 
@@ -134,8 +134,6 @@ window.addEventListener("load", function() {
   if (window.ethereum) {
     // use MetaMask's provider
     App.web3 = new Web3(window.ethereum);
-    console.log("load kao");
-    console.log(App.web3.version);
     window.ethereum.enable(); // get permission to access accounts
   } else {
     console.warn(
