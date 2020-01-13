@@ -7,7 +7,6 @@ import usdt from '../../build/contracts/TetherToken.json';
 // import bulk_artifacts from '../../build/contracts/xx.json';
 // var fs = require("fs");
 // import fs from "fs";
-var FastCsv = require("fast-csv");
 var BigNumber = require("bignumber.js");
 
 const App = {
@@ -16,9 +15,6 @@ const App = {
   meta: null,
   // metabulk:null,
   processedList: null,
-  listFile: "./data/list.csv",
-  processedListFile: "./data/processed.txt",
-  processedListUpdateFile: "./data/processed_updated.txt",
   processedList:null,
   targets:new Array(),
   eventsNum:new Array(),
