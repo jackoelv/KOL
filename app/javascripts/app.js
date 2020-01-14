@@ -56,6 +56,7 @@ const App = {
       let missionID = parseInt(await missionId().call());
 
       this.missionId = missionID;
+      $("input[name='MissionId']").val(missionID-1);
       this.account = accounts[0];
       this.refreshBalance();
       this.getNodesVotedNum();
