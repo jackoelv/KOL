@@ -3,48 +3,163 @@
 <head>
   <title>createKolMission</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-  <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
-<link href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css' rel='stylesheet' type='text/css'>
+   <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="http://i.gtimg.cn/vipstyle/frozenui/2.0.0/css/frozen.css">
 
 </head>
 <body class="container">
    <div style="text-align:center">
-  <h1>KOL ― Dapp</h1>
-  <p>我的钱包地址是： <strong class="myAddress">loading...</strong></p>
-  <p>你有 <strong class="balance">loading...</strong> 个KOL</p>
-  <p>是超级节点？ <strong class="supernode">loading...</strong></p>
-  <p>是节点？<strong class="node">loading...</strong></p>
-  <p>投票了吗？<strong class="voted">loading...</strong></p>
-  </div>
-    <hr style="border:1px dotted #036" />
-      <p>任务编号：<strong class="missionid">loading...</strong>
-        <br>
-        同意的节点数量：<strong class="nodeVotedNum">loading...</strong></p>
-      <p>同意的超级节点数量：<strong class="superVotedNum">loading...</strong></p>
+  <h1>社区KOL联盟</h1>
+
+  <ul class="ui-list-text border-list">
+      <li class="ui-border">
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>现在开始投票吧：
+            </div>
+        </div>
+
+      <form action="">
+      <section class="ui-input-wrap ui-border-t">
+          <div class="ui-input ui-border-radius ui-input-text">
+              <input type="text" name="MissionId" value="" placeholder="请输入任务ID...">
+          </div>
+      </section>
+          <div class="ui-form-item ui-form-item-radio ui-border-b">
+              <label class="ui-radio" for="radio">
+                  <input type="radio" name="Agree" value="true">
+              </label>
+              <p>同意</p>
+          </div>
+          <div class="ui-form-item ui-form-item-radio ui-border-b">
+
+              <label class="ui-radio" for="radio">
+                  <input type="radio" checked="" name="Agree" value="false">
+              </label>
+              <p>反对</p>
+          </div>
+      </form>
+
+      <div class="ui-tooltips ui-tooltips-guide">
+          <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+              <i class="ui-icon-talk"></i>投票结果是
+          </div>
+      </div>
+      <div class="ui-tooltips">
+          <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <p id="status">waiting...</p>
+          </div>
+      </div>
+
+      <div class="ui-btn-wrap">
+              <button class="ui-btn-lg ui-btn-danger" onclick="App.voteKol(1)">超级节点投票按这里</button>
+      </div>
+
+      <div class="ui-btn-wrap">
+              <button class="ui-btn-lg ui-btn-primary" onclick="App.voteKol(2)">社区节点投票按这里</button>
+      </div>
+
+      </li>
+
+      <li class="ui-border">
 
 
-        <h1 style="text-align:center">投票结果是&nbsp;:</h1>
-        <br>
-        <p id="status">waiting...</p>
-        <br>
+
+<button class="ui-btn-lg disabled">下面是一些数据情况：</button>
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>我的钱包地址是：
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <strong class="myAddress">loading...</strong>
+            </div>
+        </div>
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>我的KOL余额是：
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <strong class="balance">loading...</strong>
+            </div>
+        </div>
+
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>我是超级节点吗？
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                 <strong class="supernode">loading...</strong>
+            </div>
+        </div>
+
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>我是节点吗？
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                 <strong class="node">loading...</strong>
+            </div>
+        </div>
+
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>近期任务我已经投票了吗？
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                 <strong class="voted">loading...</strong>
+            </div>
+        </div>
 
 
-<hr style="border:1px dotted #036" />
-
-  <h1>&nbsp;&nbsp;投票</h1>
-  <br>
-
-<label>请输入任务ID :&nbsp;<input name="MissionId" type="text" value="" placeholder="0" /></label>
-<br>
-<label>同意 <input name="Agree" type="radio" value="true" /></label>
-<label>反对 <input name="Agree" type="radio" value="false" /></label>
-<br>
-<a href="#" onclick="App.voteKol(1)" class="btn btn-primary">超级节点按这里</a>
-<p><strong class="node">------我是分割线------</strong></p>
-<a href="#" onclick="App.voteKol(2)" class="btn btn-primary">节点投票按这里</a>
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>当前投票进行中的任务编号是：
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                 <strong class="missionid">loading...</strong>
+            </div>
+        </div>
 
 
-<hr style="border:1px dotted #036" />
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>同意的超级节点数量：
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                 <strong class="superVotedNum">loading...</strong>
+            </div>
+        </div>
+
+
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>同意的节点数量：
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                 <strong class="nodeVotedNum">loading...</strong>
+            </div>
+        </div>
+
+
+      </li>
+  </ul>
+
 
 </body>
 <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>

@@ -70,9 +70,12 @@ const App = {
 
 
   voteKol: async function(type){
+    console.log("yes in");
     this.setStatus("投票任务执行进行中......");
     let missionId = $("input[name='MissionId']").val();
     let agree = ( $("input[name='Agree']").val());
+    console.log(missionId);
+    console.log(agree);
     const { voteMission } = this.meta.methods;
     await voteMission(type,missionId,agree).send({from: this.account});
     this.setStatus("投票完毕！");
