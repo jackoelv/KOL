@@ -8,7 +8,10 @@ var BigNumber = require("bignumber.js");
 
 const App = {
   web3: null,
+  // accounts:null,
   account: null,
+  // accountLength:0,
+  // currentAccount:0,
   meta: null,
   // metabulk:null,
   processedList: null,
@@ -51,13 +54,14 @@ const App = {
         deployedNetwork.address,
       );
       const { missionId } = this.meta.methods;
-      const accounts = await web3.eth.getAccounts();
+      let accounts = await web3.eth.getAccounts();
 
       let missionID = parseInt(await missionId().call());
 
       this.missionId = missionID;
       $("input[name='MissionId']").val(missionID-1);
       this.account = accounts[0];
+      this.initial();
       // this.refreshBalance();
       // this.getNodesVotedNum();
       this.setmStatus("链上数据加载成功！");
@@ -93,10 +97,6 @@ const App = {
         this.setStatus("投票失败，刷新重来吧");
     }
 
-
-
-
-
   },
 
   refreshBalance: async function() {
@@ -113,9 +113,9 @@ const App = {
     const supernode = await querySuperNode(this.account).call();
     const node = await queryNode(this.account).call();
     const votedresult = await voted(this.account,this.missionId-1).call();
-    const myAddress = this.account;
+    // const myAddress = this.account;
 
-    const addrElement = document.getElementsByClassName("myAddress")[0];
+    // const addrElement = document.getElementsByClassName("myAddress")[0];
     const balanceElement = document.getElementsByClassName("balance")[0];
     const supernodeElement = document.getElementsByClassName("supernode")[0];
     const nodeElement = document.getElementsByClassName("node")[0];
@@ -136,12 +136,28 @@ const App = {
     else
       votedElement.innerHTML = "没投票";
     balanceElement.innerHTML = balance;
-    addrElement.innerHTML = myAddress;
+    // addrElement.innerHTML = myAddress;
 
     this.getNodesVotedNum();
 
   },
 
+  initial:function(){
+    const addrElement = document.getElementsByClassName("myAddress")[0];
+    const myAddress = this.account;
+    addrElement.innerHTML = myAddress;
+
+  },
+  // changeWallet:function(){
+  //   console.log(this.accountLength);
+  //   if(this.accountLength == this.currentAccount + 1 )
+  //     this.currentAccount = 0;
+  //   else {
+  //     this.currentAccount++;
+  //   }
+  //   this.account = this.accounts[this.currentAccount];
+  //   this.initial();
+  // },
 
   setStatus: function(message) {
     const status = document.getElementsByClassName("status")[0];
