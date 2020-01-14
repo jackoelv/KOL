@@ -58,8 +58,8 @@ const App = {
       this.missionId = missionID;
       $("input[name='MissionId']").val(missionID-1);
       this.account = accounts[0];
-      this.refreshBalance();
-      this.getNodesVotedNum();
+      // this.refreshBalance();
+      // this.getNodesVotedNum();
 
     } catch (error) {
       console.error("Could not connect to contract or chain.");
@@ -120,6 +120,8 @@ const App = {
     balanceElement.innerHTML = balance;
     addrElement.innerHTML = myAddress;
 
+    this.getNodesVotedNum();
+
   },
 
 
@@ -142,9 +144,7 @@ window.addEventListener("load", function() {
       "No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live",
     );
     // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-    App.web3 = new Web3(
-      new Web3.providers.HttpProvider("http://127.0.0.1:8545"),
-    );
+
   }
 
   App.start();
