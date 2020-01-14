@@ -4,9 +4,6 @@ import Web3 from "web3";
 import kolvote_artifacts from '../../build/contracts/KOLVote.json';
 import kolcoreteam from '../../build/contracts/KolCoreTeam.json';
 import usdt from '../../build/contracts/TetherToken.json';
-// import bulk_artifacts from '../../build/contracts/xx.json';
-// var fs = require("fs");
-// import fs from "fs";
 var BigNumber = require("bignumber.js");
 
 const App = {
@@ -75,17 +72,22 @@ const App = {
 
 
   voteKol: async function(type){
+    const { web3 } = this;
     this.setStatus("上链中，耐心等待窗口弹出......");
     let missionId = $("input[name='MissionId']").val();
     // let agree = ( $("input[name='Agree']").val());
     let agree = $('input:radio:checked').val();
-    console.log(missionId);
-    console.log(agree);
-    console.log(type);
+    let gasPrice = await web3.eth.getGasPrice();
+    let addPrice = 3 * 10 ** 9;
+    var BN = web3.utils.BN;
+    let price = new BN(gasPrice).add(new BN(addPrice)).toString();
+
     const { voteMission } = this.meta.methods;
     try
     {
-        await voteMission(type,missionId,agree).send({from: this.account});
+        await voteMission(type,missionId,agree).send({from: this.account,
+                                                    gasPrice:price,
+                                                    gas:300000});
         this.setStatus("投票成功！");
     }catch(error){
         this.setStatus("投票失败，刷新重来吧");
@@ -147,7 +149,6 @@ const App = {
   },
 
   setmStatus: function(message) {
-    console.log("woriaaa");
     const mstatus = document.getElementsByClassName("startup")[0];
     mstatus.innerHTML = message;
   },
