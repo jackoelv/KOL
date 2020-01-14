@@ -37,6 +37,9 @@ const App = {
     superVotedNum.innerHTML = knodeVotedNum[2].toString();
     missionid.innerHTML = this.missionId - 1;
 
+    const buttonDetail = document.getElementsByClassName("getDetail")[0];
+    buttonDetail.innerHTML = "查询已完成";
+
   },
 
   start: async function() {
@@ -60,9 +63,10 @@ const App = {
       this.account = accounts[0];
       // this.refreshBalance();
       // this.getNodesVotedNum();
-
+      this.setmStatus("链上数据加载成功！");
     } catch (error) {
-      console.error("Could not connect to contract or chain.");
+      // console.error("Could not connect to contract or chain.");
+      this.setmStatus("连接以太坊网络失败，请刷新重试");
     };
 
     console.log("finished");
@@ -71,19 +75,31 @@ const App = {
 
 
   voteKol: async function(type){
-    console.log("yes in");
-    this.setStatus("投票任务执行进行中......");
+    this.setStatus("上链中，耐心等待窗口弹出......");
     let missionId = $("input[name='MissionId']").val();
-    let agree = ( $("input[name='Agree']").val());
+    // let agree = ( $("input[name='Agree']").val());
+    let agree = $('input:radio:checked').val();
     console.log(missionId);
     console.log(agree);
+    console.log(type);
     const { voteMission } = this.meta.methods;
-    await voteMission(type,missionId,agree).send({from: this.account});
-    this.setStatus("投票完毕！");
+    try
+    {
+        await voteMission(type,missionId,agree).send({from: this.account});
+        this.setStatus("投票成功！");
+    }catch(error){
+        this.setStatus("投票失败，刷新重来吧");
+    }
+
+
+
+
 
   },
 
   refreshBalance: async function() {
+    const buttonDetail = document.getElementsByClassName("getDetail")[0];
+    buttonDetail.innerHTML = "查询进行中...";
     const { web3 } = this;
     const { balanceOf } = this.meta.methods;
     const { querySuperNode } = this.meta.methods;
@@ -126,10 +142,15 @@ const App = {
 
 
   setStatus: function(message) {
-    const status = document.getElementById("status");
+    const status = document.getElementsByClassName("status")[0];
     status.innerHTML = message;
   },
 
+  setmStatus: function(message) {
+    console.log("woriaaa");
+    const mstatus = document.getElementsByClassName("startup")[0];
+    mstatus.innerHTML = message;
+  },
 };
 
 window.App = App;
