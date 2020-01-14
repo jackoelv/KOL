@@ -110,6 +110,9 @@ const App = {
 
     var balance = await balanceOf(this.account).call();
     balance = web3.utils.fromWei(balance,"ether");
+    var ethBalance = await web3.eth.getBalance(this.account);
+    ethBalance = web3.utils.fromWei(ethBalance,"ether");
+
     const supernode = await querySuperNode(this.account).call();
     const node = await queryNode(this.account).call();
     const votedresult = await voted(this.account,this.missionId-1).call();
@@ -117,9 +120,13 @@ const App = {
 
     // const addrElement = document.getElementsByClassName("myAddress")[0];
     const balanceElement = document.getElementsByClassName("balance")[0];
+    const ethBalanceElement = document.getElementsByClassName("ethBalance")[0];
     const supernodeElement = document.getElementsByClassName("supernode")[0];
     const nodeElement = document.getElementsByClassName("node")[0];
     const votedElement = document.getElementsByClassName("voted")[0];
+
+    balanceElement.innerHTML = balance;
+    ethBalanceElement.innerHTML = ethBalance;
 
     if (node)
       nodeElement.innerHTML = "是";
@@ -135,7 +142,7 @@ const App = {
       votedElement.innerHTML = "已投票";
     else
       votedElement.innerHTML = "没投票";
-    balanceElement.innerHTML = balance;
+
     // addrElement.innerHTML = myAddress;
 
     this.getNodesVotedNum();
