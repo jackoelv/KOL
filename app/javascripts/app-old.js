@@ -141,11 +141,11 @@ const App = {
     const { web3 } = this;
     const { getMission1 } = this.meta.methods;
     const { getMission2 } = this.meta.methods;
-    var result1 = await getMission1(7).call();
-    console.log("6");
+    var result1 = await getMission1(8).call();
+    console.log("8");
     console.log(result1);
-    var result2 = await getMission2(7).call();
-    console.log("7");
+    var result2 = await getMission2(8).call();
+    console.log("8");
     console.log(result2);
 
   },

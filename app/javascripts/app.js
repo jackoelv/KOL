@@ -94,7 +94,7 @@ const App = {
                                                     gas:300000});
         this.setStatus("投票成功！");
     }catch(error){
-        this.setStatus("投票失败，刷新重来吧");
+        this.setStatus("投票异常，稍后检查确认一下是否已投票成功");
     }
 
   },
