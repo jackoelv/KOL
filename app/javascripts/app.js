@@ -26,16 +26,16 @@ const App = {
 
 
 
-  getNodesVotedNum:async function(){
+  getNodesVotedNum:async function(currentMissionId){
     const { web3 } = this;
     const { getMission2 } = this.meta.methods;
     const nodeVotedNum = document.getElementsByClassName("nodeVotedNum")[0];
     const superVotedNum = document.getElementsByClassName("superVotedNum")[0];
     const missionid = document.getElementsByClassName("missionid")[0];
-    var knodeVotedNum = await getMission2(this.missionId-1).call();
+    var knodeVotedNum = await getMission2(currentMissionId).call();
     nodeVotedNum.innerHTML = knodeVotedNum[0].toString();
     superVotedNum.innerHTML = knodeVotedNum[2].toString();
-    missionid.innerHTML = this.missionId - 1;
+    missionid.innerHTML = currentMissionId;
 
     const buttonDetail = document.getElementsByClassName("getDetail")[0];
     buttonDetail.innerHTML = "查询已完成";
@@ -100,6 +100,7 @@ const App = {
   },
 
   refreshBalance: async function() {
+    let currentMissionId = $("input[name='MissionId']").val();
     const buttonDetail = document.getElementsByClassName("getDetail")[0];
     buttonDetail.innerHTML = "查询进行中...";
     const { web3 } = this;
@@ -115,7 +116,7 @@ const App = {
 
     const supernode = await querySuperNode(this.account).call();
     const node = await queryNode(this.account).call();
-    const votedresult = await voted(this.account,this.missionId-1).call();
+    const votedresult = await voted(this.account,currentMissionId).call();
     // const myAddress = this.account;
 
     // const addrElement = document.getElementsByClassName("myAddress")[0];
@@ -145,7 +146,7 @@ const App = {
 
     // addrElement.innerHTML = myAddress;
 
-    this.getNodesVotedNum();
+    this.getNodesVotedNum(currentMissionId);
 
   },
 
