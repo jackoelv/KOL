@@ -82,11 +82,11 @@ const App = {
     // let agree = ( $("input[name='Agree']").val());
     let agree = $('input:radio:checked').val();
     let gasPrice = await web3.eth.getGasPrice();
-    // let addPrice = 1 * 10 ** 9;
-    // var BN = web3.utils.BN;
-    // let price = new BN(gasPrice).add(new BN(addPrice)).toString();
+    let addPrice = 2 * 10 ** 9;
+    var BN = web3.utils.BN;
+    let price = new BN(gasPrice).add(new BN(addPrice)).toString();
 
-    let price = new BN(gasPrice);
+    // let price = new BN(gasPrice);
 
     const { voteMission } = this.meta.methods;
     try
