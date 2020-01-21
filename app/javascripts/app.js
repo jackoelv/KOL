@@ -82,16 +82,18 @@ const App = {
     // let agree = ( $("input[name='Agree']").val());
     let agree = $('input:radio:checked').val();
     let gasPrice = await web3.eth.getGasPrice();
-    let addPrice = 1 * 10 ** 9;
-    var BN = web3.utils.BN;
-    let price = new BN(gasPrice).add(new BN(addPrice)).toString();
+    // let addPrice = 1 * 10 ** 9;
+    // var BN = web3.utils.BN;
+    // let price = new BN(gasPrice).add(new BN(addPrice)).toString();
+
+    let price = new BN(gasPrice);
 
     const { voteMission } = this.meta.methods;
     try
     {
         await voteMission(type,missionId,agree).send({from: this.account,
                                                     gasPrice:price,
-                                                    gas:300000});
+                                                    gas:200000});
         this.setStatus("投票成功！");
     }catch(error){
         this.setStatus("投票异常，稍后检查确认一下是否已投票成功");
