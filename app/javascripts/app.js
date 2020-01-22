@@ -93,7 +93,7 @@ const App = {
     {
         await voteMission(type,missionId,agree).send({from: this.account,
                                                     gasPrice:price,
-                                                    gas:200000});
+                                                    gas:300000});
         this.setStatus("投票成功！");
     }catch(error){
         this.setStatus("投票异常，稍后检查确认一下是否已投票成功");
