@@ -1,10 +1,6 @@
-import "../stylesheets/app.css";
 
 import Web3 from "web3";
 import kolvote_artifacts from '../../build/contracts/KOLVote.json';
-import kolcoreteam from '../../build/contracts/KolCoreTeam.json';
-import usdt from '../../build/contracts/TetherToken.json';
-var BigNumber = require("bignumber.js");
 
 const App = {
   web3: null,
@@ -21,9 +17,6 @@ const App = {
   targetAddr:new Array(),
   targetSuper:new Array(),
   missionId:null,
-
-
-
 
 
   getNodesVotedNum:async function(currentMissionId){

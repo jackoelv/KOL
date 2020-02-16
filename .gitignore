@@ -104,3 +104,4 @@ dist
 .tern-port
 build/app.js
 build/index.html
+build/kolapp.js
