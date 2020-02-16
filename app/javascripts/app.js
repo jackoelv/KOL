@@ -38,6 +38,7 @@ const App = {
   createKolMission: async function(){
     const { web3 } = this;
     const { createKolMission } = this.meta.methods;
+
     let missionName = $("input[name='missionName']").val();
     let missionAmount = $("input[name='missionAmount']").val();
     let agree = $('input:radio[name="isKol"]:checked').val();
@@ -61,6 +62,37 @@ const App = {
     }
 
   },
+
+  addKolOffering: async function(){
+    const { web3 } = this;
+    const { getMission1 } = this.meta.methods;
+    const { addKolOffering } = this.meta.methods;
+    let offerMissionId = $("input[name='offerMissionId']").val();
+    let offerMissionAddress = $("input[name='offerMissionAddress']").val();
+    let offerMissionAmount = $("input[name='offerMissionAmount']").val();
+
+    let result = await getMission1(offerMissionId).call();
+    
+    let isKol = result[0];
+    var unit = 0;
+    if (isKol) {
+      unit = 10 * (10 ** 18);
+    }else {
+      unit = 10 * (10 ** 6);
+    }
+    var BN = web3.utils.BN;
+    offerMissionAmount = new BN(offerMissionAmount).mul(new BN(unit)).toString();
+    try
+    {
+        await addKolOffering(offerMissionId,offerMissionAddress,offerMissionAmount).send({from: this.account,
+                                                    gasPrice:price,
+                                                    gas:300000});
+        this.setStatus("名单添加成功！");
+    }catch(error){
+        this.setStatus("名单添加异常，稍后检查确认一下是否已成功");
+    }
+  },
+
 
   start: async function() {
     console.log("111");

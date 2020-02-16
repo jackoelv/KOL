@@ -57,6 +57,36 @@
 <div class="ui-btn-wrap">
   <button class="ui-btn-lg ui-btn-primary" onclick="App.voteKol()">发起基金转账投票</button>
 </div>
+
+<div class="ui-tooltips ui-tooltips-guide">
+  <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+      <i class="ui-icon-talk"></i>添加转账名单地址金额
+  </div>
+</div>
+<section class="ui-input-wrap ui-border-t">
+    <div class="ui-input ui-border-radius ui-input-text">
+        <input type="text" name="offerMissionId" value="" placeholder="输入任务编号...">
+    </div>
+</section>
+
+<section class="ui-input-wrap ui-border-t">
+    <div class="ui-input ui-border-radius ui-input-text">
+        <input type="text" name="offerMissionAddress" value="" placeholder="输入收款地址...">
+    </div>
+</section>
+
+<section class="ui-input-wrap ui-border-t">
+    <div class="ui-input ui-border-radius ui-input-text">
+        <input type="text" name="offerMissionAmount" value="" placeholder="输入转账金额...">
+    </div>
+</section>
+
+<div class="ui-btn-wrap">
+  <button class="ui-btn-lg ui-btn-primary" onclick="App.addKolOffering()">上传收款名单</button>
+</div>
+
+
+
 <div class="ui-tooltips ui-tooltips-guide">
   <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
       <i class="ui-icon-talk"></i>超级节点投票区域
