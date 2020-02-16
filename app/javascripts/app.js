@@ -190,6 +190,7 @@ const App = {
 window.App = App;
 
 window.addEventListener("load", function() {
+  console.log("load 000");
   if (window.ethereum) {
     // use MetaMask's provider
     console.log("load 111");
