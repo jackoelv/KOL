@@ -22,10 +22,6 @@ const App = {
   targetSuper:new Array(),
   missionId:null,
 
-
-
-
-
   getNodesVotedNum:async function(currentMissionId){
     const { web3 } = this;
     const { getMission2 } = this.meta.methods;
