@@ -63,16 +63,18 @@ const App = {
   },
 
   start: async function() {
+    console.log("111");
     const { web3 } = this;
     try {
       this.meta = new web3.eth.Contract(
         KOLUSDTFund.abi,
         "0x27750e6D41Aef99501eBC256538c6A13a254Ea15",
       );
+      console.log("222");
       const { missionId } = this.meta.methods;
       let accounts = await web3.eth.getAccounts();
       let missionID = parseInt(await missionId().call());
-
+      console.log("333");
       this.missionId = missionID;
       $("input[name='MissionId']").val(missionID-1);
       this.account = accounts[0];
@@ -190,9 +192,13 @@ window.App = App;
 window.addEventListener("load", function() {
   if (window.ethereum) {
     // use MetaMask's provider
+    console.log("load 111");
     App.web3 = new Web3(window.ethereum);
+    console.log("load 222");
     window.ethereum.enable(); // get permission to access accounts
+    console.log("load 333");
   } else {
+    console.log("load error");
     console.warn(
       "No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live",
     );
