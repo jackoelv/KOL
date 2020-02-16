@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>KOL</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+   <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0, user-scalable=no">
+  <link rel="stylesheet" href="https://i.gtimg.cn/vipstyle/frozenui/2.0.0/css/frozen.css">
+  <link rel="Shortcut Icon" href="./images/KOL128.ico" type="image/x-icon" />
+
+</head>
+<body style = "margin-left: 1%;margin-right: 1%;margin-top: 2%;font-family: 'Open Sans', 'sans-serif';">
+  <h1><p class="ui-txt-highlight">基金会治理平台--社区KOL联盟</p></h1>
+
+  <div class="ui-tooltips">
+    <div class="ui-tooltips-cnt ui-border-b">
+        <p class="startup">加载链上数据进行中......</p><a class="ui-icon-close"></a>
+    </div>
+  </div>
+  <div class="ui-tooltips ui-tooltips-guide">
+      <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+          <i class="ui-icon-talk"></i>执行结果是
+      </div>
+  </div>
+  <div class="ui-tooltips">
+      <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+            <p class="status">点击后查看结果...</p>
+      </div>
+  </div>
+  <div class="ui-tooltips ui-tooltips-guide">
+    <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+        <i class="ui-icon-talk"></i>基金会转账任务发起
+    </div>
+</div>
+
+<section class="ui-input-wrap ui-border-t">
+    <div class="ui-input ui-border-radius ui-input-text">
+        <input type="text" name="missionName" value="" placeholder="输入任务名称...">
+    </div>
+</section>
+<section class="ui-input-wrap ui-border-t">
+    <div class="ui-input ui-border-radius ui-input-text">
+        <input type="text" name="missionAmount" value="" placeholder="输入转账数量...">
+    </div>
+</section>
+<div class="ui-form-item ui-form-item-radio ui-border-b">
+    <label class="ui-radio" for="radio">
+        <input type="radio" checked="" name="isKol" value="true" >
+    </label>
+    <p>转出KOL</p>
+</div>
+<div class="ui-form-item ui-form-item-radio ui-border-b">
+    <label class="ui-radio" for="radio">
+        <input type="radio"  name="isKol" value="false">
+    </label>
+    <p>转出USDT</p>
+</div>
+<div class="ui-btn-wrap">
+  <button class="ui-btn-lg ui-btn-primary" onclick="App.voteKol()">发起基金转账投票</button>
+</div>
+<div class="ui-tooltips ui-tooltips-guide">
+  <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+      <i class="ui-icon-talk"></i>超级节点投票区域
+  </div>
+</div>
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>请输入任务ID，默认是当期任务：
+            </div>
+        </div>
+
+      <form action="">
+      <section class="ui-input-wrap ui-border-t">
+          <div class="ui-input ui-border-radius ui-input-text">
+              <input type="text" name="MissionId" value="" placeholder="等待加载当期任务ID...">
+          </div>
+      </section>
+          <div class="ui-form-item ui-form-item-radio ui-border-b">
+              <label class="ui-radio" for="radio">
+                  <input type="radio" checked="true" name="yes" value="true">
+              </label>
+              <p>同意</p>
+          </div>
+          <div class="ui-form-item ui-form-item-radio ui-border-b">
+
+              <label class="ui-radio" for="radio">
+                  <input type="radio" name="yes" value="false">
+              </label>
+              <p>反对</p>
+          </div>
+      </form>
+
+
+
+      <div class="ui-btn-wrap">
+              <button class="ui-btn-lg ui-btn-danger" onclick="App.voteKol(1)">超级节点投票按这里</button>
+      </div>
+
+
+<button class="ui-btn-lg" onclick="App.refreshBalance()">点击这里获取详情</button>
+
+<div class="ui-tooltips">
+    <div class="ui-tooltips-cnt ui-border-b">
+        <strong class="getDetail">准备中...</strong><a class="ui-icon-close"></a>
+    </div>
+</div>
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>我的钱包地址是：
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <strong class="myAddress">准备中...</strong>
+            </div>
+        </div>
+
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>我的ETH余额是：
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <strong class="ethBalance">准备中...</strong>
+            </div>
+        </div>
+
+
+
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>近期任务我已经投票了吗？
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                 <strong class="voted">准备中...</strong>
+            </div>
+        </div>
+
+
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>当前查询的任务编号是：
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                 <strong class="missionid">请点击获取详情</strong>
+            </div>
+        </div>
+
+
+        <div class="ui-tooltips ui-tooltips-guide">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                <i class="ui-icon-talk"></i>同意的超级节点数量：
+            </div>
+        </div>
+        <div class="ui-tooltips">
+            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
+                 <strong class="superVotedNum">请点击获取详情</strong>
+            </div>
+        </div>
+
+
+</body>
+<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
+<script src="app.js"></script>
+</html>
