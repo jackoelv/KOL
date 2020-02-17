@@ -72,7 +72,7 @@ const App = {
     let offerMissionAmount = $("input[name='offerMissionAmount']").val();
 
     let result = await getMission1(offerMissionId).call();
-    
+
     let isKol = result[0];
     var unit = 0;
     if (isKol) {
