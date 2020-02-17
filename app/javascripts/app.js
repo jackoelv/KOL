@@ -1,8 +1,5 @@
-import "../stylesheets/app.css";
-
 import Web3 from "web3";
 import KOLUSDTFund from '../../build/contracts/KOLUSDTFund.json';
-var BigNumber = require("bignumber.js");
 
 const App = {
   web3: null,
@@ -35,25 +32,33 @@ const App = {
 
   },
 
-  createKolMission: async function(){
+  createMission: async function(){
     const { web3 } = this;
     const { createKolMission } = this.meta.methods;
 
     let missionName = $("input[name='missionName']").val();
     let missionAmount = $("input[name='missionAmount']").val();
     let agree = $('input:radio[name="isKol"]:checked').val();
-    var unit = 0;
-    if (agree) {
-      unit = 10 * (10 ** 18);
+    console.log(missionAmount);
+
+    var unit = 10 ** 18;
+    var _agree = true;
+    if (agree === "true"){
+      unit = 10 ** 18;
+      _agree = true
     }else {
-      unit = 10 * (10 ** 6);
+      unit = 10 ** 6;
+      _agree = false;
     }
     var BN = web3.utils.BN;
-    missionAmount = new BN(missionAmount).mul(new BN(unit)).toString();
+    let missionAmountNew = new BN(missionAmount).mul(new BN(unit.toString())).toString();
     missionName = web3.utils.fromAscii(missionName);
+    let gasPrice = await web3.eth.getGasPrice();
+    let addPrice = 2 * 10 ** 9;
+    let price = new BN(gasPrice).add(new BN(addPrice)).toString();
     try
     {
-        await createKolMission(missionName,missionAmount,agree).send({from: this.account,
+        await createKolMission(missionName,missionAmountNew,_agree).send({from: this.account,
                                                     gasPrice:price,
                                                     gas:300000});
         this.setStatus("任务发起成功！");
@@ -74,17 +79,22 @@ const App = {
     let result = await getMission1(offerMissionId).call();
 
     let isKol = result[0];
-    var unit = 0;
-    if (isKol) {
-      unit = 10 * (10 ** 18);
+
+    var unit = 10 ** 18;
+
+    if (isKol){
+      unit = 10 ** 18;
     }else {
-      unit = 10 * (10 ** 6);
+      unit = 10 ** 6;
     }
     var BN = web3.utils.BN;
-    offerMissionAmount = new BN(offerMissionAmount).mul(new BN(unit)).toString();
+    let newOfferMissionAmount = new BN(offerMissionAmount).mul(new BN(unit)).toString();
+    let gasPrice = await web3.eth.getGasPrice();
+    let addPrice = 2 * 10 ** 9;
+    let price = new BN(gasPrice).add(new BN(addPrice)).toString();
     try
     {
-        await addKolOffering(offerMissionId,offerMissionAddress,offerMissionAmount).send({from: this.account,
+        await addKolOffering(offerMissionId,offerMissionAddress,newOfferMissionAmount).send({from: this.account,
                                                     gasPrice:price,
                                                     gas:300000});
         this.setStatus("名单添加成功！");
@@ -95,27 +105,21 @@ const App = {
 
 
   start: async function() {
-    console.log("111");
     const { web3 } = this;
     try {
       this.meta = new web3.eth.Contract(
         KOLUSDTFund.abi,
         "0x27750e6D41Aef99501eBC256538c6A13a254Ea15",
       );
-      console.log("222");
       const { missionId } = this.meta.methods;
       let accounts = await web3.eth.getAccounts();
       let missionID = parseInt(await missionId().call());
-      console.log("333");
       this.missionId = missionID;
       $("input[name='MissionId']").val(missionID-1);
       this.account = accounts[0];
       this.initial();
-      // this.refreshBalance();
-      // this.getNodesVotedNum();
       this.setmStatus("链上数据加载成功！");
     } catch (error) {
-      // console.error("Could not connect to contract or chain.");
       this.setmStatus("连接以太坊网络失败，请刷新重试");
     };
 
@@ -128,7 +132,6 @@ const App = {
     const { web3 } = this;
     this.setStatus("上链中，耐心等待窗口弹出......");
     let missionId = $("input[name='MissionId']").val();
-    // let agree = ( $("input[name='Agree']").val());
     let agree = $('input:radio[name="yes"]:checked').val();
     let gasPrice = await web3.eth.getGasPrice();
     let addPrice = 3 * 10 ** 9;
@@ -136,11 +139,17 @@ const App = {
     let price = new BN(gasPrice).add(new BN(addPrice)).toString();
 
     // let price = new BN(gasPrice);
+    let _agree = true;
+    if (agree === "false"){
+      _agree = false;
+    }
 
     const { voteMission } = this.meta.methods;
+    console.log(missionId);
+    console.log(_agree);
     try
     {
-        await voteMission(missionId,agree).send({from: this.account,
+        await voteMission(missionId,_agree).send({from: this.account,
                                                     gasPrice:price,
                                                     gas:300000});
         this.setStatus("投票成功！");
@@ -155,47 +164,20 @@ const App = {
     const buttonDetail = document.getElementsByClassName("getDetail")[0];
     buttonDetail.innerHTML = "查询进行中...";
     const { web3 } = this;
-    // const { getMission1 } = this.meta.methods;
-    // const { getMission2 } = this.meta.methods;
-    // const { getOfferings } = this.meta.methods;
     const { voted } = this.meta.methods;
-
-    // var balance = await balanceOf(this.account).call();
-    // balance = web3.utils.fromWei(balance,"ether");
     var ethBalance = await web3.eth.getBalance(this.account);
     ethBalance = web3.utils.fromWei(ethBalance,"ether");
 
-    // const supernode = await querySuperNode(this.account).call();
-    // const node = await queryNode(this.account).call();
     const votedresult = await voted(this.account,currentMissionId).call();
-    // const myAddress = this.account;
-
-    // const addrElement = document.getElementsByClassName("myAddress")[0];
-    // const balanceElement = document.getElementsByClassName("balance")[0];
     const ethBalanceElement = document.getElementsByClassName("ethBalance")[0];
-    // const supernodeElement = document.getElementsByClassName("supernode")[0];
-    // const nodeElement = document.getElementsByClassName("node")[0];
     const votedElement = document.getElementsByClassName("voted")[0];
 
-    // balanceElement.innerHTML = balance;
     ethBalanceElement.innerHTML = ethBalance;
-
-    // if (node)
-    //   nodeElement.innerHTML = "是";
-    // else
-    //   nodeElement.innerHTML = "不是";
-
-    // if (supernode)
-    //   supernodeElement.innerHTML = "是";
-    // else
-    //   supernodeElement.innerHTML  = "不是";
 
     if (votedresult)
       votedElement.innerHTML = "已投票";
     else
       votedElement.innerHTML = "没投票";
-
-    // addrElement.innerHTML = myAddress;
 
     this.getNodesVotedNum(currentMissionId);
 
@@ -222,16 +204,11 @@ const App = {
 window.App = App;
 
 window.addEventListener("load", function() {
-  console.log("load 000");
   if (window.ethereum) {
     // use MetaMask's provider
-    console.log("load 111");
     App.web3 = new Web3(window.ethereum);
-    console.log("load 222");
     window.ethereum.enable(); // get permission to access accounts
-    console.log("load 333");
   } else {
-    console.log("load error");
     console.warn(
       "No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live",
     );
