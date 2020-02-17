@@ -53,7 +53,7 @@ const App = {
     missionName = web3.utils.fromAscii(missionName);
     let gasPrice = await web3.eth.getGasPrice();
     let addPrice = 2 * 10 ** 9;
-    let price = new BN(gasPrice).add(new BN(addPrice)).toString();
+    let price = new BN(gasPrice).add(new BN(addPrice.toString())).toString();
     try
     {
         await createKolMission(missionName,missionAmountNew,_agree).send({from: this.account,
@@ -77,7 +77,6 @@ const App = {
     let result = await getMission1(offerMissionId).call();
 
     let isKol = result[0];
-
     var unit = 10 ** 18;
 
     if (isKol){
@@ -86,7 +85,7 @@ const App = {
       unit = 10 ** 6;
     }
     var BN = web3.utils.BN;
-    let newOfferMissionAmount = new BN(offerMissionAmount).mul(new BN(unit)).toString();
+    let newOfferMissionAmount = new BN(offerMissionAmount).mul(new BN(unit.toString())).toString();
     let gasPrice = await web3.eth.getGasPrice();
     let addPrice = 2 * 10 ** 9;
     let price = new BN(gasPrice).add(new BN(addPrice)).toString();
