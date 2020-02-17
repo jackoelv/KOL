@@ -39,8 +39,6 @@ const App = {
     let missionName = $("input[name='missionName']").val();
     let missionAmount = $("input[name='missionAmount']").val();
     let agree = $('input:radio[name="isKol"]:checked').val();
-    console.log(missionAmount);
-
     var unit = 10 ** 18;
     var _agree = true;
     if (agree === "true"){
@@ -145,8 +143,6 @@ const App = {
     }
 
     const { voteMission } = this.meta.methods;
-    console.log(missionId);
-    console.log(_agree);
     try
     {
         await voteMission(missionId,_agree).send({from: this.account,
