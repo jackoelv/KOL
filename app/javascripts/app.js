@@ -1,6 +1,6 @@
 
 import Web3 from "web3";
-import kolvote_artifacts from '../../build/contracts/KOLVote.json';
+import kolvote_artifacts from '../../build/contracts/KolFund.json';
 
 const App = {
   web3: null,
@@ -39,12 +39,10 @@ const App = {
     const { web3 } = this;
 
     try {
-      // get contract instance
-      const networkId = await web3.eth.net.getId();
-      const deployedNetwork = kolvote_artifacts.networks[networkId];
+
       this.meta = new web3.eth.Contract(
         kolvote_artifacts.abi,
-        deployedNetwork.address,
+        "0x4a5025d943dcc6db2e1d76eb46aaf2d647d5562c",
       );
       const { missionId } = this.meta.methods;
       let accounts = await web3.eth.getAccounts();
