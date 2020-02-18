@@ -1,6 +1,7 @@
 
 import Web3 from "web3";
-import kolvote_artifacts from '../../build/contracts/KolFund.json';
+import kolfund_artifacts from '../../build/contracts/KolFund.json';
+import kolvote_artifacts from '../../build/contracts/KOLVote.json';
 
 const App = {
   web3: null,
@@ -9,6 +10,7 @@ const App = {
   // accountLength:0,
   // currentAccount:0,
   meta: null,
+  metafund:null,
   // metabulk:null,
   processedList: null,
   processedList:null,
@@ -21,7 +23,7 @@ const App = {
 
   getNodesVotedNum:async function(currentMissionId){
     const { web3 } = this;
-    const { getMission2 } = this.meta.methods;
+    const { getMission2 } = this.metafund.methods;
     const nodeVotedNum = document.getElementsByClassName("nodeVotedNum")[0];
     const superVotedNum = document.getElementsByClassName("superVotedNum")[0];
     const missionid = document.getElementsByClassName("missionid")[0];
@@ -40,11 +42,15 @@ const App = {
 
     try {
 
-      this.meta = new web3.eth.Contract(
-        kolvote_artifacts.abi,
+      this.metafund = new web3.eth.Contract(
+        kolfund_artifacts.abi,
         "0x4a5025d943dcc6db2e1d76eb46aaf2d647d5562c",
       );
-      const { missionId } = this.meta.methods;
+      this.meta = new web3.eth.Contract(
+        kolvote_artifacts.abi,
+        "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
+      );
+      const { missionId } = this.metafund.methods;
       let accounts = await web3.eth.getAccounts();
 
       let missionID = parseInt(await missionId().call());
@@ -79,7 +85,7 @@ const App = {
 
     // let price = new BN(gasPrice);
 
-    const { voteMission } = this.meta.methods;
+    const { voteMission } = this.metafund.methods;
     try
     {
         await voteMission(type,missionId,agree).send({from: this.account,
@@ -100,7 +106,7 @@ const App = {
     const { balanceOf } = this.meta.methods;
     const { querySuperNode } = this.meta.methods;
     const { queryNode } = this.meta.methods;
-    const { voted } = this.meta.methods;
+    const { voted } = this.metafund.methods;
 
     var balance = await balanceOf(this.account).call();
     balance = web3.utils.fromWei(balance,"ether");
