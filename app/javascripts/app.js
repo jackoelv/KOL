@@ -18,14 +18,60 @@ const App = {
   missionId:null,
   getNodesVotedNum:async function(currentMissionId){
     const { web3 } = this;
+    const { getMission1 } = this.meta.methods;
     const { getMission2 } = this.meta.methods;
+    const { getOfferings } = this.meta.methods;
+
     // const nodeVotedNum = document.getElementsByClassName("nodeVotedNum")[0];
     const superVotedNum = document.getElementsByClassName("superVotedNum")[0];
-    const missionid = document.getElementsByClassName("missionid")[0];
+    const missionid =     document.getElementsByClassName("missionid")[0];
+    const missionName =   document.getElementsByClassName("missionName")[0];
+    const missionAmount = document.getElementsByClassName("missionAmount")[0];
+    const missionAddress = document.getElementsByClassName("missionAddress")[0];
+    const missionEndTime =  document.getElementsByClassName("missionEndTime")[0];
+    const offerAmount = document.getElementsByClassName("offerAmount")[0];
+
+    var misstionDetail = await getMission1(currentMissionId).call();
     var knodeVotedNum = await getMission2(currentMissionId).call();
-    // nodeVotedNum.innerHTML = knodeVotedNum[0].toString();
+    var isKol = misstionDetail[0];
+    var unit = 10 ** 18;
+    var cointype = "KOL";
+    if (isKol){
+      unit = 10 ** 18;
+    }else {
+      unit = 10 ** 6;
+      cointype = "USDT";
+    }
+    var BN = web3.utils.BN;
+    let amount = new BN(misstionDetail[3].toString()).div(new BN(unit.toString())).toString();
+
+    missionAmount.innerHTML = amount + " " + cointype;
+
+    try{
+      var offering = await getOfferings(currentMissionId,0).call();
+      var offeringLength = parseInt(offering[2]);
+      if (offeringLength == 1) {
+        let offeringAmount = new BN(offering[1].toString()).div(new BN(unit.toString())).toString();
+        missionAddress.innerHTML = offering[0] ;
+        offerAmount.innerHTML = offeringAmount + " " + cointype;
+      }else {
+
+      }
+    }catch(e){
+      console.log("error is: "+e);
+      missionAddress.innerHTML = "无有效名单数据";
+      offerAmount.innerHTML = "无有效名单数据";
+    }
+
     superVotedNum.innerHTML = knodeVotedNum[0].toString();
     missionid.innerHTML = currentMissionId;
+    missionName.innerHTML = web3.utils.hexToAscii(misstionDetail[5].toString());
+
+    var time = misstionDetail[2];
+    var unixTimestamp = new Date(time*1000);
+    missionEndTime.innerHTML = unixTimestamp.toLocaleString();
+
+
 
     const buttonDetail = document.getElementsByClassName("getDetail")[0];
     buttonDetail.innerHTML = "查询已完成";
@@ -160,6 +206,7 @@ const App = {
     buttonDetail.innerHTML = "查询进行中...";
     const { web3 } = this;
     const { voted } = this.meta.methods;
+
     var ethBalance = await web3.eth.getBalance(this.account);
     ethBalance = web3.utils.fromWei(ethBalance,"ether");
 
