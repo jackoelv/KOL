@@ -23,14 +23,51 @@ const App = {
 
   getNodesVotedNum:async function(currentMissionId){
     const { web3 } = this;
+    const { getMission1 } = this.metafund.methods;
     const { getMission2 } = this.metafund.methods;
+    const { getOfferings } = this.metafund.methods;
+
     const nodeVotedNum = document.getElementsByClassName("nodeVotedNum")[0];
     const superVotedNum = document.getElementsByClassName("superVotedNum")[0];
-    const missionid = document.getElementsByClassName("missionid")[0];
+    const missionid =     document.getElementsByClassName("missionid")[0];
+    const missionName =   document.getElementsByClassName("missionName")[0];
+    const missionAmount = document.getElementsByClassName("missionAmount")[0];
+    const missionAddress = document.getElementsByClassName("missionAddress")[0];
+    const missionEndTime =  document.getElementsByClassName("missionEndTime")[0];
+    const offerAmount = document.getElementsByClassName("offerAmount")[0];
+
+    var misstionDetail = await getMission1(currentMissionId).call();
     var knodeVotedNum = await getMission2(currentMissionId).call();
+
+    let amount = web3.utils.fromWei(misstionDetail[2],"ether");
+
+    missionAmount.innerHTML = amount + " KOL";
+
+    try{
+      var offering = await getOfferings(currentMissionId,0).call();
+      var offeringLength = parseInt(offering[2]);
+      if (offeringLength == 1) {
+        let offeringAmount = web3.utils.fromWei(offering[1]);
+        missionAddress.innerHTML = offering[0] ;
+        offerAmount.innerHTML = offeringAmount + " KOL";
+      }else {
+
+      }
+    }catch(e){
+      console.log("error is: "+e);
+      missionAddress.innerHTML = "无有效名单数据";
+      offerAmount.innerHTML = "无有效名单数据";
+    }
     nodeVotedNum.innerHTML = knodeVotedNum[0].toString();
     superVotedNum.innerHTML = knodeVotedNum[2].toString();
     missionid.innerHTML = currentMissionId;
+    missionName.innerHTML = web3.utils.hexToAscii(misstionDetail[4]);
+
+    var time = misstionDetail[1];
+    var unixTimestamp = new Date(time*1000);
+    missionEndTime.innerHTML = unixTimestamp.toLocaleString();
+
+
 
     const buttonDetail = document.getElementsByClassName("getDetail")[0];
     buttonDetail.innerHTML = "查询已完成";
