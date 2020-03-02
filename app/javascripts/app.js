@@ -104,7 +104,7 @@ const App = {
     {
         await createKolMission(missionName,missionAmountNew,_agree).send({from: this.account,
                                                     gasPrice:price,
-                                                    gas:300000});
+                                                    gas:150000});
         this.setStatus("任务发起成功！");
     }catch(error){
         this.setStatus("任务发起异常，稍后检查确认一下是否已成功");
@@ -139,7 +139,7 @@ const App = {
     {
         await addKolOffering(offerMissionId,offerMissionAddress,newOfferMissionAmount).send({from: this.account,
                                                     gasPrice:price,
-                                                    gas:300000});
+                                                    gas:150000});
         this.setStatus("名单添加成功！");
     }catch(error){
         this.setStatus("名单添加异常，稍后检查确认一下是否已成功");
@@ -192,7 +192,7 @@ const App = {
     {
         await voteMission(missionId,_agree).send({from: this.account,
                                                     gasPrice:price,
-                                                    gas:300000});
+                                                    gas:70000});
         this.setStatus("投票成功！");
     }catch(error){
         this.setStatus("投票异常，稍后检查确认一下是否已投票成功");
