@@ -8,7 +8,7 @@ const App = {
   meta: null,
   metaToken: null,
   metaKOL:null,
-  contractAddr: "0x3828ccFD54d6614b2bbdD6234A5C8528632DdD0c",
+  contractAddr: "0xdFeA88Ee964354d72F8e0E5bb5b809fC7Ad6b982",
   tokenAddress: null,
   decimal: null,
   targetAddress: new Array(),
@@ -24,7 +24,7 @@ const App = {
     try {
       this.meta = new web3.eth.Contract(
         BTT.abi,
-        "0x3828ccFD54d6614b2bbdD6234A5C8528632DdD0c",
+        this.contractAddr,
       );
       let accounts = await web3.eth.getAccounts();
       this.account = accounts[0];

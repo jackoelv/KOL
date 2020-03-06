@@ -40,7 +40,7 @@ module.exports = {
       },
       network_id: 1,
       networkCheckTimeout:200000,
-      gasPrice: 5000000000,
+      gasPrice: 3000000000,
       gas: 2300000
     }
 
