@@ -44,6 +44,7 @@
     "solc": "^0.4.23",
     "truffle-hdwallet-provider": "^1.0.17",
     "truffle-hdwallet-provider-privkey": "^1.0.3",
-    "uglifyjs-webpack-plugin": "^2.2.0"
+    "uglifyjs-webpack-plugin": "^2.2.0",
+    "weui": "^2.2.0"
   }
 }

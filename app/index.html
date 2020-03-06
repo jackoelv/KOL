@@ -1,254 +1,70 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>KOL</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-   <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0, user-scalable=no">
-  <link rel="stylesheet" href="https://i.gtimg.cn/vipstyle/frozenui/2.0.0/css/frozen.css">
-  <link rel="Shortcut Icon" href="./images/KOL128.ico" type="image/x-icon" />
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+        <title>WeUI</title>
+        <!-- 引入 WeUI -->
+        <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.3/weui.min.css"/>
+    </head>
+    <body>
+        <!-- 使用 -->
+        <div class="container" id="container"></div>
+        <div class="page" style="background-color:rgb(237, 237, 237)">
+            <div class="page__hd" style="padding:40px">
+                <h1 class="page__title">批量转币BTT</h1>
+                <p class="page__desc">BTT是一个简单好用省钱的批量转币的Dapp</p>
+            </div>
+            <div class="page__bd">
 
-</head>
-<body style = "margin-left: 1%;margin-right: 1%;margin-top: 2%;font-family: 'Open Sans', 'sans-serif';">
-  <h1><p class="ui-txt-highlight">基金会治理平台1.0--社区KOL联盟</p></h1>
+                <div class="weui-cells__title">设置基本信息</div>
+                <div class="weui-cells weui-cells_form">
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label">合约地址</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="tokenAddress" value = "0x911040Cde98B12826013221d3a5980a9b346C345" placeholder="0x4f72807bEd497B515F2a78e35C9d988A9f66cd26"/>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label">小数位数</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" type="text" name="decimal" pattern="[0-9]*" value="6" placeholder="18"/>
+                        </div>
+                    </div>
 
-  <div class="ui-tooltips">
-    <div class="ui-tooltips-cnt ui-border-b">
-        <p class="startup">新版本加载链上数据进行中......</p><a class="ui-icon-close"></a>
-    </div>
-  </div>
-  <div class="ui-tooltips ui-tooltips-guide">
-      <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-          <i class="ui-icon-talk"></i>执行结果是
-      </div>
-  </div>
-  <div class="ui-tooltips">
-      <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-            <p class="status">点击后查看结果...</p>
-      </div>
-  </div>
-  <div class="ui-tooltips ui-tooltips-guide">
-    <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-        <i class="ui-icon-talk"></i>基金会转账任务发起
-    </div>
-</div>
+                </div>
 
-<section class="ui-input-wrap ui-border-t">
-    <div class="ui-input ui-border-radius ui-input-text">
-        <input type="text" name="missionName" value="" placeholder="输入任务名称...">
-    </div>
-</section>
-<section class="ui-input-wrap ui-border-t">
-    <div class="ui-input ui-border-radius ui-input-text">
-        <input type="text" name="missionAmount" value="" placeholder="输入转账数量...">
-    </div>
-</section>
-<div class="ui-form-item ui-form-item-radio ui-border-b">
-    <label class="ui-radio" for="radio">
-        <input type="radio" checked="" name="isKol" value="true" >
-    </label>
-    <p>转出KOL</p>
-</div>
-<div class="ui-form-item ui-form-item-radio ui-border-b">
-    <label class="ui-radio" for="radio">
-        <input type="radio"  name="isKol" value="false">
-    </label>
-    <p>转出USDT</p>
-</div>
-<div class="ui-btn-wrap">
-  <button class="ui-btn-lg ui-btn-primary" onclick="App.createMission()">发起基金转账投票</button>
-</div>
+                <div class="weui-cells__title">粘贴批量转账收款名单和数量,不可以超过200</div>
+                <div class="weui-cells weui-cells_form">
+                    <div class="weui-cell">
+                        <div class="weui-cell__bd">
+                            <textarea class="weui-textarea" style="font-size:1px" name="addressList"
+                            placeholder="0xEDe59E683F59519eeAbD9C872633e68ed2F17F46,240
+0xd37359C05Ed049C0F6a997f5B3b81C369C17E59C,240
+0xEAA4047FF03C8DD2e501ba99D757beb575Dd2Aac,240
+0x4E4543037CBCc16DDb3794f9E6990F36D63DA9eD,240
+0x20f49657B30f75fE0be4eD2Ce907b3a353b0c6F2,240" rows="10">0xaf18075f9f36863cbb9c6cf81f9f740316e003a3,10
+0x7f706bf3f2aff9c72664ce8febd244a7e1d034af,10
+0x516b0c808b32b5fa305a910022861ae00080cfff,10
+0xf9c53a3192640ac85ea3a0f468fb3e37b388d061,10
+0x2d56ecdce8fe8be4f28ee2c997e4d5624de7cecc,10
+0xd20f4d6d1746ee7957695837c3148eaeebbac77a,10
+0x760f6530449270f0d3d2c676173204ac887663ea,10
+0xe2ec44549b3ec410b4a41491b4c45541efbd7b8b,10
+0x1b49402ec48dfe0a54a085527d1f8125eacf6dcb,10</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="weui-cells__tips">格式为:地址,数量</div>
 
-<div class="ui-tooltips ui-tooltips-guide">
-  <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-      <i class="ui-icon-talk"></i>添加转账名单地址金额
-  </div>
-</div>
-<section class="ui-input-wrap ui-border-t">
-    <div class="ui-input ui-border-radius ui-input-text">
-        <input type="text" name="offerMissionId" value="" placeholder="输入任务编号...">
-    </div>
-</section>
-
-<section class="ui-input-wrap ui-border-t">
-    <div class="ui-input ui-border-radius ui-input-text">
-        <input type="text" name="offerMissionAddress" value="" placeholder="输入收款地址...">
-    </div>
-</section>
-
-<section class="ui-input-wrap ui-border-t">
-    <div class="ui-input ui-border-radius ui-input-text">
-        <input type="text" name="offerMissionAmount" value="" placeholder="输入转账金额...">
-    </div>
-</section>
-
-<div class="ui-btn-wrap">
-  <button class="ui-btn-lg ui-btn-primary" onclick="App.addKolOffering()">上传收款名单</button>
-</div>
-
-
-
-<div class="ui-tooltips ui-tooltips-guide">
-  <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-      <i class="ui-icon-talk"></i>超级节点投票区域
-  </div>
-</div>
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>请输入任务ID，默认是当期任务：
+                <div class="weui-btn-area">
+                    <a class="weui-btn weui-btn_primary" id="showTooltips" onclick="App.readTarget()">第一步：预览合约转账</a>
+                </div>
+                <div id="list">
+                </div>
             </div>
         </div>
-
-      <form action="">
-      <section class="ui-input-wrap ui-border-t">
-          <div class="ui-input ui-border-radius ui-input-text">
-              <input type="text" name="MissionId" value="" placeholder="等待加载当期任务ID...">
-          </div>
-      </section>
-          <div class="ui-form-item ui-form-item-radio ui-border-b">
-              <label class="ui-radio" for="radio">
-                  <input type="radio" checked="true" name="yes" value="true">
-              </label>
-              <p>同意</p>
-          </div>
-          <div class="ui-form-item ui-form-item-radio ui-border-b">
-
-              <label class="ui-radio" for="radio">
-                  <input type="radio" name="yes" value="false">
-              </label>
-              <p>反对</p>
-          </div>
-      </form>
-
-
-
-      <div class="ui-btn-wrap">
-              <button class="ui-btn-lg ui-btn-danger" onclick="App.voteKol()">超级节点投票按这里</button>
-      </div>
-
-
-<button class="ui-btn-lg" onclick="App.refreshBalance()">点击这里获取详情</button>
-
-<div class="ui-tooltips">
-    <div class="ui-tooltips-cnt ui-border-b">
-        <strong class="getDetail">准备中...</strong><a class="ui-icon-close"></a>
-    </div>
-</div>
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>我的钱包地址是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <strong class="myAddress">准备中...</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>我的ETH余额是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <strong class="ethBalance">准备中...</strong>
-            </div>
-        </div>
-
-
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>近期任务我已经投票了吗？
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="voted">准备中...</strong>
-            </div>
-        </div>
-
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>当前查询的任务编号是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="missionid">请点击获取详情</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>当前查询的任务名称是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="missionName">请点击获取详情</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>当前查询的任务金额是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="missionAmount">请点击获取详情</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>当前查询的任务收款地址是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="missionAddress">请点击获取详情</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>当前查询任务收款地址收款金额是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="offerAmount">请点击获取详情</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>当前查询的任务投票截止时间是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="missionEndTime">请点击获取详情</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>同意的超级节点数量：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="superVotedNum">请点击获取详情</strong>
-            </div>
-        </div>
-
-
-</body>
-<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
-<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/fundapp.js"></script>
-<!-- <script src="app.js"></script> -->
+    </body>
+<script src="jquery-3.1.1.slim.min.js"></script>
+<script src="app.js"></script>
 </html>

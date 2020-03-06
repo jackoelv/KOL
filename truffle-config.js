@@ -14,6 +14,12 @@ module.exports = {
       network_id: '*',
       gas: 80000000
     },
+    gan: {
+      host: 'localhost',
+      port: 7545,
+      network_id: '5777',
+      gas: 6700000
+    },
     ropsten: {
       provider: function() {
         return new HDWalletProvider(privKeys, "https://ropsten.infura.io/v3/b1fb153dd7e44bef9cb4d9b661071583");
