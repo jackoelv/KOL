@@ -43,11 +43,11 @@ const App = {
   },
   setDiv: function(address,amount){
     var div = '  <div class="weui-cell weui-cell_access">'
-        +'<div class="weui-cell__bd" style="text-align:left;font-size:1px">'
+        +'<div class="weui-cell__bd" style="text-align:left;font-size:12px">'
         + address
         +'</div>'
         +'<div class="weui-cell__ft" style="font-size: 0">'
-        +'    <span style="vertical-align:middle; font-size: 1px;text-align:right">'
+        +'    <span style="vertical-align:middle; font-size: 12px;text-align:right">'
         + amount
         +'</span>'
         +'</div>'
