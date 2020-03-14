@@ -161,7 +161,7 @@ const App = {
       $("input[name='MissionId']").val(missionID-1);
       this.account = accounts[0];
       this.initial();
-      this.setmStatus("链上数据加载成功！");
+      this.setmStatus("链上数据加载成功-GAS15W！");
     } catch (error) {
       this.setmStatus("连接以太坊网络失败，请刷新重试");
     };
