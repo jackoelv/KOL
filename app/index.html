@@ -6,6 +6,7 @@
         <title>批量转币BTT</title>
         <!-- 引入 WeUI -->
         <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.3/weui.min.css"/>
+
     </head>
     <body>
         <!-- 使用 -->
@@ -20,13 +21,13 @@
                 <div class="weui-cells__title">设置基本信息</div>
                 <div class="weui-cells weui-cells_form">
                     <div class="weui-cell">
-                        <div class="weui-cell__hd"><label class="weui-label">合约地址</label></div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:46px">合约</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="tokenAddress" value = "0x0946e36c2887025c389ef85ea5f9150e0bed4d69" placeholder="0x0946e36c2887025c389ef85ea5f9150e0bed4d69"/>
+                            <input class="weui-input"  type="text" name="tokenAddress"  id="autocomplete" style="font-size:12px;z-index:2;" autocomplete="off" value = "0x0946e36c2887025c389ef85ea5f9150e0bed4d69" placeholder="0x0946e36c2887025c389ef85ea5f9150e0bed4d69"/>
                         </div>
                     </div>
                     <div class="weui-cell">
-                        <div class="weui-cell__hd"><label class="weui-label">小数位数</label></div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:46px">精度</label></div>
                         <div class="weui-cell__bd">
                             <input class="weui-input" type="text" name="decimal" pattern="[0-9]*" value="18" placeholder="18"/>
                         </div>
@@ -53,6 +54,25 @@
             </div>
         </div>
     </body>
-<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/jquery-3.1.1.slim.min.js"></script>
-<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/bttapp.js"></script>
+<!-- <script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/jquery-3.1.1.slim.min.js"></script> -->
+<!-- <script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/bttapp.js"></script> -->
+
+<script src="jquery-3.1.1.slim.min.js"></script>
+<script src="jquery.autocomplete.js"></script>
+<script src="app.js"></script>
+<script type="text/javascript">
+var countries = [
+    { value: 'Andorra', data: 'AD' },
+    // ...
+    { value: 'Zimbabwe', data: 'ZZ' }
+];
+
+$('#autocomplete').autocomplete({
+    lookup: countries,
+    onSelect: function (suggestion) {
+        console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+    }
+});
+
+</script>
 </html>

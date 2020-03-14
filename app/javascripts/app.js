@@ -46,7 +46,7 @@ const App = {
         +'<div class="weui-cell__bd" style="text-align:left;font-size:12px">'
         + address
         +'</div>'
-        +'<div class="weui-cell__ft" style="font-size: 0">'
+        +'<div class="weui-cell__ft" style="font-size: 12px">'
         +'    <span style="vertical-align:middle; font-size: 12px;text-align:right">'
         + amount
         +'</span>'

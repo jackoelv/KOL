@@ -16,6 +16,7 @@ module.exports = {
       { from: './app/index.html', to: "index.html" },
       { from: './app/msg_text.html', to: "msg_text.html" },
       { from: './app/javascripts/jquery-3.1.1.slim.min.js', to: "jquery-3.1.1.slim.min.js" },
+      { from: './app/javascripts/jquery.autocomplete.js', to: "jquery.autocomplete.js" },
     ]),
   ],
 
