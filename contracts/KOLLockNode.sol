@@ -151,6 +151,7 @@ contract KOLLockNode is Ownable{
 
   uint256 public dealTime =  3 days;
   uint256 public missionId = 0;
+  uint256 public constant totalUserSupply = 16000000 *(10**18);
 
   uint16 public constant totalSuperNodes = 21;
   uint16 public constant totalNodes = 500;
@@ -207,6 +208,9 @@ contract KOLLockNode is Ownable{
     address target;
     uint256 targetAmount;
   }
+
+  mapping (address => uint256) private nodeBalance;
+
   KolOffering[] private kolOfferings;
   mapping(uint256 => KolOffering[]) private offeringList;
 
@@ -298,15 +302,7 @@ contract KOLLockNode is Ownable{
     }
     Voter[msg.sender][_missionId] = true;
   }
-  function addKolOffering(uint256 _missionId,address _target,uint256 _targetAmount) onlyNodes public{
-    require(missionList[_missionId].superPassed);
-    require(!missionList[_missionId].done);
-    require(token.queryNode(_target)||token.querySuperNode(_target));
-    require(missionList[_missionId].offeringAmount.add(_targetAmount) <= missionList[_missionId].totalAmount);
-    offeringList[_missionId].push(KolOffering(_target,_targetAmount));
-    missionList[_missionId].offeringAmount = missionList[_missionId].offeringAmount.add(_targetAmount);
 
-  }
   function excuteVote(uint256 _missionId) onlyOwner public {
     require(!missionList[_missionId].done);
     require(uint256(now) < (missionList[_missionId].endTime + uint256(dealTime)));
@@ -316,7 +312,9 @@ contract KOLLockNode is Ownable{
 
 
     for (uint m = 0; m < offeringList[_missionId].length; m++){
-      token.transfer(offeringList[_missionId][m].target, offeringList[_missionId][m].targetAmount);
+      //这里要做一个记账。
+      /* token.transfer(offeringList[_missionId][m].target, offeringList[_missionId][m].targetAmount); */
+      nodeBalance[offeringList[_missionId][m].target] = nodeBalance[offeringList[_missionId][m].target].add(offeringList[_missionId][m].targetAmount);
     }
     missionList[_missionId].done = true;
     emit OfferingFinished(_missionId,missionList[_missionId].offeringAmount,offeringList[_missionId].length);
@@ -352,8 +350,33 @@ contract KOLLockNode is Ownable{
   function getOfferings(uint256 _missionId,uint256 _id) public view returns(address,uint256,uint256){
     return(offeringList[_missionId][_id].target,offeringList[_missionId][_id].targetAmount,offeringList[_missionId].length);
   }
+
+  function addKolOffering(uint256 _missionId,address[] _target ,uint256[] _targetAmount) onlyNodes public{
+    require(missionList[_missionId].superPassed);
+    require(!missionList[_missionId].done);
+    require(_target.length = _targetAmount.length);
+    bool isNode = false;
+    for (uint j = 0; j< _targetAmount.length; j++){
+      isNode = token.queryNode(_target[j])||token.querySuperNode(_target[j]);
+      require(isNode);
+      missionList[_missionId].offeringAmount = missionList[_missionId].offeringAmount.add(_targetAmount[j]);
+      offeringList[_missionId].push(KolOffering(_target[j],_targetAmount[j]));
+      missionList[_missionId].offeringAmount = missionList[_missionId].offeringAmount.add(_targetAmount[j]);
+    }
+    require(missionList[_missionId].totalAmount >= missionList[_missionId].offeringAmount);
+
+  }
   function voted(address _node,uint256 _missionId) public view returns(bool){
     return Voter[_node][_missionId];
+  }
+  function getKOL() onlyNodes public {
+    //节点把自己的币给释放出来。还有一个意外情况，就是节点更换了新的地址。这个会有点麻烦。也就是说节点地址不可以作为唯一的识别代码。
+    require(nodeBalance[msg.sender] > 0);
+    uint256 userSupplyed = token.userSupplyed();
+    uint256 pptRate = userSupplyed.mul(1000).div(totalUserSupply);
+    uint256 amount = nodeBalance[msg.sender].mul(pptRate).div(1000);
+    token.transfer(msg.sender, amount);
+
   }
 
 }
