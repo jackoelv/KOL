@@ -1,9 +1,10 @@
 // var KOL = artifacts.require("KOL");
-var KOLVote = artifacts.require("KOLVote");
 // var KOLMission = artifacts.require("KOLMission");
 // var KOLOffer = artifacts.require("KOLOffer");
-var KolCoreTeam = artifacts.require("KolCoreTeam");
-var KolFund = artifacts.require("KolFund");
+// var KolCoreTeam = artifacts.require("KolCoreTeam");
+// var KolFund = artifacts.require("KolFund");
+var KOLVote = artifacts.require("KOLVote");
+var LockNode = artifacts.require("KOLLockNode");
 
 module.exports = function(deployer) {
   // deployer.deploy(KOL,{gas: 6700000});
