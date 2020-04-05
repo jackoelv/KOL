@@ -192,7 +192,7 @@ contract KOL is StandardToken{
     /* 测试环境 */
 
     uint16 public constant totalSuperNodes = 3;
-    uint16 public constant totalNodes = 3;
+    uint16 public constant totalNodes = 10;//3;
     uint16 public constant halfSuperNodes = 1;
     uint16 public constant mostNodes = 1;
     uint16 public constant halfNodes = 1;

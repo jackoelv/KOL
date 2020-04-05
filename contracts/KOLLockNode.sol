@@ -152,14 +152,29 @@ contract KOLLockNode is Ownable{
   uint256 public dealTime =  3 days;
   uint256 public missionId = 0;
   uint256 public constant totalUserSupply = 16000000 *(10**18);
+  uint256 public constant totalNodeBalance = 2380000 *(10**18);
+  uint256 public nodeRate = 0;
+  uint256 public releasedAll = 0;
+  uint256 public balanceAll = 0;
+  /* 正式环境 */
 
-  uint16 public constant totalSuperNodes = 21;
+  /* uint16 public constant totalSuperNodes = 21;
   uint16 public constant totalNodes = 500;
   uint16 public constant halfSuperNodes = 11;
   uint16 public constant mostNodes = 335;
   uint16 public constant halfNodes = 251;
   uint16 public constant minSuperNodes = 15;
-  uint16 public constant minNodes = 101;
+  uint16 public constant minNodes = 101; */
+
+  /* 测试环境 */
+
+  uint16 public constant totalSuperNodes = 3;
+  uint16 public constant totalNodes = 10;
+  uint16 public constant halfSuperNodes = 1;
+  uint16 public constant mostNodes = 1;
+  uint16 public constant halfNodes = 1;
+  uint16 public constant minSuperNodes = 1;
+  uint16 public constant minNodes = 1;
 
   uint16 public constant most = 67;
   uint16 public constant half = 51;
@@ -174,6 +189,10 @@ contract KOLLockNode is Ownable{
   event MissionPassed(uint256 _missionId,bytes32 _name);
   event OfferingFinished(uint256 _missionId,uint256 _totalAmount,uint256 _length);
   event MissionLaunched(bytes32 _name,uint256 _missionId,address _whoLaunch);
+  event AllTokenBack(address _fund,uint256 _amount);
+  event Recycled(address _node,uint256 _amount);
+  event RateChanged(uint256 _rate);
+
 
   modifier onlySuperNode() {
     require(token.querySuperNode(msg.sender));
@@ -193,7 +212,9 @@ contract KOLLockNode is Ownable{
     uint256 endTime;
     uint256 totalAmount;
     uint256 offeringAmount;
+    uint256 rate;
     bytes32 name;
+    address recycleNodeAddr;
     uint16 agreeNodes;
     uint16 refuseNodes;
     uint16 agreeSuperNodes;
@@ -210,6 +231,7 @@ contract KOLLockNode is Ownable{
   }
 
   mapping (address => uint256) private nodeBalance;
+  mapping (address => uint256) private nodeReleasedBalance;
 
   KolOffering[] private kolOfferings;
   mapping(uint256 => KolOffering[]) private offeringList;
@@ -217,13 +239,18 @@ contract KOLLockNode is Ownable{
   function missionPassed(uint256 _missionId) private {
     emit MissionPassed(_missionId,missionList[_missionId].name);
   }
-  function createKolMission(bytes32 _name,uint256 _totalAmount) onlyNodes public {
+  function createKolMission(bytes32 _name,uint256 _totalAmount,address _recycleNodeAddr,uint256 _rate) onlyNodes public {
       bytes32 iName = _name;
+      uint256 balance = token.balanceOf(this);
+      uint256 allLeftBalance = balanceAll.sub(releasedAll);
+      require(balance >= allLeftBalance.add(_totalAmount));
       missionList[missionId] = KolMission(uint256(now),
                                           uint256(now + dealTime),
                                           _totalAmount,
                                           0,
+                                          _rate,
                                           iName,
+                                          _recycleNodeAddr,
                                           0,
                                           0,
                                           0,
@@ -308,28 +335,46 @@ contract KOLLockNode is Ownable{
     require(uint256(now) < (missionList[_missionId].endTime + uint256(dealTime)));
     require(missionList[_missionId].superPassed);
     require(missionList[_missionId].nodePassed);
-    require(missionList[_missionId].totalAmount == missionList[_missionId].offeringAmount);
-
-
-    for (uint m = 0; m < offeringList[_missionId].length; m++){
-      //这里要做一个记账。
-      /* token.transfer(offeringList[_missionId][m].target, offeringList[_missionId][m].targetAmount); */
-      nodeBalance[offeringList[_missionId][m].target] = nodeBalance[offeringList[_missionId][m].target].add(offeringList[_missionId][m].targetAmount);
+    if (missionList[_missionId].name == "TRANSFER ALL KOL TO FUND"){
+      transferAllKolToFund();
+      missionList[_missionId].done = true;
+    }else if (missionList[_missionId].name == "RECYCLE KOL FROM OLDNODE"){
+      recycleKOL(missionList[_missionId].recycleNodeAddr);
+      missionList[_missionId].done = true;
+    }else if(missionList[_missionId].name == "CHANGE RELEASE RATE"){
+      nodeRate = missionList[_missionId].rate;
+      missionList[_missionId].done = true;
+      emit RateChanged(nodeRate);
+    }else{
+      require(token.balanceOf(this).add(releasedAll) >= balanceAll.add(missionList[_missionId].totalAmount));
+      require(missionList[_missionId].totalAmount == missionList[_missionId].offeringAmount);
+      for (uint m = 0; m < offeringList[_missionId].length; m++){
+        //这里要做一个记账。
+        /* token.transfer(offeringList[_missionId][m].target, offeringList[_missionId][m].targetAmount); */
+        nodeBalance[offeringList[_missionId][m].target] = nodeBalance[offeringList[_missionId][m].target].add(offeringList[_missionId][m].targetAmount);
+      }
+      balanceAll = balanceAll.add(missionList[_missionId].offeringAmount);
+      nodeRate = missionList[_missionId].rate;
+      missionList[_missionId].done = true;
+      emit RateChanged(nodeRate);
+      emit OfferingFinished(_missionId,missionList[_missionId].offeringAmount,offeringList[_missionId].length);
     }
-    missionList[_missionId].done = true;
-    emit OfferingFinished(_missionId,missionList[_missionId].offeringAmount,offeringList[_missionId].length);
 
   }
   function getMission1(uint256 _missionId) public view returns(uint256,
                                                             uint256,
                                                             uint256,
                                                             uint256,
-                                                            bytes32){
+                                                            uint256,
+                                                            bytes32,
+                                                            address){
     return(missionList[_missionId].startTime,
             missionList[_missionId].endTime,
             missionList[_missionId].totalAmount,
             missionList[_missionId].offeringAmount,
-            missionList[_missionId].name);
+            missionList[_missionId].rate,
+            missionList[_missionId].name,
+            missionList[_missionId].recycleNodeAddr);
   }
   function getMission2(uint256 _missionId) public view returns(uint16,
                                                               uint16,
@@ -354,14 +399,15 @@ contract KOLLockNode is Ownable{
   function addKolOffering(uint256 _missionId,address[] _target ,uint256[] _targetAmount) onlyNodes public{
     require(missionList[_missionId].superPassed);
     require(!missionList[_missionId].done);
-    require(_target.length = _targetAmount.length);
+    require(_target.length == _targetAmount.length);
     bool isNode = false;
     for (uint j = 0; j< _targetAmount.length; j++){
+
       isNode = token.queryNode(_target[j])||token.querySuperNode(_target[j]);
       require(isNode);
       missionList[_missionId].offeringAmount = missionList[_missionId].offeringAmount.add(_targetAmount[j]);
       offeringList[_missionId].push(KolOffering(_target[j],_targetAmount[j]));
-      missionList[_missionId].offeringAmount = missionList[_missionId].offeringAmount.add(_targetAmount[j]);
+
     }
     require(missionList[_missionId].totalAmount >= missionList[_missionId].offeringAmount);
 
@@ -372,11 +418,40 @@ contract KOLLockNode is Ownable{
   function getKOL() onlyNodes public {
     //节点把自己的币给释放出来。还有一个意外情况，就是节点更换了新的地址。这个会有点麻烦。也就是说节点地址不可以作为唯一的识别代码。
     require(nodeBalance[msg.sender] > 0);
-    uint256 userSupplyed = token.userSupplyed();
-    uint256 pptRate = userSupplyed.mul(1000).div(totalUserSupply);
-    uint256 amount = nodeBalance[msg.sender].mul(pptRate).div(1000);
-    token.transfer(msg.sender, amount);
+    uint256 amount = nodeBalance[msg.sender].mul(nodeRate).div(100);
+    uint256 releaseKol = amount.sub(nodeReleasedBalance[msg.sender]);
+    require(releaseKol > 0);
+    require(nodeReleasedBalance[msg.sender].add(releaseKol)<=nodeBalance[msg.sender]);
+    require(token.balanceOf(this) >= releaseKol);
 
+    token.transfer(msg.sender, releaseKol);
+    nodeReleasedBalance[msg.sender] = nodeReleasedBalance[msg.sender].add(releaseKol);
+    releasedAll = releasedAll.add(releaseKol);
+  }
+  function queryBalance(address _node) onlyNodes public view returns(uint256,uint256){
+    return(nodeBalance[_node],nodeReleasedBalance[_node]);
+  }
+  function transferAllKolToFund() private {
+    address fund = 0x27750e6d41aef99501ebc256538c6a13a254ea15;
+    uint256 balance = token.balanceOf(this);
+    token.transfer(fund, balance);
+    emit AllTokenBack(fund,balance);
+  }
+  function recycleKOL(address _node) private {
+    require((!token.queryNode(_node)) && (!token.querySuperNode(msg.sender)));
+    require(nodeBalance[_node] > 0);
+    uint256 recycles = nodeBalance[_node].sub(nodeReleasedBalance[_node]);
+    balanceAll = balanceAll.sub(recycles);
+    nodeBalance[_node] = nodeReleasedBalance[_node];
+    emit Recycled(_node,recycles);
+  }
+  function leftKOL() public view returns(uint256,bool) {
+    uint256 balance = token.balanceOf(this);
+    uint256 allLeftBalance = balanceAll.sub(releasedAll);
+    if (balance >= allLeftBalance)
+      return(balance.sub(allLeftBalance),true);
+    else
+      return(allLeftBalance.sub(balance),false);
   }
 
 }

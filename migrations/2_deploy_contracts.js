@@ -12,7 +12,8 @@ module.exports = function(deployer) {
   // deployer.deploy(KOLMission,{gas: 6700000});
   // deployer.deploy(KOLOffer,{gas: 7700000});KolCoreTeam
 
-  deployer.deploy(KOLVote,{gas: 6700000});
+  // deployer.deploy(KOLVote,{gas: 6700000});
+  deployer.deploy(LockNode,"0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",{gas: 6700000});
   // deployer.deploy(KolFund,
   //                "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
   //                {gas: 7700000});
