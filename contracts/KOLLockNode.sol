@@ -5,7 +5,7 @@ pragma solidity ^0.4.23;
  *             ╚═╝└  └  ┴└─┘┴┴ ┴┴─┘ └─┬─────────────────────┬─┘ ╚╩╝└─┘└─┘╚═╝┴ ┴ └─┘
  *   ┌────────────────────────────────┘                     └──────────────────────────────┐
  *   │    ┌─────────────────────────────────────────────────────────────────────────────┐  │
- *   └────┤ Dev:Jack Koe ├─────────────┤ Special for: KOL  ├───────────────┤ 20200402   ├──┘
+ *   └────┤ Dev:Jack Koe ├─────────────┤ Special for: KOL  ├───────────────┤ 20200406   ├──┘
  *        └─────────────────────────────────────────────────────────────────────────────┘
  */
 
@@ -114,8 +114,6 @@ pragma solidity ^0.4.23;
  contract KOL is StandardToken {
    function queryNode(address _addr) public view returns(bool);
    function querySuperNode(address _addr) public view returns(bool);
-   uint256 public userSupplyed;
-   uint256 public constant totalUserSupply = 16000000 *(10**18);
  }
 
  /**
@@ -151,30 +149,28 @@ contract KOLLockNode is Ownable{
 
   uint256 public dealTime =  3 days;
   uint256 public missionId = 0;
-  uint256 public constant totalUserSupply = 16000000 *(10**18);
-  uint256 public constant totalNodeBalance = 2380000 *(10**18);
   uint256 public nodeRate = 0;
   uint256 public releasedAll = 0;
   uint256 public balanceAll = 0;
   /* 正式环境 */
 
-  /* uint16 public constant totalSuperNodes = 21;
+  uint16 public constant totalSuperNodes = 21;
   uint16 public constant totalNodes = 500;
   uint16 public constant halfSuperNodes = 11;
   uint16 public constant mostNodes = 335;
   uint16 public constant halfNodes = 251;
   uint16 public constant minSuperNodes = 15;
-  uint16 public constant minNodes = 101; */
+  uint16 public constant minNodes = 101;
 
   /* 测试环境 */
-
+/*
   uint16 public constant totalSuperNodes = 3;
   uint16 public constant totalNodes = 10;
   uint16 public constant halfSuperNodes = 1;
   uint16 public constant mostNodes = 1;
   uint16 public constant halfNodes = 1;
   uint16 public constant minSuperNodes = 1;
-  uint16 public constant minNodes = 1;
+  uint16 public constant minNodes = 1; */
 
   uint16 public constant most = 67;
   uint16 public constant half = 51;
@@ -416,7 +412,7 @@ contract KOLLockNode is Ownable{
     return Voter[_node][_missionId];
   }
   function getKOL() onlyNodes public {
-    //节点把自己的币给释放出来。还有一个意外情况，就是节点更换了新的地址。这个会有点麻烦。也就是说节点地址不可以作为唯一的识别代码。
+
     require(nodeBalance[msg.sender] > 0);
     uint256 amount = nodeBalance[msg.sender].mul(nodeRate).div(100);
     uint256 releaseKol = amount.sub(nodeReleasedBalance[msg.sender]);
@@ -432,7 +428,7 @@ contract KOLLockNode is Ownable{
     return(nodeBalance[_node],nodeReleasedBalance[_node]);
   }
   function transferAllKolToFund() private {
-    address fund = 0x27750e6d41aef99501ebc256538c6a13a254ea15;
+    address fund = 0x27750e6D41Aef99501eBC256538c6A13a254Ea15;
     uint256 balance = token.balanceOf(this);
     token.transfer(fund, balance);
     emit AllTokenBack(fund,balance);
