@@ -1,7 +1,7 @@
 pragma solidity ^0.4.23;
 /*
  *             ╔═╗┌─┐┌─┐┬┌─┐┬┌─┐┬   ┌─────────────────────────┐ ╦ ╦┌─┐┌┐ ╔═╗┬┌┬┐┌─┐
- *             ║ ║├┤ ├┤ ││  │├─┤│   │ KOL Community Foundation  │ ║║║├┤ ├┴┐╚═╗│ │ ├┤
+ *             ║ ║├┤ ├┤ ││  │├─┤│   │ KOL Community Foundation│ │ ║║║├┤ ├┴┐╚═╗│ │ ├┤
  *             ╚═╝└  └  ┴└─┘┴┴ ┴┴─┘ └─┬─────────────────────┬─┘ ╚╩╝└─┘└─┘╚═╝┴ ┴ └─┘
  *   ┌────────────────────────────────┘                     └──────────────────────────────┐
  *   │    ┌─────────────────────────────────────────────────────────────────────────────┐  │
@@ -162,15 +162,6 @@ contract KOLLockNode is Ownable{
   uint16 public constant minSuperNodes = 15;
   uint16 public constant minNodes = 101;
 
-  /* 测试环境 */
-/*
-  uint16 public constant totalSuperNodes = 3;
-  uint16 public constant totalNodes = 10;
-  uint16 public constant halfSuperNodes = 1;
-  uint16 public constant mostNodes = 1;
-  uint16 public constant halfNodes = 1;
-  uint16 public constant minSuperNodes = 1;
-  uint16 public constant minNodes = 1; */
 
   uint16 public constant most = 67;
   uint16 public constant half = 51;
