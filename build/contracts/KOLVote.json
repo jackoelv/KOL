@@ -63022,12 +63022,12 @@
         }
       },
       "links": {},
-      "address": "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
-      "transactionHash": "0x31bfdcfe267f56ee6e28961de442049d52ab44a0bd608e25d884f7e8aa6d1c6f"
+      "address": "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+      "transactionHash": "0x00594c53434570482028e31ff454da90907ea75607f47b4de60652ce900b19d9"
     }
   },
   "schemaVersion": "3.0.19",
-  "updatedAt": "2020-04-06T04:12:45.083Z",
+  "updatedAt": "2020-04-11T05:11:38.820Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}

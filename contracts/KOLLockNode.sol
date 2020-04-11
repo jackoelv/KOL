@@ -154,14 +154,20 @@ contract KOLLockNode is Ownable{
   uint256 public balanceAll = 0;
   /* 正式环境 */
 
-  uint16 public constant totalSuperNodes = 21;
+  /* uint16 public constant totalSuperNodes = 21;
   uint16 public constant totalNodes = 500;
   uint16 public constant halfSuperNodes = 11;
   uint16 public constant mostNodes = 335;
   uint16 public constant halfNodes = 251;
   uint16 public constant minSuperNodes = 15;
-  uint16 public constant minNodes = 101;
-
+  uint16 public constant minNodes = 101; */
+  uint16 public constant totalSuperNodes = 3;
+  uint16 public constant totalNodes = 3;
+  uint16 public constant halfSuperNodes = 1;
+  uint16 public constant mostNodes = 1;
+  uint16 public constant halfNodes = 1;
+  uint16 public constant minSuperNodes = 1;
+  uint16 public constant minNodes = 1;
 
   uint16 public constant most = 67;
   uint16 public constant half = 51;

@@ -10,6 +10,8 @@
 </head>
 <body style = "margin-left: 1%;margin-right: 1%;margin-top: 2%;font-family: 'Open Sans', 'sans-serif';">
   <h1><p class="ui-txt-highlight">工资锁仓发行合约-社区KOL联盟</p></h1>
+
+
   <div class="ui-tooltips">
     <div class="ui-tooltips-cnt ui-border-b">
         <p class="startup">加载链上数据进行中......</p><a class="ui-icon-close"></a>
@@ -27,6 +29,7 @@
               <input type="text" name="MissionId" value="" placeholder="等待加载当期任务ID...">
           </div>
       </section>
+
           <div class="ui-form-item ui-form-item-radio ui-border-b">
               <label class="ui-radio" for="radio">
                   <input type="radio" checked="true" name="Agree" value="true">
@@ -235,6 +238,13 @@
                <strong class="missionEndTime">请点击获取详情</strong>
           </div>
       </div>
+
+      <div class="ui-btn-wrap">
+              <button class="ui-btn-lg ui-btn-danger" id="releaseBtn" style="display:none" onclick="App.getKOL()">释放我的KOL</button>
+      </div>
+
+
+
 
 </body>
 <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
