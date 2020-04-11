@@ -1,5 +1,6 @@
 
 import Web3 from "web3";
+import lockNode_artifacts from '../../build/contracts/KOLLockNode.json';
 import kolvote_artifacts from '../../build/contracts/KOLVote.json';
 
 const App = {
@@ -8,6 +9,7 @@ const App = {
   account: null,
   // accountLength:0,
   // currentAccount:0,
+  metaLock:null,
   meta: null,
   // metabulk:null,
   processedList: null,
@@ -21,59 +23,57 @@ const App = {
 
   getNodesVotedNum:async function(currentMissionId){
     const { web3 } = this;
-    const { getMission1 } = this.meta.methods;
-    const { getMission2 } = this.meta.methods;
-    const { getOfferings } = this.meta.methods;
+    const { getMission1 } = this.metaLock.methods;
+    const { getMission2 } = this.metaLock.methods;
+    const { getOfferings } = this.metaLock.methods;
 
     const nodeVotedNum = document.getElementsByClassName("nodeVotedNum")[0];
     const superVotedNum = document.getElementsByClassName("superVotedNum")[0];
     const missionid =     document.getElementsByClassName("missionid")[0];
     const missionName =   document.getElementsByClassName("missionName")[0];
-    const missionAmount = document.getElementsByClassName("missionAmount")[0];
-    const missionAddress = document.getElementsByClassName("missionAddress")[0];
     const missionEndTime =  document.getElementsByClassName("missionEndTime")[0];
-    const offerAmount = document.getElementsByClassName("offerAmount")[0];
+    const missionAmount = document.getElementsByClassName("missionAmount")[0];
 
-    const missionOldNode = document.getElementsByClassName("missionOldNode")[0];
-    const missionNewNode = document.getElementsByClassName("missionNewNode")[0];
+    const nodeRate = document.getElementsByClassName("nodeRate")[0];
 
     var misstionDetail = await getMission1(currentMissionId).call();
     var knodeVotedNum = await getMission2(currentMissionId).call();
 
-    let amount = web3.utils.fromWei(misstionDetail[4]);
+    nodeRate.innerHTML = misstionDetail[4].toString();
+    let amount = 0;
+    try {
+      amount = web3.utils.fromWei(misstionDetail[2]);
+      amount = web3.eth.fromWei(amount,"ether");
+    } catch (e) {
+      amount = 0;
+    } finally {
 
-    if (amount == 0){
-      missionOldNode.innerHTML = misstionDetail[0];
-      missionNewNode.innerHTML = misstionDetail[1];
-    }else{
-      missionOldNode.innerHTML = currentMissionId + "号为币发行任务，地址无意义";
-      missionNewNode.innerHTML = currentMissionId + "号为币发行任务，地址无意义";
     }
 
 
     missionAmount.innerHTML = amount + " KOL";
 
-    try{
-      var offering = await getOfferings(currentMissionId,0).call();
-      var offeringLength = parseInt(offering[2]);
-      if (offeringLength == 1) {
-        let offeringAmount = web3.utils.fromWei(offering[1]);
-        missionAddress.innerHTML = offering[0] ;
-        offerAmount.innerHTML = offeringAmount + " KOL";
-      }else {
-
-      }
-    }catch(e){
-      console.log("error is: "+e);
-      missionAddress.innerHTML = "无有效名单数据";
-      offerAmount.innerHTML = "无有效名单数据";
-    }
+    // try{
+    //   var offering = await getOfferings(currentMissionId,0).call();
+    //   var offeringLength = parseInt(offering[2]);
+    //   if (offeringLength == 1) {
+    //     let offeringAmount = web3.utils.fromWei(offering[1]);
+    //     missionAddress.innerHTML = offering[0] ;
+    //     offerAmount.innerHTML = offeringAmount + " KOL";
+    //   }else {
+    //
+    //   }
+    // }catch(e){
+    //   console.log("error is: "+e);
+    //   missionAddress.innerHTML = "无有效名单数据";
+    //   offerAmount.innerHTML = "无有效名单数据";
+    // }
     nodeVotedNum.innerHTML = knodeVotedNum[0].toString();
     superVotedNum.innerHTML = knodeVotedNum[2].toString();
     missionid.innerHTML = currentMissionId;
-    missionName.innerHTML = web3.utils.hexToAscii(misstionDetail[6]);
+    missionName.innerHTML = web3.utils.hexToAscii(misstionDetail[5]);
 
-    var time = misstionDetail[3];
+    var time = misstionDetail[1];
     var unixTimestamp = new Date(time*1000);
     missionEndTime.innerHTML = unixTimestamp.toLocaleString();
 
@@ -90,13 +90,15 @@ const App = {
 
     try {
       // get contract instance
-      const networkId = await web3.eth.net.getId();
-      const deployedNetwork = kolvote_artifacts.networks[networkId];
+      this.metaLock = new web3.eth.Contract(
+        lockNode_artifacts.abi,
+        "0x0017a04A2E182376235530D501Bc3Fbe7CA07a5b",
+      );
       this.meta = new web3.eth.Contract(
         kolvote_artifacts.abi,
-        deployedNetwork.address,
+        "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
       );
-      const { missionId } = this.meta.methods;
+      const { missionId } = this.metaLock.methods;
       let accounts = await web3.eth.getAccounts();
 
       let missionID = parseInt(await missionId().call());
@@ -124,14 +126,14 @@ const App = {
     let missionId = $("input[name='MissionId']").val();
     // let agree = ( $("input[name='Agree']").val());
     let agree = $('input:radio:checked').val();
-    let gasPrice = await web3.eth.getGasPrice();
-    let addPrice = 3 * 10 ** 9;
-    var BN = web3.utils.BN;
-    let price = new BN(gasPrice).add(new BN(addPrice)).toString();
+    let price = await web3.eth.getGasPrice();
+    // let addPrice = 3 * 10 ** 9;
+    // var BN = web3.utils.BN;
+    // let price = new BN(gasPrice).add(new BN(addPrice)).toString();
 
     // let price = new BN(gasPrice);
 
-    const { voteMission } = this.meta.methods;
+    const { voteMission } = this.metaLock.methods;
     try
     {
         await voteMission(type,missionId,agree).send({from: this.account,
@@ -149,29 +151,50 @@ const App = {
     const buttonDetail = document.getElementsByClassName("getDetail")[0];
     buttonDetail.innerHTML = "查询进行中...";
     const { web3 } = this;
-    const { balanceOf } = this.meta.methods;
     const { querySuperNode } = this.meta.methods;
     const { queryNode } = this.meta.methods;
-    const { voted } = this.meta.methods;
+    const { voted } = this.metaLock.methods;
+    const { queryBalance } = this.metaLock.methods;
 
-    var balance = await balanceOf(this.account).call();
-    balance = web3.utils.fromWei(balance,"ether");
+    console.log("1");
+    console.log(this.account);
+    try {
+      var bothbalance = await queryBalance(this.account).call();
+
+      console.log(bothbalance.length);
+      var balance = web3.eth.fromWei(bothbalance[0],"ether");
+      var releasedKOL = web3.eth.fromWei(bothbalance[1],"ether");
+      var freeBalance = Number(balance) - Number(releasedKOL);
+    } catch (e) {
+      balance = 0;
+      releasedKOL = 0;
+      freeBalance = 0;
+    } finally {
+
+    }
+
+
+    console.log("2");
+
     var ethBalance = await web3.eth.getBalance(this.account);
     ethBalance = web3.utils.fromWei(ethBalance,"ether");
 
+    console.log("3");
     const supernode = await querySuperNode(this.account).call();
     const node = await queryNode(this.account).call();
     const votedresult = await voted(this.account,currentMissionId).call();
-    // const myAddress = this.account;
-
-    // const addrElement = document.getElementsByClassName("myAddress")[0];
+    console.log("4");
     const balanceElement = document.getElementsByClassName("balance")[0];
+    const freeBalanceElement = document.getElementsByClassName("freeBalance")[0];
+    const releasedKOLElement = document.getElementsByClassName("releasedKOL")[0];
     const ethBalanceElement = document.getElementsByClassName("ethBalance")[0];
     const supernodeElement = document.getElementsByClassName("supernode")[0];
     const nodeElement = document.getElementsByClassName("node")[0];
     const votedElement = document.getElementsByClassName("voted")[0];
-
+    console.log("5");
     balanceElement.innerHTML = balance;
+    freeBalanceElement.innerHTML = freeBalance;
+    releasedKOLElement.innerHTML = releasedKOL;
     ethBalanceElement.innerHTML = ethBalance;
 
     if (node)
@@ -190,8 +213,10 @@ const App = {
       votedElement.innerHTML = "没投票";
 
     // addrElement.innerHTML = myAddress;
-
-    this.getNodesVotedNum(currentMissionId);
+    console.log("6");
+    this.getNodesVotedNum(0);//测试临时用一下
+    // this.getNodesVotedNum(currentMissionId);
+    console.log("7");
 
   },
 
