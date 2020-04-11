@@ -29,11 +29,11 @@ const App = {
       // get contract instance
       this.metaLock = new web3.eth.Contract(
         lockNode_artifacts.abi,
-        "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
+        "0x0017a04A2E182376235530D501Bc3Fbe7CA07a5b",
       );
       this.meta = new web3.eth.Contract(
         kolvote_artifacts.abi,
-        "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+        "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
       );
       const { missionId } = this.metaLock.methods;
       let accounts = await web3.eth.getAccounts();
