@@ -115,10 +115,10 @@ const App = {
     let missionId = $("input[name='MissionId']").val();
     // let agree = ( $("input[name='Agree']").val());
     let agree = $('input:radio:checked').val();
-    let gasPrice = await web3.eth.getGasPrice();
-    let addPrice = 3 * 10 ** 9;
-    var BN = web3.utils.BN;
-    let price = new BN(gasPrice).add(new BN(addPrice)).toString();
+    let price = await web3.eth.getGasPrice();
+    // let addPrice = 3 * 10 ** 9;
+    // var BN = web3.utils.BN;
+    // let price = new BN(gasPrice).add(new BN(addPrice)).toString();
 
     // let price = new BN(gasPrice);
 
