@@ -145,7 +145,7 @@ pragma solidity ^0.4.23;
 contract KOLPromote is Ownable{
   using SafeMath for uint256;
   string public name = "KOL Promotion";
-  KOL public token;
+  KOL public kol;
 
   uint256 public begin;
   uint256 public end;
@@ -156,6 +156,14 @@ contract KOLPromote is Ownable{
 
   uint8 public constant userLevel1 = 20;
   uint8 public constant userLevel2 = 10;
+
+  uint8 public constant comLevel1Users = 100;
+  uint8 public constant comLevel2Users = 300;
+  uint8 public constant comLevel3Users = 500;
+
+  uint8 public constant comLevel1Amount = 10000 * (10 ** 18);
+  uint8 public constant comLevel2Amount = 30000 * (10 ** 18);
+  uint8 public constant comLevel3Amount = 50000 * (10 ** 18);
 
   uint8 public constant comLevel1 = 3;
   uint8 public constant comLevel2 = 5;
@@ -174,7 +182,8 @@ contract KOLPromote is Ownable{
   };
 
 
-  mapping (address => lock[]) internal LockBalance;
+  mapping (address => lock[]) internal LockHistory;
+  mapping (address => uint256) internal LockBalance;
   mapping (address => address) internal InviteRelation;//A=>B B is father;
   mapping (uint256 => uint256) internal ClosePrice;
   mapping (address => uint256) internal TotalUsers;
@@ -182,29 +191,34 @@ contract KOLPromote is Ownable{
   mapping (uint256 => address) public InviteCode;
   mapping (address => uint256) public RInviteCode;
 
+  mapping (address => uint8) internal isLevelN;
+
 
   event Registed(address _user,uint256 inviteCode);
 
 
   constructor(address _tokenAddress) public {
-    token = KOL(_tokenAddress);
+    kol = KOL(_tokenAddress);
   }
 
   modifier onlySuperNode() {
-    require(token.querySuperNode(msg.sender));
+    require(kol.querySuperNode(msg.sender));
       _;
   }
   modifier onlyNode() {
-      require(token.queryNode(msg.sender));
+      require(kol.queryNode(msg.sender));
       _;
   }
   modifier onlyNodes() {
-      require(token.querySuperNode(msg.sender)||token.queryNode(msg.sender));
+      require(kol.querySuperNode(msg.sender)||kol.queryNode(msg.sender));
       _;
   }
-
-  function withDraw() public {
-
+  /**
+   * @title 提现KOL到自己的账户
+   * @dev visit: https://github.com/jackoelv/KOL/
+  */
+  function withDraw(uint256 _amount) public {
+    //先判断用户账户里面有多少本金，多少利息，以及多少邀请佣金。
   }
 
   /**
@@ -218,7 +232,7 @@ contract KOLPromote is Ownable{
    * @title 注册并绑定邀请关系
    * @dev visit: https://github.com/jackoelv/KOL/
   */
-  function register(uint256 _fInviteCode) private {
+  function register(uint256 _fInviteCode) public {
     uint256 random = uint256(keccak256(now, msg.sender)) % 100;
     uint256 _myInviteCode = iCode.add(random);
     iCode = iCode.add(random);
@@ -240,24 +254,65 @@ contract KOLPromote is Ownable{
     }
 
   }
+  /**
+   * @title 转入KOL进行持仓生息
+   * @dev visit: https://github.com/jackoelv/KOL/
+  */
   function join(uint256 _amount) public {
+    kol.transferFrom(msg.sender,address(this),_amount);
+    LockHistory[msg.sender].push(now,_amount);
+    LockBalance[msg.sender] = LockBalance[msg.sender].add(_amount);
 
-    LockBalance[msg.sender].push(now,_amount);
-  }
 
-  function sumLocks() public view returns(uint256){
-    uint256 totalLocks;
-    for (uint i = 0 ; i< LockBalance[msg.sender].length; i++) {
-      totalLocks.add(LockBalance[msg.sender][i].amount);
+    for (uint i = 0; i<InviteList[msg.sender].length; i++){
+      if (LockHistory[msg.sender].length == 1){
+        //给上面的人数+1
+        TotalUsers[InviteList[msg.sender][i]] += 1;
+      }
+      //给上面的加入团队总金额
+      TotalLockingAmount[InviteList[msg.sender][i]] = InviteList[msg.sender][i].add(_amount);
+      queryAndSetLevelN(InviteList[msg.sender][i]);
     }
-    return (totalLocks);
-  }
 
-  function upgrate() {
 
   }
+  /**
+   * @title 查询并设置用户的身份级别
+   * @dev visit: https://github.com/jackoelv/KOL/
+  */
+  function queryAndSetLevelN(address _addr) internal{
+    if ((TotalUsers[_addr] >= comLevel3Users) && (TotalLockingAmount[_addr] >= comLevel3Amount)){
+      isLevelN[_addr] = 3;
+    }else if((TotalUsers[_addr] >= comLevel2Users) && (TotalLockingAmount[_addr] >= comLevel2Amount)){
+      isLevelN[_addr] = 2;
+    }else if((TotalUsers[_addr] >= comLevel1Users) && (TotalLockingAmount[_addr] >= comLevel1Amount)){
+      isLevelN[_addr] = 1;
+    }
+  }
+  /**
+   * @title 查询并计算用户的持币生息收益
+   * @dev visit: https://github.com/jackoelv/KOL/
+  */
+  function calcuBonus() public view returns(uint256,uint256) {
+    //第一个返回日收益，第二个返回总收益
+    uint256 dayBonus = LockBalance[msg.sender].mul(3).div(1000);
+  }
 
+  /**
+   * @title 查询并计算用户的邀请收益
+   * @dev visit: https://github.com/jackoelv/KOL/
+  */
+  function calcuInviteBonus() private {
 
+  }
+
+  /**
+   * @title 查询并计算用户的网体收益
+   * @dev visit: https://github.com/jackoelv/KOL/
+  */
+  function calcuComBonus() private {
+
+  }
 
 
 }
