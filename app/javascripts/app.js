@@ -145,7 +145,13 @@ const App = {
       }
       this.targetAddress[i+1] = targets[0];
       this.targetAmount[i+1] = targets[1];
-      this.targetAmountWei[i+1] = new BN(targets[1]).mul(new BN(unit.toString())).toString();
+      console.log("wori1");
+      console.log(targets[1]);
+      // this.targetAmountWei[i+1] = new BN(targets[1]).mul(new BN(unit.toString())).toString();
+      this.targetAmountWei[i+1] = web3.utils.toWei(targets[1].toString(),"ether");
+
+      console.log(this.targetAmount[i+1]);
+      console.log(this.targetAmountWei[i+1]);
 
 
       this.totalTokens += Number(this.targetAmount[i+1]);
@@ -156,7 +162,11 @@ const App = {
 
     };
 
-    this.targetAmountWei[0] = new BN(this.totalTokens).mul(new BN(unit.toString())).toString();
+    // this.targetAmountWei[0] = new BN(this.totalTokens).mul(new BN(unit.toString())).toString();
+    this.targetAmountWei[0] = web3.utils.toWei(this.totalTokens.toString(),"ether");
+    console.log("wori2");
+    console.log(this.targetAmountWei[0]);
+    console.log(this.totalTokens);
     this.getList();
     this.setApproveBtn();
     this.checkData();
@@ -260,8 +270,8 @@ const App = {
      const { web3 } = this;
      var BN = web3.utils.BN;
      let amount = this.targetAmountWei[0];
-     let addAmount = 10 * (10 ** 18);
-     amount = new BN(amount).add(new BN(addAmount.toString())).toString();
+     // let addAmount = 10 * (10 ** 18);
+     // amount = new BN(amount).add(new BN(addAmount.toString())).toString();
 
      let price = await web3.eth.getGasPrice();
      // let addPrice = 1 * 10 ** 9;
