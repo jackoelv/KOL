@@ -145,17 +145,19 @@ const App = {
       }
       this.targetAddress[i+1] = targets[0];
       this.targetAmount[i+1] = targets[1];
-      console.log("wori1");
-      console.log(targets[1]);
+      // console.log("wori1");
+      // console.log(targets[1]);
       // this.targetAmountWei[i+1] = new BN(targets[1]).mul(new BN(unit.toString())).toString();
       this.targetAmountWei[i+1] = web3.utils.toWei(targets[1].toString(),"ether");
 
-      console.log(this.targetAmount[i+1]);
-      console.log(this.targetAmountWei[i+1]);
+      // console.log(this.targetAmount[i+1]);
+      // console.log(this.targetAmountWei[i+1]);
 
 
       // this.totalTokens += Number(this.targetAmount[i+1]);
       this.totalTokens = NP.plus(this.totalTokens,this.targetAmount[i+1]);
+      // console.log(this.totalTokens);
+      this.totalTokens = NP.strip(this.totalTokens);
       if(!web3.utils.isAddress(this.targetAddress[i+1]))
       {
           console.log("error exit,should abort the app and throw errors");
