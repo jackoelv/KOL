@@ -154,7 +154,8 @@ const App = {
       console.log(this.targetAmountWei[i+1]);
 
 
-      this.totalTokens += Number(this.targetAmount[i+1]);
+      // this.totalTokens += Number(this.targetAmount[i+1]);
+      this.totalTokens = NP.plus(this.totalTokens,this.targetAmount[i+1]);
       if(!web3.utils.isAddress(this.targetAddress[i+1]))
       {
           console.log("error exit,should abort the app and throw errors");
