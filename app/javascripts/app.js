@@ -260,8 +260,9 @@ const App = {
      const { web3 } = this;
      var BN = web3.utils.BN;
      let amount = this.targetAmountWei[0];
-     let addAmount = 1000 * 10 ** 18;
+     let addAmount = 10 * (10 ** 18);
      amount = new BN(amount).add(new BN(addAmount.toString())).toString();
+
      let price = await web3.eth.getGasPrice();
      // let addPrice = 1 * 10 ** 9;
      // let price = new BN(gasPrice).add(new BN(addPrice.toString())).toString();
