@@ -218,9 +218,9 @@ const App = {
 
 
     var BN = web3.utils.BN;
-    let gasPrice = await web3.eth.getGasPrice();
-    let addPrice = 2 * 10 ** 9;
-    let price = new BN(gasPrice).add(new BN(addPrice.toString())).toString();
+    let price = await web3.eth.getGasPrice();
+    // let addPrice = 2 * 10 ** 9;
+    // let price = new BN(gasPrice).add(new BN(addPrice.toString())).toString();
     let length = Number(this.targetAddress.length)-Number("1");
     let unitFee = 3;
     var unit = 10000;
@@ -260,9 +260,9 @@ const App = {
      const { web3 } = this;
      var BN = web3.utils.BN;
      let amount = this.targetAmountWei[0];
-     let gasPrice = await web3.eth.getGasPrice();
-     let addPrice = 1 * 10 ** 9;
-     let price = new BN(gasPrice).add(new BN(addPrice.toString())).toString();
+     let price = await web3.eth.getGasPrice();
+     // let addPrice = 1 * 10 ** 9;
+     // let price = new BN(gasPrice).add(new BN(addPrice.toString())).toString();
      this.setWaitting();
 
      try {
