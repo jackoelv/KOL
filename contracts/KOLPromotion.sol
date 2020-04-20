@@ -179,6 +179,7 @@ contract KOLPromote is Ownable{
   struct lock{
     uint256 time;
     uint256 amount;
+    bool withDrawed;
   };
 
 
@@ -192,6 +193,9 @@ contract KOLPromote is Ownable{
   mapping (address => uint256) public RInviteCode;
 
   mapping (address => uint8) internal isLevelN;
+  mapping (address => bool) public USDTOrCoin;
+
+  mapping (address => uint256) public WithDraws;
 
 
   event Registed(address _user,uint256 inviteCode);
@@ -256,13 +260,15 @@ contract KOLPromote is Ownable{
   }
   /**
    * @title 转入KOL进行持仓生息
+   * @param _usdtOrCoin, true:金本位; false:币本位
    * @dev visit: https://github.com/jackoelv/KOL/
   */
-  function join(uint256 _amount) public {
+  function join(uint256 _amount,bool _usdtOrCoin) public {
     kol.transferFrom(msg.sender,address(this),_amount);
-    LockHistory[msg.sender].push(now,_amount);
+    LockHistory[msg.sender].push(now,_amount,false);
     LockBalance[msg.sender] = LockBalance[msg.sender].add(_amount);
 
+    USDTOrCoin[msg.sender] = _usdtOrCoin;
 
     for (uint i = 0; i<InviteList[msg.sender].length; i++){
       if (LockHistory[msg.sender].length == 1){
@@ -294,8 +300,10 @@ contract KOLPromote is Ownable{
    * @dev visit: https://github.com/jackoelv/KOL/
   */
   function calcuBonus() public view returns(uint256,uint256) {
-    //第一个返回日收益，第二个返回总收益
+    //第一个返回当前日收益，第二个返回总收益
     uint256 dayBonus = LockBalance[msg.sender].mul(3).div(1000);
+
+
   }
 
   /**
@@ -311,6 +319,14 @@ contract KOLPromote is Ownable{
    * @dev visit: https://github.com/jackoelv/KOL/
   */
   function calcuComBonus() private {
+
+  }
+
+  /**
+   * @title 录入KOL的收盘价
+   * @dev visit: https://github.com/jackoelv/KOL/
+  */
+  function putClosePrice() onlyNodes public{
 
   }
 
