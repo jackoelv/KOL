@@ -241,6 +241,7 @@ contract KOLPromote is Ownable{
 
   }
   function join(uint256 _amount) public {
+
     LockBalance[msg.sender].push(now,_amount);
   }
 
