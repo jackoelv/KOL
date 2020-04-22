@@ -142,13 +142,14 @@ pragma solidity ^0.4.23;
   * title KOL Promotion contract
   * dev visit: https://github.com/jackoelv/KOL/
  */
+ //测试说明，把一天改成1分钟。提现限制为5分钟。
 contract KOLPro is Ownable{
   using SafeMath for uint256;
   string public name = "KOL Promotion";
   KOL public kol;
   address public reciever;
 
-  uint256 public begin = 1588262400;//2020年5月1日0点0分0秒
+  uint256 public begin;//2020年4月22日0点0分0秒
   uint256 public end;
 
   uint256 public iCode;
@@ -158,9 +159,14 @@ contract KOLPro is Ownable{
   uint8 public constant userLevel1 = 20;
   uint8 public constant userLevel2 = 10;
 
-  uint16 public constant comLevel1Users = 100;
+  /* uint16 public constant comLevel1Users = 100;
   uint16 public constant comLevel2Users = 300;
-  uint16 public constant comLevel3Users = 500;
+  uint16 public constant comLevel3Users = 500; */
+
+  //测试的时候就把数字变小一点。
+  uint16 public constant comLevel1Users = 2;
+  uint16 public constant comLevel2Users = 3;
+  uint16 public constant comLevel3Users = 4;
 
   uint256 public constant comLevel1Amount = 10000 * (10 ** 18);
   uint256 public constant comLevel2Amount = 30000 * (10 ** 18);
@@ -171,7 +177,9 @@ contract KOLPro is Ownable{
   uint8 public constant comLevel3 = 10;
   uint8 public constant withDrawRate = 5;
 
-  uint256 public constant withDrawDays = 30 days;
+  /* uint256 public constant withDrawDays = 30 days; */
+  //测试限制5分钟
+  uint256 public constant withDrawDays = 5 minutes;
 
 
   /* address[] private inviteAddr;// A->B->C: inviteAddr= B,A
@@ -264,7 +272,9 @@ contract KOLPro is Ownable{
     uint256 team;
     uint256 balance;
     uint256 yestodayLastSecond = getYestodayLastSecond(now);//昨天的最后一秒
-    uint256 lastingDays = now.sub(now.sub(begin) % 86400).div(86400);//除法刚好是整数
+    /* uint256 lastingDays = now.sub(now.sub(begin) % 86400).div(86400);//除法刚好是整数 */
+    //测试的时候就是过去了多少个分钟
+    uint256 lastingDays = now.sub(now.sub(begin) % 60).div(60);
     for (uint i = 0 ; i<lastingDays; i++) {
        self += calcuBonus(msg.sender,yestodayLastSecond);
        promotion += calcuInviteBonus(msg.sender,yestodayLastSecond);
@@ -298,8 +308,8 @@ contract KOLPro is Ownable{
       }
 
     }
-    kol.transfer(msg.sender,total.mul(95).div(100).add(balance));
-    kol.transfer(reciever,total.mul(5).div(100));
+    kol.transfer(msg.sender,total.mul(100-withDrawRate).div(100).add(balance));
+    kol.transfer(reciever,total.mul(withDrawRate).div(100));
 
   }
   /**
@@ -576,7 +586,9 @@ contract KOLPro is Ownable{
   */
   function getYestodayLastSecond(uint256 _queryTime) private view returns(uint256){
     //录入的价格为4位小数
-    return (_queryTime.sub(_queryTime.sub(begin) % 86400) - 1);
+    /* return (_queryTime.sub(_queryTime.sub(begin) % 86400) - 1); */
+    //测试 上一分钟的最后一秒
+    return (_queryTime.sub(_queryTime.sub(begin) % 60) - 1);
   }
 
 
