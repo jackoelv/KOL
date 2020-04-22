@@ -146,6 +146,7 @@ contract KOLPromote is Ownable{
   using SafeMath for uint256;
   string public name = "KOL Promotion";
   KOL public kol;
+  address public reciever;
 
   uint256 public begin = 1588262400;//2020年5月1日0点0分0秒
   uint256 public end;
@@ -229,10 +230,11 @@ contract KOLPromote is Ownable{
   event WithDrawBalance(address _user,uint256 _balance);
 
 
-  constructor(address _tokenAddress,uint256 _begin,uint256 _end) public {
+  constructor(address _tokenAddress,address _reciever,uint256 _begin,uint256 _end) public {
     kol = KOL(_tokenAddress);
     begin = _begin;
     end = _end;
+    reciever = _reciever;
 
   }
 
@@ -260,23 +262,23 @@ contract KOLPromote is Ownable{
     uint256 self;
     uint256 promotion;
     uint256 team;
-    if (_type) {
+    uint256 balance;
+    uint256 yestodayLastSecond = getYestodayLastSecond(now);//昨天的最后一秒
+    uint256 lastingDays = now.sub(now.sub(begin) % 86400).div(86400);//除法刚好是整数
+    for (uint i = 0 ; i<lastingDays; i++) {
+       self += calcuBonus(msg.sender,yestodayLastSecond);
+       promotion += calcuInviteBonus(msg.sender,yestodayLastSecond);
+       team += calcuTeamBonus(msg.sender,yestodayLastSecond);
+       yestodayLastSecond = yestodayLastSecond.sub(86400);
+    }
+    //应该把这个历史记录下来？爆出一个事件吧，不记录链上了。
+    emit WithDraw(msg.sender,self,promotion,team);
+    uint256 total = self.add(promotion).add(team);
+    WithDraws[msg.sender] += total;
+
+    if (!_type) {
       //提利息+奖励
       //今天凌晨的时间
-      uint256 yestodayLastSecond = getYestodayLastSecond(now);//昨天的最后一秒
-      uint256 lastingDays = now.sub(now.sub(begin) % 86400).div(86400);//除法刚好是整数
-      for (uint i = 0 ; i<lastingDays; i++) {
-         self += calcuBonus(msg.sender,yestodayLastSecond);
-         promotion += calcuInviteBonus(msg.sender,yestodayLastSecond);
-         team += calcuTeamBonus(msg.sender,yestodayLastSecond);
-         yestodayLastSecond = yestodayLastSecond.sub(86400);
-      }
-      //应该把这个历史记录下来？爆出一个事件吧，不记录链上了。
-      emit WithDraw(msg.sender,self,promotion,team);
-      uint256 total = self.add(promotion).add(team);
-      WithDraws[msg.sender] += total;
-      kol.transfer(msg.sender,total);
-    }else{
       //提本金，先判断是否符合条件，一旦提了本金就要注意给上级网体降级减少网体的加速。
       if ((TotalLockingAmount[msg.sender] < LockBalance[msg.sender].mul(withDrawRate)) &&
                                     (now < LockHistory[msg.sender][0].begin + withDrawDays)){
@@ -287,14 +289,17 @@ contract KOLPromote is Ownable{
           LockHistory[msg.sender][j].end = now;
           LockHistory[msg.sender][j].withDrawed = true;
         }
-        uint256 balance = LockBalance[msg.sender];
+        balance = LockBalance[msg.sender];
         emit WithDrawBalance(msg.sender,balance);
-        kol.transfer(msg.sender,balance);
+        WithDraws[msg.sender] += balance;
+        /* kol.transfer(msg.sender,balance); */
         LockBalance[msg.sender] = 0;
         afterDraw(msg.sender,balance);//提现以后需要对上级所有的网体人数和金额做减法。
       }
 
     }
+    kol.transfer(msg.sender,total.mul(95).div(100).add(balance));
+    kol.transfer(reciever,total.mul(5).div(100));
 
   }
   /**
@@ -441,7 +446,6 @@ contract KOLPromote is Ownable{
             }else{
               tmpBonus += LockHistory[_addr][i].amount.mul(3).div(1000);
             }
-
           }
         }
       }
@@ -586,6 +590,9 @@ contract KOLPromote is Ownable{
     uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
     ClosePrice[yestodayLastSecond] = price;
 
+  }
+  function setReciever(address _addr) onlyOwner public{
+    reciever = _addr;
   }
 
 }
