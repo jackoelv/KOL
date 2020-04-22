@@ -179,7 +179,7 @@ contract KOLPro is Ownable{
 
   /* uint256 public constant withDrawDays = 30 days; */
   //测试限制5分钟
-  uint256 public constant withDrawDays = 5 minutes;
+  uint256 public constant withDrawDays = 2 minutes;
 
 
   /* address[] private inviteAddr;// A->B->C: inviteAddr= B,A
@@ -220,7 +220,7 @@ contract KOLPro is Ownable{
   mapping (address => uint256) internal InviteCurrentDayBonus;
 
   mapping (address => address) internal InviteRelation;//A=>B B is father;
-  mapping (uint256 => uint256) internal ClosePrice;
+  mapping (uint256 => uint256) public ClosePrice;
   mapping (address => uint256) internal TotalUsers;
   mapping (address => uint256) internal TotalLockingAmount;
   mapping (uint256 => address) public InviteCode;
@@ -243,7 +243,7 @@ contract KOLPro is Ownable{
     begin = _begin;
     end = _end;
     reciever = _reciever;
-
+    InviteCode[0] = owner;
   }
 
   modifier onlySuperNode() {
@@ -258,6 +258,7 @@ contract KOLPro is Ownable{
       require(kol.querySuperNode(msg.sender)||kol.queryNode(msg.sender));
       _;
   }
+
   /**
    * title 提现KOL到自己的账户
    * dev visit: https://github.com/jackoelv/KOL/
@@ -266,15 +267,20 @@ contract KOLPro is Ownable{
     //_type true，提利息，false，提本息
     //提现就把利息全部提走，只能提整数，不能提小数点。
     //如果是提现本金，需要判断一下用户是否满足自由提现的条件。
+    uint256 currentTime;
+    if (now > end)
+      currentTime = end;
+    else
+      currentTime = now;
     require(LockBalance[msg.sender] > 0);
     uint256 self;
     uint256 promotion;
     uint256 team;
     uint256 balance;
-    uint256 yestodayLastSecond = getYestodayLastSecond(now);//昨天的最后一秒
-    /* uint256 lastingDays = now.sub(now.sub(begin) % 86400).div(86400);//除法刚好是整数 */
+    uint256 yestodayLastSecond = getYestodayLastSecond(currentTime);//昨天的最后一秒
+    /* uint256 lastingDays = currentTime.sub(currentTime.sub(begin) % 86400).div(86400);//除法刚好是整数 */
     //测试的时候就是过去了多少个分钟
-    uint256 lastingDays = now.sub(now.sub(begin) % 60).div(60);
+    uint256 lastingDays = currentTime.sub(currentTime.sub(begin) % 60).div(60);
     for (uint i = 0 ; i<lastingDays; i++) {
        self += calcuBonus(msg.sender,yestodayLastSecond);
        promotion += calcuInviteBonus(msg.sender,yestodayLastSecond);
@@ -291,12 +297,12 @@ contract KOLPro is Ownable{
       //今天凌晨的时间
       //提本金，先判断是否符合条件，一旦提了本金就要注意给上级网体降级减少网体的加速。
       if ((TotalLockingAmount[msg.sender] < LockBalance[msg.sender].mul(withDrawRate)) &&
-                                    (now < LockHistory[msg.sender][0].begin + withDrawDays)){
+                                    (currentTime < LockHistory[msg.sender][0].begin + withDrawDays)){
           //没有达到提现要求
           return;
       }else{
         for (uint j = 0; j<LockHistory[msg.sender].length; j++){
-          LockHistory[msg.sender][j].end = now;
+          LockHistory[msg.sender][j].end = currentTime;
           LockHistory[msg.sender][j].withDrawed = true;
         }
         balance = LockBalance[msg.sender];
@@ -327,17 +333,11 @@ contract KOLPro is Ownable{
   }
 
   /**
-   * title 获得自己的邀请码
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function getCode() public view returns(uint256) {
-    return (RInviteCode[msg.sender]);
-  }
-  /**
    * title 注册并绑定邀请关系
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function register(uint256 _fInviteCode) public {
+    require(now <= end);
     uint256 random = uint256(keccak256(now, msg.sender)) % 100;
     uint256 _myInviteCode = iCode.add(random);
     iCode = iCode.add(random);
@@ -365,6 +365,7 @@ contract KOLPro is Ownable{
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function join(uint256 _amount,bool _usdtOrCoin) public {
+    require(now <= end);
     kol.transferFrom(msg.sender,address(this),_amount);
     LockHistory[msg.sender].push(lock(now,_amount,0,false));
     LockBalance[msg.sender] = LockBalance[msg.sender].add(_amount);
@@ -422,6 +423,7 @@ contract KOLPro is Ownable{
     //输入参数为查询的时间。
     //返回值为截止到查询时间之前当天的静态收益。
     //金本位考虑进来。
+    require(_queryTime <= end);
     uint256 tmpBonus;
     uint256 yestodayLastSecond;
     uint256 theDaylastSecond;
@@ -464,6 +466,10 @@ contract KOLPro is Ownable{
 
 
   }
+
+  function calcuBonusP(uint256 _queryTime) public view returns(uint256){
+    return(calcuBonus(msg.sender,_queryTime));
+  }
   /**
    * title 查询到指定时间点，计算用户当天的推广收益
    * dev visit: https://github.com/jackoelv/KOL/
@@ -471,6 +477,7 @@ contract KOLPro is Ownable{
   function calcuInviteBonus(address _addr,uint256 _queryTime) private view returns(uint256) {
     //直推，直推的直推，比较金额，计算佣金。
     //先计算直推的
+    require(_queryTime <= end);
     address[] childUser = ChildAddrs[_addr];
 
     uint256 dayLockBalance;//先算出这一天他的有效锁仓余额是多少
@@ -486,29 +493,34 @@ contract KOLPro is Ownable{
       //每个直推独立计算
       childLockBalance = queryLockBalance(childUser[i],_queryTime);
       if (dayLockBalance >= childLockBalance){
-        level1Bonus += childLockBalance.mul(userLevel1).div(100);
+        level1Bonus += childLockBalance.mul(3).div(1000).mul(userLevel1).div(100);
       }else{
-        level1Bonus += dayLockBalance.mul(userLevel1).div(100);
+        level1Bonus += dayLockBalance.mul(3).div(1000).mul(userLevel1).div(100);
       }
       //再计算二级的
       address[] child2User = ChildAddrs[childUser[i]];
       for (uint j = 0; j<child2User.length; j++){
         child2LockBalance = queryLockBalance(child2User[j],_queryTime);
         if (dayLockBalance >= child2LockBalance){
-          level2Bonus += childLockBalance.mul(userLevel2).div(100);
+          level2Bonus += childLockBalance.mul(3).div(1000).mul(userLevel2).div(100);
         }else{
-          level2Bonus += dayLockBalance.mul(userLevel2).div(100);
+          level2Bonus += dayLockBalance.mul(3).div(1000).mul(userLevel2).div(100);
         }
       }
     }
     return (level1Bonus.add(level2Bonus));
 
   }
+
+  function calcuInviteBonusP(uint256 _queryTime) public view returns(uint256){
+    return(calcuInviteBonus(msg.sender,_queryTime));
+  }
   /**
    * title 查询指定时间用户的有效锁仓余额
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function queryLockBalance(address _addr,uint256 _queryTime) private view returns(uint256) {
+    require(_queryTime <= end);
     uint256 dayLockBalance;
     for (uint j = 0; j<LockHistory[_addr].length; j++){
       if (LockHistory[_addr][j].withDrawed){
@@ -525,11 +537,16 @@ contract KOLPro is Ownable{
     }
     return dayLockBalance;
   }
+
+  function queryLockBalanceP(uint256 _queryTime) public view returns(uint256){
+    return(queryLockBalance(msg.sender,_queryTime));
+  }
   /**
    * title 查询并计算用户的网体收益
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function calcuTeamBonus(address _addr,uint256 _queryTime) private view returns(uint256) {
+    require(_queryTime <= end);
     uint8 rate;
     if (TeamRateList[_addr].length == 0){
       return 0;
@@ -560,26 +577,31 @@ contract KOLPro is Ownable{
     }
 
   }
+  function calcuTeamBonusP(uint256 _queryTime) public view returns(uint256){
+    return(calcuTeamBonus(msg.sender,_queryTime));
+  }
   /**
    * title 递归计算直推网体奖励
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function levelBonus(uint256 _ancientBalance,uint8 _rate,address _addr,uint256 _queryTime) private view returns(uint256){
+    require(_queryTime <= end);
     uint256 bonus;
 
     if ( ChildAddrs[_addr].length > 0 ){
       for (uint i = 0; i<ChildAddrs[_addr].length; i++){
         uint256 childLockBalance = queryLockBalance(ChildAddrs[_addr][i],_queryTime);
         if (_ancientBalance >= childLockBalance) {
-          bonus += childLockBalance.mul(_rate).div(100);
+          bonus += childLockBalance.mul(3).div(1000).mul(_rate).div(100);
         }else{
-          bonus += _ancientBalance.mul(_rate).div(100);
+          bonus += _ancientBalance.mul(3).div(1000).mul(_rate).div(100);
         }
         bonus += levelBonus(_ancientBalance,_rate,ChildAddrs[_addr][i],_queryTime);
       }
     }
     return 0;
   }
+
   /**
    * title 根据给定时间计算出昨天的最后一秒
    * dev visit: https://github.com/jackoelv/KOL/
@@ -588,6 +610,7 @@ contract KOLPro is Ownable{
     //录入的价格为4位小数
     /* return (_queryTime.sub(_queryTime.sub(begin) % 86400) - 1); */
     //测试 上一分钟的最后一秒
+    require(_queryTime <= (end+1 days));
     return (_queryTime.sub(_queryTime.sub(begin) % 60) - 1);
   }
 
@@ -599,6 +622,7 @@ contract KOLPro is Ownable{
   */
   function putClosePrice(uint256 price,uint256 _queryTime) onlyNodes public{
     //录入的价格为4位小数
+    require(_queryTime <= end);
     uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
     ClosePrice[yestodayLastSecond] = price;
 
@@ -606,5 +630,53 @@ contract KOLPro is Ownable{
   function setReciever(address _addr) onlyOwner public{
     reciever = _addr;
   }
+
+  /**
+   * title 获得自己的邀请码
+   * dev visit: https://github.com/jackoelv/KOL/
+  */
+  function getCode() public view returns(uint256) {
+    return (RInviteCode[msg.sender]);
+  }
+  /**
+   * title 查询自己的直推下级
+   * dev visit: https://github.com/jackoelv/KOL/
+  */
+  function getTeam() public view returns(address[],bool[]) {
+    bool[] validUser;
+    for (uint i = 0; i<ChildAddrs[msg.sender].length; i++){
+      if (LockBalance[ChildAddrs[msg.sender][i]] > 0)
+        validUser.push(true);
+      else
+        validUser.push(false);
+    }
+    return(ChildAddrs[msg.sender],validUser);
+  }
+  /**
+   * title 查询自己的网体人数
+   * dev visit: https://github.com/jackoelv/KOL/
+  */
+  function getTeamTotalUsers() public view returns(uint256) {
+    return (TotalUsers[msg.sender]);
+  }
+  /**
+   * title 查询自己的网体金额
+   * dev visit: https://github.com/jackoelv/KOL/
+  */
+  function getTeamTotalAmount() public view returns(uint256) {
+    return (TotalLockingAmount[msg.sender]);
+  }
+  /**
+   * title 查询自己的锁仓历史
+   * dev visit: https://github.com/jackoelv/KOL/
+  */
+  function getLockHistory(uint _index) public view returns(uint256,uint256,uint256,bool) {
+    require( (_index<(LockHistory[msg.sender].length)) && (_index>=0) );
+    return(LockHistory[msg.sender][_index].begin,
+                LockHistory[msg.sender][_index].end,
+                LockHistory[msg.sender][_index].amount,
+                LockHistory[msg.sender][_index].withDrawed);
+  }
+
 
 }
