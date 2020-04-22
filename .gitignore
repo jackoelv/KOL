@@ -116,3 +116,12 @@ build/btt2app.js
 build/btt3app.js
 build/number.js
 build/contracts/
+build/contracts/KOL.json
+build/contracts/KOLVote.json
+build/contracts/Migrations.json
+build/contracts/Ownable.json
+build/contracts/Pausable.json
+build/contracts/SafeMath.json
+build/contracts/StandardToken.json
+build/contracts/TetherToken.json
+build/contracts/UpgradedStandardToken.json
