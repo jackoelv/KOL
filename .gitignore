@@ -115,3 +115,5 @@ build/btt23app.js
 build/btt2app.js
 build/btt3app.js
 build/number.js
+build/contracts/KOLPro.json
+build/contracts/BasicToken.json

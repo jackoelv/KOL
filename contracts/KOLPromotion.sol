@@ -142,7 +142,7 @@ pragma solidity ^0.4.23;
   * title KOL Promotion contract
   * dev visit: https://github.com/jackoelv/KOL/
  */
-contract KOLPromote is Ownable{
+contract KOLPro is Ownable{
   using SafeMath for uint256;
   string public name = "KOL Promotion";
   KOL public kol;
