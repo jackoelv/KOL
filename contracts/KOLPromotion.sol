@@ -263,7 +263,7 @@ contract KOLPromote is Ownable{
     if (_type) {
       //提利息+奖励
       //今天凌晨的时间
-      uint256 yestodayLastSecond = now.sub(now.sub(begin) % 86400) - 1;//昨天的最后一秒
+      uint256 yestodayLastSecond = getYestodayLastSecond(now);//昨天的最后一秒
       uint256 lastingDays = now.sub(now.sub(begin) % 86400).div(86400);//除法刚好是整数
       for (uint i = 0 ; i<lastingDays; i++) {
          self += calcuBonus(msg.sender,yestodayLastSecond);
@@ -400,37 +400,48 @@ contract KOLPromote is Ownable{
     }
   }
   /**
-   * title 用户升级后首次计算历史佣金的汇总
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function firstUpgradeBonus(address _addr) internal{
-    if (isLevelN[_addr] == 1){
-      //首次升级社区长,计算日加速
-    }else if (isLevelN[_addr] ==2 ){
-      //首次升级到精英社区
-    }else if (isLevelN[_addr] == 3){
-      //首次升级到VIP社区
-    }
-  }
-  /**
    * title 查询到指定时间点，当天用户的持币生息收益，建议输入时间为当天的11点59分
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function calcuBonus(address _addr,uint256 _queryTime) private view returns(uint256) {
     //输入参数为查询的时间。
     //返回值为截止到查询时间之前当天的静态收益。
+    //金本位考虑进来。
     uint256 tmpBonus;
+    uint256 yestodayLastSecond;
+    uint256 theDaylastSecond;
+    uint256 tmpCalcu;
     if (LockHistory[_addr].length > 0){
       for (uint i = 0; i<LockHistory[_addr].length; i++){
         if (LockHistory[_addr][i].withDrawed){
           //如果是已经提现的资金，那就要求计算日期是在起止时间内的。
           if ((_queryTime >= LockHistory[_addr][i].begin) && (_queryTime <= LockHistory[_addr][i].end)){
-              tmpBonus += LockHistory[_addr][i].amount.mul(3).div(1000);
+              if (USDTOrCoin[_addr]){
+                //金本位
+                yestodayLastSecond = getYestodayLastSecond(_queryTime);
+                theDaylastSecond = getYestodayLastSecond(LockHistory[_addr][i].begin);
+                tmpCalcu = LockHistory[_addr][i].amount.mul(ClosePrice[theDaylastSecond]).mul(3).div(1000);
+                tmpCalcu = tmpCalcu.div(ClosePrice[yestodayLastSecond]);
+                tmpBonus += tmpCalcu;
+              }else{
+                //币本位
+                tmpBonus += LockHistory[_addr][i].amount.mul(3).div(1000);
+              }
+
           }
         }else{
           if (_queryTime >= LockHistory[_addr][i].begin ){
             //这个就要计入到当天的收益
-            tmpBonus += LockHistory[_addr][i].amount.mul(3).div(1000);
+            if (USDTOrCoin[_addr]){
+              yestodayLastSecond = getYestodayLastSecond(_queryTime);
+              theDaylastSecond = getYestodayLastSecond(LockHistory[_addr][i].begin);
+              tmpCalcu = LockHistory[_addr][i].amount.mul(ClosePrice[theDaylastSecond]).mul(3).div(1000);
+              tmpCalcu = tmpCalcu.div(ClosePrice[yestodayLastSecond]);
+              tmpBonus += tmpCalcu;
+            }else{
+              tmpBonus += LockHistory[_addr][i].amount.mul(3).div(1000);
+            }
+
           }
         }
       }
@@ -555,17 +566,26 @@ contract KOLPromote is Ownable{
     }
     return 0;
   }
+  /**
+   * title 根据给定时间计算出昨天的最后一秒
+   * dev visit: https://github.com/jackoelv/KOL/
+  */
+  function getYestodayLastSecond(uint256 _queryTime) private view returns(uint256){
+    //录入的价格为4位小数
+    return (_queryTime.sub(_queryTime.sub(begin) % 86400) - 1);
+  }
+
+
 
   /**
    * title 录入KOL的收盘价
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function putClosePrice(uint256 price) onlyNodes public{
+  function putClosePrice(uint256 price,uint256 _queryTime) onlyNodes public{
     //录入的价格为4位小数
-    uint256 yestodayLastSecond = now.sub(now.sub(begin) % 86400) - 1;
+    uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
     ClosePrice[yestodayLastSecond] = price;
 
   }
-
 
 }
