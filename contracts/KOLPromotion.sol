@@ -338,6 +338,7 @@ contract KOLPro is Ownable{
   */
   function register(uint256 _fInviteCode) public {
     require(now <= end);
+    require(RInviteCode[msg.sender] == 0);
     uint256 random = uint256(keccak256(now, msg.sender)) % 100;
     uint256 _myInviteCode = iCode.add(random);
     iCode = iCode.add(random);
@@ -569,8 +570,16 @@ contract KOLPro is Ownable{
     if (rate>0){
       //现在开始计算整个网体的奖励，从直推开始一路递归下去
       //有一个问题没有考虑到，就是升级以前的网体收益是不同的。！！！
+      uint8 _rate;
+      if (rate == 1){
+        _rate = comLevel1;
+      }else if(rate == 2 ){
+        _rate = comLevel2;
+      }else if(rate == 3 ){
+        _rate = comLevel3;
+      }
       uint256 dayLockBalance = queryLockBalance(_addr,_queryTime);
-      return levelBonus(dayLockBalance,rate,_addr,_queryTime);
+      return levelBonus(dayLockBalance,_rate,_addr,_queryTime);
 
     }else{
       return 0;
@@ -598,8 +607,11 @@ contract KOLPro is Ownable{
         }
         bonus += levelBonus(_ancientBalance,_rate,ChildAddrs[_addr][i],_queryTime);
       }
+      return bonus;
+    }else{
+      return 0;
     }
-    return 0;
+
   }
 
   /**
@@ -642,15 +654,16 @@ contract KOLPro is Ownable{
    * title 查询自己的直推下级
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function getTeam() public view returns(address[],bool[]) {
-    bool[] validUser;
+  function getTeam() public view returns(address[]) {
+    /* bool[] validUser;
     for (uint i = 0; i<ChildAddrs[msg.sender].length; i++){
       if (LockBalance[ChildAddrs[msg.sender][i]] > 0)
         validUser.push(true);
       else
         validUser.push(false);
     }
-    return(ChildAddrs[msg.sender],validUser);
+    return(ChildAddrs[msg.sender],validUser); */
+    return (ChildAddrs[msg.sender]);
   }
   /**
    * title 查询自己的网体人数
@@ -670,12 +683,13 @@ contract KOLPro is Ownable{
    * title 查询自己的锁仓历史
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function getLockHistory(uint _index) public view returns(uint256,uint256,uint256,bool) {
+  function getLockHistory(uint _index) public view returns(uint256,uint256,uint256,bool,uint256) {
     require( (_index<(LockHistory[msg.sender].length)) && (_index>=0) );
     return(LockHistory[msg.sender][_index].begin,
                 LockHistory[msg.sender][_index].end,
                 LockHistory[msg.sender][_index].amount,
-                LockHistory[msg.sender][_index].withDrawed);
+                LockHistory[msg.sender][_index].withDrawed,
+                LockHistory[msg.sender].length);
   }
 
 
