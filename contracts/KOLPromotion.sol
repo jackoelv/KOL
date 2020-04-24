@@ -153,6 +153,7 @@ contract KOLPro is Ownable{
   uint256 public end;
 
   uint256 public iCode;
+  uint256 public every = 10 seconds;//1 days;
 
 
 
@@ -209,13 +210,17 @@ contract KOLPro is Ownable{
     uint256 time;
     uint256 amount;
   }
+  struct dayBonus{
+    uint256 theDayLastSecond;
+    uint256 theDayAllBonus;
+  }
 
   mapping (address => address[]) internal InviteList;
   mapping (address => address[]) internal ChildAddrs;
   mapping (address => teamRate[]) internal TeamRateList;
   mapping (address => lock[]) internal LockHistory;
   mapping (address => uint256) internal LockBalance;
-  mapping (address => uint256) internal LockHistoryBonus;
+  mapping (address => dayBonus[]) internal LockHistoryBonus;
   mapping (address => uint256) internal InviteHistoryBonus;
   mapping (address => uint256) internal InviteCurrentDayBonus;
 
@@ -280,12 +285,12 @@ contract KOLPro is Ownable{
     uint256 yestodayLastSecond = getYestodayLastSecond(currentTime);//昨天的最后一秒
     /* uint256 lastingDays = currentTime.sub(currentTime.sub(begin) % 86400).div(86400);//除法刚好是整数 */
     //测试的时候就是过去了多少个分钟
-    uint256 lastingDays = currentTime.sub(currentTime.sub(begin) % 60).div(60);
+    uint256 lastingDays = currentTime.sub(currentTime.sub(begin) % every).div(every);
     for (uint i = 0 ; i<lastingDays; i++) {
        self += calcuBonus(msg.sender,yestodayLastSecond);
        promotion += calcuInviteBonus(msg.sender,yestodayLastSecond);
        team += calcuTeamBonus(msg.sender,yestodayLastSecond);
-       yestodayLastSecond = yestodayLastSecond.sub(86400);
+       yestodayLastSecond = yestodayLastSecond.sub(every);
     }
     //应该把这个历史记录下来？爆出一个事件吧，不记录链上了。
     emit WithDraw(msg.sender,self,promotion,team);
@@ -622,8 +627,8 @@ contract KOLPro is Ownable{
     //录入的价格为4位小数
     /* return (_queryTime.sub(_queryTime.sub(begin) % 86400) - 1); */
     //测试 上一分钟的最后一秒
-    require(_queryTime <= (end+1 days));
-    return (_queryTime.sub(_queryTime.sub(begin) % 60) - 1);
+    require(_queryTime <= (end + every));
+    return (_queryTime.sub(_queryTime.sub(begin) % every) - 1);
   }
 
 
@@ -655,14 +660,6 @@ contract KOLPro is Ownable{
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function getTeam() public view returns(address[]) {
-    /* bool[] validUser;
-    for (uint i = 0; i<ChildAddrs[msg.sender].length; i++){
-      if (LockBalance[ChildAddrs[msg.sender][i]] > 0)
-        validUser.push(true);
-      else
-        validUser.push(false);
-    }
-    return(ChildAddrs[msg.sender],validUser); */
     return (ChildAddrs[msg.sender]);
   }
   /**
@@ -691,6 +688,108 @@ contract KOLPro is Ownable{
                 LockHistory[msg.sender][_index].withDrawed,
                 LockHistory[msg.sender].length);
   }
+  /**
+   * title 把收益写入链上，在提现的时候好算账。
+   * dev visit: https://github.com/jackoelv/KOL/
+  */
+
+  function settlement() public{
+    require(LockHistory[msg.sender].length > 0);
+    uint256 currentTime;
+    if (now > end)
+      currentTime = end;
+    else
+      currentTime = now;
+    uint256 self;
+    uint256 promotion;
+    uint256 team;
+    uint256 balance;
+    uint256 myBegin;
+    if (LockHistoryBonus[msg.sender].length > 0){
+      uint256 last = LockHistoryBonus[msg.sender].length - 1;
+      myBegin = LockHistoryBonus[msg.sender][last].theDayLastSecond;//最后一次已经记过账的次日的凌晨0点0分0秒。
+    }else{
+      myBegin = LockHistory[msg.sender][0].begin;
+      myBegin = getYestodayLastSecond(myBegin);
+    }
+    myBegin = myBegin + 1;//这是我入金的当天的崚嶒0点0分0秒。
+    uint256 yestodayLastSecond = getYestodayLastSecond(currentTime);//昨天的最后一秒
+    uint256 tmp = currentTime.sub(myBegin) % every;
+    tmp = currentTime.sub(tmp).sub(myBegin);
+    tmp = tmp.div(every);
+    uint256 lastingDays = tmp - 1;//currentTime.sub(currentTime.sub(begin) % 60).div(60);
+    //第一个数是0，最后一个数是last-1
+    yestodayLastSecond -= lastingDays * every;
+    for (uint i = 0 ; i<lastingDays; i++) {
+       self = calcuBonus(msg.sender,yestodayLastSecond);
+       promotion = calcuInviteBonus(msg.sender,yestodayLastSecond);
+       team = calcuTeamBonus(msg.sender,yestodayLastSecond);
+       LockHistoryBonus[msg.sender].push(dayBonus(yestodayLastSecond,
+                                                  self+promotion+team));
+       yestodayLastSecond = yestodayLastSecond.add(every);
+    }
+
+  }
+
+  function TestInvite(bool _type) public view returns(uint256) {
+    uint256 currentTime;
+    if (now > end)
+      currentTime = end;
+    else
+      currentTime = now;
+    uint256 self;
+    uint256 promotion;
+    uint256 team;
+    uint256 balance;
+    uint256 myBegin = LockHistory[msg.sender][0].begin;
+    myBegin = getYestodayLastSecond(myBegin);
+    myBegin = myBegin + 1;
+    uint256 yestodayLastSecond = getYestodayLastSecond(currentTime);//昨天的最后一秒
+    uint256 tmp = currentTime.sub(myBegin) % every;
+    tmp = currentTime.sub(tmp);
+    tmp = tmp.sub(myBegin);
+    tmp = tmp.div(every);
+    uint256 lastingDays = tmp;//currentTime.sub(currentTime.sub(begin) % 60).div(60);
+    for (uint i = 0 ; i<lastingDays; i++) {
+       promotion += calcuInviteBonus(msg.sender,yestodayLastSecond);
+       yestodayLastSecond = yestodayLastSecond.sub(every);
+    }
+    return (promotion);
+  }
+  function TestTeam(bool _type) public view returns(uint256) {
+    uint256 currentTime;
+    if (now > end)
+      currentTime = end;
+    else
+      currentTime = now;
+    uint256 self;
+    uint256 promotion;
+    uint256 team;
+    uint256 balance;
+    uint256 myBegin = LockHistory[msg.sender][0].begin;
+    myBegin = getYestodayLastSecond(myBegin);
+    myBegin = myBegin + 1;
+    uint256 yestodayLastSecond = getYestodayLastSecond(currentTime);//昨天的最后一秒
+    uint256 tmp = currentTime.sub(myBegin) % every;
+    tmp = currentTime.sub(tmp);
+    tmp = tmp.sub(myBegin);
+    tmp = tmp.div(every);
+    uint256 lastingDays = tmp;//currentTime.sub(currentTime.sub(begin) % 60).div(60);
+    for (uint i = 0 ; i<lastingDays; i++) {
+       team += calcuTeamBonus(msg.sender,yestodayLastSecond);
+       yestodayLastSecond = yestodayLastSecond.sub(every);
+    }
+    return (team);
+  }
+
+  function getLockHistoryBonus(uint256 _index) public view returns(uint256,uint256,uint256){
+    //返回查询昨天的收益。
+    require(LockHistoryBonus[msg.sender].length > _index);
+    return (LockHistoryBonus[msg.sender][_index].theDayLastSecond,
+            LockHistoryBonus[msg.sender][_index].theDayAllBonus,
+            LockHistoryBonus[msg.sender].length);
+  }
+  //后面还需要加入管理员可以查询到大家所有人的情况。
 
 
 }
