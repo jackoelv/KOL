@@ -64,14 +64,14 @@ contract("test",accounts => {
       begin = web3.utils.BN(result[0]);
 
     });
-    await p.getLockHistory(1,{from:accounts[1]}).then((result) => {
-      console.log("account 1 begin   is: " + web3.utils.BN(result[0]).toString() + " time is: " + dateFtt(web3.utils.BN(result[0]).toString()));
-      console.log("account 1 end     is: "+ dateFtt(web3.utils.BN(result[1]).toString()));
-      console.log("account 1 amount  is: "+web3.utils.fromWei(result[2],"ether").toString());
-      console.log("account 1 wDraw   is: "+result[3].toString());
-      console.log("account 1 length  is: "+web3.utils.BN(result[4]).toString());
-
-    });
+    // await p.getLockHistory(1,{from:accounts[1]}).then((result) => {
+    //   console.log("account 1 begin   is: " + web3.utils.BN(result[0]).toString() + " time is: " + dateFtt(web3.utils.BN(result[0]).toString()));
+    //   console.log("account 1 end     is: "+ dateFtt(web3.utils.BN(result[1]).toString()));
+    //   console.log("account 1 amount  is: "+web3.utils.fromWei(result[2],"ether").toString());
+    //   console.log("account 1 wDraw   is: "+result[3].toString());
+    //   console.log("account 1 length  is: "+web3.utils.BN(result[4]).toString());
+    //
+    // });
     await p.getLockHistory(0,{from:accounts[2]}).then((result) => {
       console.log("account 2 begin   is: "+ dateFtt(web3.utils.BN(result[0]).toString()));
       console.log("account 2 end     is: "+ dateFtt(web3.utils.BN(result[1]).toString()));
@@ -94,16 +94,64 @@ contract("test",accounts => {
       console.log("account 4 wDraw   is: "+result[3].toString());
       console.log("account 4 length  is: "+web3.utils.BN(result[4]).toString());
     });
+    await p.getLockHistory(0,{from:accounts[5]}).then((result) => {
+      console.log("account 5 begin   is: "+ dateFtt(web3.utils.BN(result[0]).toString()));
+      console.log("account 5 end     is: "+ dateFtt(web3.utils.BN(result[1]).toString()));
+      console.log("account 5 amount  is: "+web3.utils.fromWei(result[2],"ether").toString());
+      console.log("account 5 wDraw   is: "+result[3].toString());
+      console.log("account 5 length  is: "+web3.utils.BN(result[4]).toString());
+    });
+
     console.log("现在时间是："+ now());
 
+    let target = accounts[5];
+    let father = accounts[1];
 
-    console.log("****************将accounts1 收益写入链上****************");
-    await p.settlement({from:accounts[1]});
 
-    console.log("****************查询一下Accounts1的收益****************");
-    let a1result = await p.getLockHistoryBonus(0,{from:accounts[1]});
+    console.log("****************target 收益写入链上****************");
+    await p.settlement({from:target});
+    //
+    // console.log("****************下级提本金之前看一下上级的反应****************");
+    // await p.getTeam({from:father}).then((result) => {
+    //   console.log("father1的直推：" + result);
+    // });
+    // await p.getTeamTotalUsers({from:father}).then((result) => {
+    //   console.log("father1的团队人数：" + web3.utils.BN(result).toString());
+    // });
+    // await p.getTeamTotalAmount({from:father}).then((result) => {
+    //   console.log("father1的团队入金总数数：" + web3.utils.BN(result).toString());
+    // });
+
+
+    //
+    // console.log("****************target 提现一把试试****************");
+    // k.balanceOf(target).then((result) => {
+    //   console.log("提现之前的余额：" + (web3.utils.fromWei(result,'ether')));
+    // })
+    // await p.withDraw(false,{from:target});
+    //
+    // k.balanceOf(target).then((result) => {
+    //   console.log("提现之后的余额：" + (web3.utils.fromWei(result,'ether')));
+    // })
+    //
+    // console.log("****************下级提本金之后看一下上级的反应****************");
+    // await p.getTeam({from:father}).then((result) => {
+    //   console.log("father1的直推：" + result);
+    // });
+    // await p.getTeamTotalUsers({from:father}).then((result) => {
+    //   console.log("father1的团队人数：" + web3.utils.BN(result).toString());
+    // });
+    // await p.getTeamTotalAmount({from:father}).then((result) => {
+    //   console.log("father1的团队入金总数数：" + web3.utils.BN(result).toString());
+    // });
+
+
+
+    console.log("****************查询一下target的收益****************");
+    let a1result = await p.getMyHistoryBonus(0,{from:target});
     console.log("the time  is: "+ dateFtt(web3.utils.BN(a1result[0]).toString()));
-    console.log("the bonus is: "+ web3.utils.fromWei(a1result[1],"ether"));
+    console.log("the  bonus is: "+ web3.utils.fromWei(a1result[1],"ether"));
+    console.log("left bonus is: "+ web3.utils.fromWei(a1result[2],"ether"));
 
     //
     // console.log("****************accounts 1 昨天静态收益****************");
@@ -122,33 +170,33 @@ contract("test",accounts => {
     //   console.log("本人的昨日网体收益总和是：" + web3.utils.fromWei(result,"ether"));
 
 
-    if (a1result[2]>1){
-      for (var j = 1; j<a1result[2];j++){
-        aNresult = await p.getLockHistoryBonus(j,{from:accounts[1]});
-        console.log("the time  is: "+ dateFtt(web3.utils.BN(aNresult[0]).toString()));
-        console.log("the bonus is: "+ web3.utils.fromWei(aNresult[1],"ether"));
+    if (a1result[3]>1){
+      console.log("释放历史余额的长度是：" + a1result[3]);
+      for (var j = 1; j<a1result[3];j++){
+        aNresult = await p.getMyHistoryBonus(j,{from:target});
+        console.log("the  time  is: "+ dateFtt(web3.utils.BN(aNresult[0]).toString()));
+        console.log("the  bonus is: "+ web3.utils.fromWei(aNresult[1],"ether"));
+        console.log("left bonus is: "+ web3.utils.fromWei(aNresult[2],"ether"));
 
 
         // console.log("****************accounts 1 昨天静态收益****************");
-        // await p.calcuBonusP(aNresult[0],{from:accounts[1]}).then((result) => {
+        // await p.calcuBonusP(aNresult[0],{from:accounts[2]}).then((result) => {
         //   console.log("本人的昨日静态收益是：" + web3.utils.fromWei(result,"ether"));
         // });
         //
         // console.log("****************accounts 1 昨天推广收益****************");
-        // await p.calcuInviteBonusP(aNresult[0],{from:accounts[1]}).then((result) => {
+        // await p.calcuInviteBonusP(aNresult[0],{from:accounts[2]}).then((result) => {
         //   console.log("本人的昨日推广收益总和是：" + web3.utils.fromWei(result,"ether"));
         // });
         //
         //
         // console.log("****************accounts 1 昨天网体收益****************");
-        // await p.calcuTeamBonusP(aNresult[0],{from:accounts[1]}).then((result) => {
+        // await p.calcuTeamBonusP(aNresult[0],{from:accounts[2]}).then((result) => {
         //   console.log("本人的昨日网体收益总和是：" + web3.utils.fromWei(result,"ether"));
         // });
+
       }
     }
-
-
-
 
     });
     it('Check whether the contract has been issued successfully', async () => {
