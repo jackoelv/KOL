@@ -789,7 +789,7 @@ contract KOLPro is Ownable{
     }
   }
   //管理员查询功能。
-  function adminGetInviteList(address _addr) onlyOwner public view returns(address[]){
+  /* function adminGetInviteList(address _addr) onlyOwner public view returns(address[]){
     return (InviteList[_addr]);
   }
 
@@ -815,7 +815,7 @@ contract KOLPro is Ownable{
 
   function adminGetUserDraw(address _addr) onlyOwner public view returns(uint256){
     return (WithDraws[_addr]);
-  }
+  } */
   //有一个问题，就是settlement的收尾衔接不上。就是在12点2分提现的时候，只计算到了49，59漏掉了。
 
 
