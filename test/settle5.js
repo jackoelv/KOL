@@ -56,13 +56,13 @@ contract("test",accounts => {
     //还需要测试一下gas的消耗，例如网体架构100个，1000个是什么效果？
     // 我锁仓的余额是多少？
 
-    // await p.join(web3.utils.toWei('1000','ether'),true,{from:accounts[5]});
+    await p.join(web3.utils.toWei('1000','ether'),true,{from:accounts[5]});
 
     var begin;
-    let target = accounts[2];
+    let target = accounts[5];
 
     // await p.join(web3.utils.toWei('1000','ether'),false,{from:accounts[5]});
-    await p.getLockHistory(1,{from:target}).then((result) => {
+    await p.getLockHistory(0,{from:target}).then((result) => {
       console.log("account 1 begin   is: " + web3.utils.BN(result[0]).toString() + " time is: " + dateFtt(web3.utils.BN(result[0]).toString()));
       console.log("account 1 end     is: "+ dateFtt(web3.utils.BN(result[1]).toString()));
       console.log("account 1 amount  is: "+web3.utils.fromWei(result[2],"ether").toString());

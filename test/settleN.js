@@ -59,10 +59,10 @@ contract("test",accounts => {
     // await p.join(web3.utils.toWei('1000','ether'),true,{from:accounts[5]});
 
     var begin;
-    let target = accounts[2];
+    let target = accounts[1];
 
     // await p.join(web3.utils.toWei('1000','ether'),false,{from:accounts[5]});
-    await p.getLockHistory(1,{from:target}).then((result) => {
+    await p.getLockHistory(0,{from:target}).then((result) => {
       console.log("account 1 begin   is: " + web3.utils.BN(result[0]).toString() + " time is: " + dateFtt(web3.utils.BN(result[0]).toString()));
       console.log("account 1 end     is: "+ dateFtt(web3.utils.BN(result[1]).toString()));
       console.log("account 1 amount  is: "+web3.utils.fromWei(result[2],"ether").toString());
@@ -80,7 +80,7 @@ contract("test",accounts => {
     console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 
     console.log("开始执行settle，会释放出来30个周期的");
-    await p.settlement({from:target});
+    await p.settlement(3,{from:target});
 
     console.log("****************查询一下target的收益****************");
     let a1result = await p.getMyHistoryBonus(0,{from:target});
@@ -136,9 +136,9 @@ contract("test",accounts => {
 
     console.log("************top father************");
     let topfather = accounts[1];
-    await p.getTeam({from:topfather}).then((result) => {
-      console.log(result);
-    });
+    // await p.getTeam({from:topfather}).then((result) => {
+    //   console.log(result);
+    // });
     await p.getTeamTotalUsers({from:topfather}).then((result) => {
       console.log(web3.utils.BN(result).toString());
     });

@@ -9,7 +9,15 @@ const privKeysmainnet =  ["00ed7b1e78729d70a86b3a0f828b48357b961750ddb88f8e30d9c
 module.exports = {
   networks: {
     develop: {
+      accounts: 300,
+      defaultEtherBalance: 100,
       host: 'localhost',
+      port: 8545,
+      network_id: '*',
+      gas: 80000000
+    },
+    develop1: {
+      host: '192.168.2.49',
       port: 8545,
       network_id: '*',
       gas: 80000000

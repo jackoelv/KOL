@@ -154,7 +154,7 @@ contract KOLPro is Ownable{
 
   uint256 public iCode;
   uint256 public every = 10 seconds;//1 days;
-  uint256 public maxSettleDays = 30;
+  uint256 public maxSettleDays = 1;
   uint256 public totalRegister;
   uint256 public totalBalance;
   uint256 public totalBonus;
@@ -185,7 +185,6 @@ contract KOLPro is Ownable{
   /* uint256 public constant withDrawDays = 30 days; */
   //测试限制5分钟
   uint256 public constant withDrawDays = 2 minutes;
-
 
   /* address[] private inviteAddr;// A->B->C: inviteAddr= B,A
   address[] private childAddr;// A-->B,A-->C,childAddr= B, C */
@@ -230,7 +229,7 @@ contract KOLPro is Ownable{
   mapping (address => uint256) internal InviteCurrentDayBonus;
 
   mapping (address => address) internal InviteRelation;//A=>B B is father;
-  mapping (uint256 => uint256) public ClosePrice;
+  mapping (uint256 => uint256) public ClosePrice;//需要给个默认值，而且还允许修改，否则忘记就很麻烦了。
   mapping (address => uint256) internal TotalUsers;
   mapping (address => uint256) internal TotalLockingAmount;
   mapping (uint256 => address) public InviteCode;
@@ -240,7 +239,7 @@ contract KOLPro is Ownable{
   mapping (address => bool) public USDTOrCoin;
 
   mapping (address => uint256) internal WithDraws;
-
+  //GAS优化
 
   event Registed(address _user,uint256 inviteCode);
   event GradeChanged(address _user,uint8 _oldLevel,uint8 _newLevel);
@@ -255,7 +254,6 @@ contract KOLPro is Ownable{
     reciever = _reciever;
     InviteCode[0] = owner;
   }
-
   /**
    * title 提现KOL到自己的账户
    * dev visit: https://github.com/jackoelv/KOL/
@@ -265,16 +263,15 @@ contract KOLPro is Ownable{
     //提现就把利息全部提走，只能提整数，不能提小数点。
     //如果是提现本金，需要判断一下用户是否满足自由提现的条件。
     uint256 balance;
-
     require(LockBalance[msg.sender] > 0);
+    settlement(0);
     require(LockHistoryBonus[msg.sender].length > 0);
-
     uint256 currentTime;
     if (now > end)
       currentTime = end;
     else
       currentTime = now;
-    settlement();
+
     uint256 last = LockHistoryBonus[msg.sender].length - 1;
     uint256 leftBonus = LockHistoryBonus[msg.sender][last].leftBonus;
     if ((LockHistoryBonus[msg.sender][last].theDayLastSecond + every + 1) < currentTime){
@@ -307,13 +304,12 @@ contract KOLPro is Ownable{
 
     }
     uint256 realWithdraw = leftBonus.mul(100-withDrawRate).div(100).add(balance);
+    require(realWithdraw > 0);
     WithDraws[msg.sender] += realWithdraw;
     kol.transfer(msg.sender,realWithdraw);
     emit WithDraw(msg.sender,realWithdraw);
     kol.transfer(reciever,leftBonus.mul(withDrawRate).div(100));
     LockHistoryBonus[msg.sender][last].leftBonus = 0;
-
-
   }
   /**
    * title 提现以后上级的处理
@@ -328,7 +324,6 @@ contract KOLPro is Ownable{
         queryAndSetLevelN(InviteList[_addr][i]);
     }
   }
-
   /**
    * title 注册并绑定邀请关系
    * dev visit: https://github.com/jackoelv/KOL/
@@ -364,24 +359,25 @@ contract KOLPro is Ownable{
   */
   function join(uint256 _amount,bool _usdtOrCoin) public {
     require(now <= end);
+    if (LockBalance[msg.sender] == 0) USDTOrCoin[msg.sender] = _usdtOrCoin;
     kol.transferFrom(msg.sender,address(this),_amount);
     LockHistory[msg.sender].push(lock(now,_amount,0,false));
+    uint256 oldBalance = LockBalance[msg.sender];
     LockBalance[msg.sender] = LockBalance[msg.sender].add(_amount);
     totalBalance = totalBalance.add(_amount);
 
-    USDTOrCoin[msg.sender] = _usdtOrCoin;
-
     for (uint i = 0; i<InviteList[msg.sender].length; i++){
+
       if (LockHistory[msg.sender].length == 1){
         //给上面的人数+1
         TotalUsers[InviteList[msg.sender][i]] += 1;
+      }else{
+        if (oldBalance == 0) TotalUsers[InviteList[msg.sender][i]] += 1;
       }
       //给上面的加入团队总金额
       TotalLockingAmount[InviteList[msg.sender][i]] = TotalLockingAmount[InviteList[msg.sender][i]].add(_amount);
       queryAndSetLevelN(InviteList[msg.sender][i]);
     }
-
-
   }
   /**
    * title 查询并设置用户的身份级别
@@ -424,46 +420,38 @@ contract KOLPro is Ownable{
     //金本位考虑进来。
     require(_queryTime <= end);
     uint256 tmpBonus;
-    uint256 yestodayLastSecond;
+    uint256 todayLastSecond;
     uint256 theDaylastSecond;
     uint256 tmpCalcu;
     if (LockHistory[_addr].length > 0){
       for (uint i = 0; i<LockHistory[_addr].length; i++){
-        if (LockHistory[_addr][i].withDrawed){
-          //如果是已经提现的资金，那就要求计算日期是在起止时间内的。
-          if ((_queryTime >= LockHistory[_addr][i].begin) && (_queryTime <= LockHistory[_addr][i].end)){
-              if (USDTOrCoin[_addr]){
-                //金本位
-                yestodayLastSecond = getYestodayLastSecond(_queryTime);
-                theDaylastSecond = getYestodayLastSecond(LockHistory[_addr][i].begin);
-                tmpCalcu = LockHistory[_addr][i].amount.mul(ClosePrice[theDaylastSecond]).mul(3).div(1000);
-                tmpCalcu = tmpCalcu.div(ClosePrice[yestodayLastSecond]);
-                tmpBonus += tmpCalcu;
-              }else{
-                //币本位
-                tmpBonus += LockHistory[_addr][i].amount.mul(3).div(1000);
-              }
 
-          }
-        }else{
-          if (_queryTime >= LockHistory[_addr][i].begin ){
-            //这个就要计入到当天的收益
+        bool drawed = (LockHistory[_addr][i].withDrawed) &&
+                    (_queryTime >= LockHistory[_addr][i].begin) &&
+                    (_queryTime <= LockHistory[_addr][i].end);
+
+        bool noDrawed = (!LockHistory[_addr][i].withDrawed) &&
+                    (_queryTime >= LockHistory[_addr][i].begin);
+
+        if (drawed || noDrawed){
             if (USDTOrCoin[_addr]){
-              yestodayLastSecond = getYestodayLastSecond(_queryTime);
-              theDaylastSecond = getYestodayLastSecond(LockHistory[_addr][i].begin);
-              tmpCalcu = LockHistory[_addr][i].amount.mul(ClosePrice[theDaylastSecond]).mul(3).div(1000);
-              tmpCalcu = tmpCalcu.div(ClosePrice[yestodayLastSecond]);
+              //金本位
+              todayLastSecond = getYestodayLastSecond(_queryTime) + every;
+              theDaylastSecond = getYestodayLastSecond(LockHistory[_addr][i].begin) + every;
+              tmpCalcu = LockHistory[_addr][i].amount;
+              tmpCalcu = tmpCalcu.mul(ClosePrice[theDaylastSecond]).mul(3).div(1000);
+              tmpCalcu = tmpCalcu.div(ClosePrice[todayLastSecond]);
               tmpBonus += tmpCalcu;
             }else{
-              tmpBonus += LockHistory[_addr][i].amount.mul(3).div(1000);
+              //币本位
+              tmpCalcu = LockHistory[_addr][i].amount;
+              tmpCalcu = tmpCalcu.mul(3).div(1000);
+              tmpBonus += tmpCalcu;
             }
-          }
         }
       }
     }
     return tmpBonus;
-
-
   }
 
   function calcuBonusP(uint256 _queryTime) public view returns(uint256){
@@ -566,7 +554,6 @@ contract KOLPro is Ownable{
     }else{
       return 0;
     }
-
   }
   function calcuTeamBonusP(uint256 _queryTime) public view returns(uint256){
     return(calcuTeamBonus(msg.sender,_queryTime));
@@ -593,9 +580,7 @@ contract KOLPro is Ownable{
     }else{
       return 0;
     }
-
   }
-
   /**
    * title 根据给定时间计算出昨天的最后一秒
    * dev visit: https://github.com/jackoelv/KOL/
@@ -607,24 +592,6 @@ contract KOLPro is Ownable{
     require(_queryTime <= (end + every));
     return (_queryTime.sub(_queryTime.sub(begin) % every) - 1);
   }
-
-
-
-  /**
-   * title 录入KOL的收盘价
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function putClosePrice(uint256 price,uint256 _queryTime) onlyOwner public{
-    //录入的价格为4位小数
-    require(_queryTime <= end);
-    uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
-    ClosePrice[yestodayLastSecond] = price;
-
-  }
-  function setReciever(address _addr) onlyOwner public{
-    reciever = _addr;
-  }
-
   /**
    * title 获得自己的邀请码
    * dev visit: https://github.com/jackoelv/KOL/
@@ -669,7 +636,7 @@ contract KOLPro is Ownable{
    * title 把收益写入链上，在提现的时候好算账。
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function settlement() public{
+  function settlement(uint256 maxdays) public{
     require(LockHistory[msg.sender].length > 0);
     uint256 currentTime;
     if (now > end)
@@ -698,7 +665,8 @@ contract KOLPro is Ownable{
     }
     if (lastingDays > 0){
       yestodayLastSecond -= (lastingDays-1) * every;
-      if (lastingDays > maxSettleDays) lastingDays = maxSettleDays;//每次最多处理30天的数据，防止GAS超标。
+      if (maxdays == 0) maxdays = maxSettleDays;
+      if (lastingDays > maxSettleDays) lastingDays = maxdays;//每次最多处理30天的数据，防止GAS超标。
       for (uint i = 0 ; i<lastingDays; i++) {
          uint256 yestodayAllBonus;
          if (LockHistoryBonus[msg.sender].length > 0){
@@ -707,25 +675,28 @@ contract KOLPro is Ownable{
          }else{
            yestodayAllBonus = 0;
          }
+         if (USDTOrCoin[msg.sender] && (ClosePrice[yestodayLastSecond] == 0)){
+           //金本位但是没有价格信息，先暂停计算。就必须有个定时任务来跑这个价格信息上传上链。
+             break;
+         }
          self = calcuBonus(msg.sender,yestodayLastSecond);
+         if (self > 0){
+              if (ChildAddrs[msg.sender].length > 0){
+                promotion = calcuInviteBonus(msg.sender,yestodayLastSecond);
+              }
+              if (TeamRateList[msg.sender].length > 0){
+                 team = calcuTeamBonus(msg.sender,yestodayLastSecond);
+              }
 
-         if (ChildAddrs[msg.sender].length > 0){
-           promotion = calcuInviteBonus(msg.sender,yestodayLastSecond);
-         }
-         if (TeamRateList[msg.sender].length > 0){
-            team = calcuTeamBonus(msg.sender,yestodayLastSecond);
-         }
+              LockHistoryBonus[msg.sender].push(dayBonus(yestodayLastSecond,
+                                                         self+promotion+team,
+                                                         yestodayAllBonus+self+promotion+team));
+              totalBonus += self+promotion+team;
 
-         LockHistoryBonus[msg.sender].push(dayBonus(yestodayLastSecond,
-                                                    self+promotion+team,
-                                                    yestodayAllBonus+self+promotion+team));
-         totalBonus += self+promotion+team;
+         }
          yestodayLastSecond = yestodayLastSecond.add(every);
-         /* last ++; */
       }
     }
-
-
   }
   /**
    * title 查询自己过去每日的收益汇总。
@@ -741,8 +712,6 @@ contract KOLPro is Ownable{
     }else{
       return(0,0,0,0);
     }
-
-
   }
   /**
    * title 查询自己过去每日的收益汇总。
@@ -788,35 +757,19 @@ contract KOLPro is Ownable{
       return(TeamRateList[msg.sender][index].rate,TeamRateList[msg.sender][index].changeTime);
     }
   }
-  //管理员查询功能。
-  /* function adminGetInviteList(address _addr) onlyOwner public view returns(address[]){
-    return (InviteList[_addr]);
+  /**
+   * title 录入KOL的收盘价
+   * dev visit: https://github.com/jackoelv/KOL/
+  */
+  function putClosePrice(uint256 price,uint256 _queryTime) onlyOwner public{
+    //录入的价格为4位小数
+    require(_queryTime <= end);
+    uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
+    ClosePrice[yestodayLastSecond] = price;
+
   }
-
-  function adminGetChildsList(address _addr) onlyOwner public view returns(address[]){
-    return (ChildAddrs[_addr]);
+  function setReciever(address _addr) onlyOwner public{
+    reciever = _addr;
   }
-
-  function adminGetLockBalance(address _addr) onlyOwner public view returns(uint256){
-    return (LockBalance[_addr]);
-  }
-
-  function adminGetUserTeams(address _addr) onlyOwner public view returns(uint256){
-    return (TotalUsers[_addr]);
-  }
-
-  function adminGetUserTeamAmount(address _addr) onlyOwner public view returns(uint256){
-    return (TotalLockingAmount[_addr]);
-  }
-
-  function adminGetUserLevel(address _addr) onlyOwner public view returns(uint8){
-    return (isLevelN[_addr]);
-  }
-
-  function adminGetUserDraw(address _addr) onlyOwner public view returns(uint256){
-    return (WithDraws[_addr]);
-  } */
-  //有一个问题，就是settlement的收尾衔接不上。就是在12点2分提现的时候，只计算到了49，59漏掉了。
-
 
 }

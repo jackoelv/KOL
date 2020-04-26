@@ -59,10 +59,10 @@ contract("test",accounts => {
     // await p.join(web3.utils.toWei('1000','ether'),true,{from:accounts[5]});
 
     var begin;
-    let target = accounts[2];
+    let target = accounts[5];
 
     // await p.join(web3.utils.toWei('1000','ether'),false,{from:accounts[5]});
-    await p.getLockHistory(1,{from:target}).then((result) => {
+    await p.getLockHistory(0,{from:target}).then((result) => {
       console.log("account 1 begin   is: " + web3.utils.BN(result[0]).toString() + " time is: " + dateFtt(web3.utils.BN(result[0]).toString()));
       console.log("account 1 end     is: "+ dateFtt(web3.utils.BN(result[1]).toString()));
       console.log("account 1 amount  is: "+web3.utils.fromWei(result[2],"ether").toString());
@@ -77,28 +77,12 @@ contract("test",accounts => {
     });
 
 
-    console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+    // console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
 
-    console.log("开始执行settle，会释放出来30个周期的");
-    await p.settlement({from:target});
+    // console.log("开始执行settle，会释放出来30个周期的");
+    // await p.settlement({from:target});
 
-    console.log("****************查询一下target的收益****************");
-    let a1result = await p.getMyHistoryBonus(0,{from:target});
-    console.log("释放历史余额的长度是：" + a1result[3]);
-    console.log("the time  is: "+ web3.utils.BN(a1result[0]).toString());
-    console.log("the time  is: "+ dateFtt(web3.utils.BN(a1result[0]).toString()));
-    console.log("the  bonus is: "+ web3.utils.fromWei(a1result[1],"ether"));
-    console.log("left bonus is: "+ web3.utils.fromWei(a1result[2],"ether"));
 
-    if (a1result[3]>1){
-      for (var j = 1; j<a1result[3];j++){
-        aNresult = await p.getMyHistoryBonus(j,{from:target});
-        console.log("the time  is: "+ web3.utils.BN(aNresult[0]).toString());
-        console.log("the  time  is: "+ dateFtt(web3.utils.BN(aNresult[0]).toString()));
-        console.log("the  bonus is: "+ web3.utils.fromWei(aNresult[1],"ether"));
-        console.log("left bonus is: "+ web3.utils.fromWei(aNresult[2],"ether"));
-      }
-    }
 
     var time = new Date();
     var unixTime = time.getTime();
@@ -108,9 +92,9 @@ contract("test",accounts => {
       console.log("time is "+ dateFtt(unixTime) + " lock balance  is: "+web3.utils.fromWei(result,"ether").toString());
     });
 
-    // console.log("##############################################");
-    // console.log("先测试一下提本息啥效果？");
-    // await p.withDraw(false,{from:target});
+    console.log("##############################################");
+    console.log("先测试一下提本息啥效果？");
+    await p.withDraw(false,{from:target});
 
     time = new Date();
     unixTime = time.getTime();
@@ -148,7 +132,23 @@ contract("test",accounts => {
 
 
 
+    console.log("****************查询一下target的收益****************");
+    let a1result = await p.getMyHistoryBonus(0,{from:target});
+    console.log("释放历史余额的长度是：" + a1result[3]);
+    console.log("the time  is: "+ web3.utils.BN(a1result[0]).toString());
+    console.log("the time  is: "+ dateFtt(web3.utils.BN(a1result[0]).toString()));
+    console.log("the  bonus is: "+ web3.utils.fromWei(a1result[1],"ether"));
+    console.log("left bonus is: "+ web3.utils.fromWei(a1result[2],"ether"));
 
+    if (a1result[3]>1){
+      for (var j = 1; j<a1result[3];j++){
+        aNresult = await p.getMyHistoryBonus(j,{from:target});
+        console.log("the time  is: "+ web3.utils.BN(aNresult[0]).toString());
+        console.log("the  time  is: "+ dateFtt(web3.utils.BN(aNresult[0]).toString()));
+        console.log("the  bonus is: "+ web3.utils.fromWei(aNresult[1],"ether"));
+        console.log("left bonus is: "+ web3.utils.fromWei(aNresult[2],"ether"));
+      }
+    }
 
 
 
