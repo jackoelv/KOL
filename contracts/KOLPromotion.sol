@@ -598,16 +598,33 @@ contract KOLPro is Ownable{
    * title 查询并计算用户的网体收益
    * dev visit: https://github.com/jackoelv/KOL/
   */
+  function getLast(address _addr) private view returns(uint256){
+    return(LockTeamBonus[_addr].length -1);
+  }
+  function getLastSecond(address _addr,uint _index) private view returns(uint256){
+    return(LockTeamBonus[_addr][_index].theDayLastSecond);
+  }
+  function getTheDayTeamBonus(address _addr,uint _index) private view returns(uint256){
+    return(LockTeamBonus[_addr][_index].theDayTeamBonus);
+  }
+  function getTotalTeamBonus(address _addr,uint _index) private view returns(uint256){
+    return(LockTeamBonus[_addr][_index].totalTeamBonus);
+  }
+  function getTheDayInviteBonus(address _addr,uint _index) private view returns(uint256){
+    return(LockTeamBonus[_addr][_index].theDayInviteBonus);
+  }
+  function getTotalInvitBonus(address _addr,uint _index) private view returns(uint256){
+    return(LockTeamBonus[_addr][_index].totalInviteBonus);
+  }
   function calcuTeamBonus(address _addr,uint256 _queryTime) private view returns(uint256,uint256,uint256) {
     require(_queryTime <= end);
-    dayBonus[] tmpStruct = LockTeamBonus[_addr];
-    uint256 last =tmpStruct.length -1;
+    uint256 last = getLast(_addr);
     uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
     uint256 lastDayLastSecond;
     uint256 theDay;
     uint256 index;
     for (uint i=last; i>=0; i--){
-      lastDayLastSecond=LockTeamBonus[_addr][i].theDayLastSecond;
+      lastDayLastSecond=getLastSecond(_addr,i);
       if (lastDayLastSecond<=yestodayLastSecond){
         theDay = lastDayLastSecond;
         index = i;
@@ -617,16 +634,10 @@ contract KOLPro is Ownable{
     if (theDay > 0){
       //找到了这样一条
       uint256 lastingDays = (yestodayLastSecond - theDay) % every;
-      dayBonus theDayBonusStruct = LockTeamBonus[_addr][index];
-      uint256 teamBonus = lastingDays * theDayBonusStruct.theDayTeamBonus +  theDayBonusStruct.totalTeamBonus;
-      uint256 inviteBonus = lastingDays * theDayBonusStruct.theDayInviteBonus +  theDayBonusStruct.totalInviteBonus;
-      /* LockTeamBonus[_addr][index].totalTeamBonus = 0;
-      LockTeamBonus[_addr][index].totalInviteBonus =0;
-      for (i = index+1; i<=last; i++){
-        LockTeamBonus[_addr][i].totalTeamBonus -=teamBonus;
-        LockTeamBonus[_addr][i].totalInviteBonus -=inviteBonus;
-      } */
-      return(teamBonus,inviteBonus,index);
+      uint256 theDayTeamBonus = getTheDayTeamBonus(_addr,index);
+      uint256 totalTeamBonus = getTotalTeamBonus(_addr,index);
+      uint256 teamBonus = lastingDays * theDayTeamBonus +  totalTeamBonus;
+      return(teamBonus,0,index);
 
 
     }else{
