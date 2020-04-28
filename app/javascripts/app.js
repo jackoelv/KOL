@@ -141,6 +141,7 @@ const App = {
     const { getMission2 } = this.metaLock.methods;
     const { getOfferings } = this.metaLock.methods;
     const { queryBalance } = this.metaLock.methods;
+    const { nodeRate } = this.metaLock.methods;
 
 
     console.log("11");
@@ -151,12 +152,14 @@ const App = {
     const missionEndTime =  document.getElementsByClassName("missionEndTime")[0];
     const missionAmount = document.getElementsByClassName("missionAmount")[0];
 
-    const nodeRate = document.getElementsByClassName("nodeRate")[0];
+    const nodeRates = document.getElementsByClassName("nodeRate")[0];
     console.log("12");
     var misstionDetail = await getMission1(currentMissionId).call();
     var knodeVotedNum = await getMission2(currentMissionId).call();
+    var rates = parseInt(await nodeRate().call());
     console.log("13");
-    nodeRate.innerHTML = misstionDetail[4].toString();
+    nodeRates.innerHTML = rates;
+    console.log(rates);
     let amount = 0;
     console.log(misstionDetail);
     try {
@@ -184,7 +187,7 @@ const App = {
       console.log(bothbalance);
       var balance = web3.utils.fromWei(bothbalance[0],"ether");
       var releasedKOL = web3.utils.fromWei(bothbalance[1],"ether");
-      var freeBalance = Number(balance) * Number(misstionDetail[4]) / 100 - Number(releasedKOL);
+      var freeBalance = Number(balance) * Number(rates) / 100 - Number(releasedKOL);
     } catch (e) {
       console.log("no");
       console.log(e);
