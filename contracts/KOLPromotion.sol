@@ -181,6 +181,7 @@ contract KOLPro is Ownable{
   uint8 public constant comLevel2 = 5;
   uint8 public constant comLevel3 = 10;
   uint8 public constant withDrawRate = 5;
+  uint8 public constant fee = 5;
 
   /* uint256 public constant withDrawDays = 30 days; */
   //测试限制5分钟
@@ -215,16 +216,18 @@ contract KOLPro is Ownable{
   }
   struct dayBonus{
     uint256 theDayLastSecond;
-    uint256 theDayAllBonus;
-    uint256 leftBonus;
+    uint256 theDayTeamBonus;
+    uint256 totalTeamBonus;
+    uint256 theDayInviteBonus;
+    uint256 totalInviteBonus;
+    uint8 theDayRate;
   }
-
   mapping (address => address[]) internal InviteList;
   mapping (address => address[]) internal ChildAddrs;
   mapping (address => teamRate[]) internal TeamRateList;
   mapping (address => lock[]) internal LockHistory;
   mapping (address => uint256) internal LockBalance;
-  mapping (address => dayBonus[]) internal LockHistoryBonus;
+  mapping (address => dayBonus[]) internal LockTeamBonus;
   mapping (address => uint256) internal InviteHistoryBonus;
   mapping (address => uint256) internal InviteCurrentDayBonus;
 
@@ -236,9 +239,13 @@ contract KOLPro is Ownable{
   mapping (address => uint256) public RInviteCode;
 
   mapping (address => uint8) internal isLevelN;
+  mapping (uint8 => uint8) internal levelRate;
   mapping (address => bool) public USDTOrCoin;
 
   mapping (address => uint256) internal WithDraws;
+  mapping (address => mapping (address => uint256) ) ABTeamBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
+  mapping (address => mapping (address => uint256) ) ABInviteBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
+
   //GAS优化
 
   event Registed(address _user,uint256 inviteCode);
@@ -253,6 +260,10 @@ contract KOLPro is Ownable{
     end = _end;
     reciever = _reciever;
     InviteCode[0] = owner;
+    levelRate[0] = 0;
+    levelRate[1] = comLevel1;
+    levelRate[2] = comLevel2;
+    levelRate[3] = comLevel3;
   }
   /**
    * title 提现KOL到自己的账户
@@ -264,19 +275,27 @@ contract KOLPro is Ownable{
     //如果是提现本金，需要判断一下用户是否满足自由提现的条件。
     uint256 balance;
     require(LockBalance[msg.sender] > 0);
-    settlement(0);
-    require(LockHistoryBonus[msg.sender].length > 0);
+    uint256 selfBonus = calcuBonus(msg.sender,now);
+    uint256 teamBonus;
+    uint256 inviteBonus;
+    uint256 index;
+    (teamBonus,  inviteBonus,  index) = calcuTeamBonus(msg.sender,now);
+    uint256 allBonus = selfBonus + teamBonus + inviteBonus;
+
     uint256 currentTime;
     if (now > end)
       currentTime = end;
     else
       currentTime = now;
 
+    /* require(LockHistoryBonus[msg.sender].length > 0);
+
+
     uint256 last = LockHistoryBonus[msg.sender].length - 1;
     uint256 leftBonus = LockHistoryBonus[msg.sender][last].leftBonus;
     if ((LockHistoryBonus[msg.sender][last].theDayLastSecond + every + 1) < currentTime){
       _type = true;
-    }
+    } */
 
 
     if (!_type) {
@@ -289,8 +308,8 @@ contract KOLPro is Ownable{
           return;
       }else{
 
-        last = LockHistoryBonus[msg.sender].length - 1;
-        leftBonus = LockHistoryBonus[msg.sender][last].leftBonus;
+        /* last = LockHistoryBonus[msg.sender].length - 1;
+        leftBonus = LockHistoryBonus[msg.sender][last].leftBonus; */
         for (uint j = 0; j<LockHistory[msg.sender].length; j++){
           LockHistory[msg.sender][j].end = currentTime;
           LockHistory[msg.sender][j].withDrawed = true;
@@ -299,29 +318,40 @@ contract KOLPro is Ownable{
         emit WithDrawBalance(msg.sender,balance);
         /* kol.transfer(msg.sender,balance); */
         LockBalance[msg.sender] = 0;
-        afterDraw(msg.sender,balance);//提现以后需要对上级所有的网体人数和金额做减法。
+        afterDraw(msg.sender,balance,teamBonus,inviteBonus,index);//提现以后需要对上级所有的网体人数和金额做减法。
       }
 
     }
-    uint256 realWithdraw = leftBonus.mul(100-withDrawRate).div(100).add(balance);
+    uint256 realWithdraw = allBonus.mul(100-fee).div(100).add(balance);
     require(realWithdraw > 0);
     WithDraws[msg.sender] += realWithdraw;
     kol.transfer(msg.sender,realWithdraw);
     emit WithDraw(msg.sender,realWithdraw);
-    kol.transfer(reciever,leftBonus.mul(withDrawRate).div(100));
-    LockHistoryBonus[msg.sender][last].leftBonus = 0;
+    kol.transfer(reciever,allBonus.mul(fee).div(100));
   }
   /**
    * title 提现以后上级的处理
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function afterDraw(address _addr,uint256 _amount) private{
+  function afterDraw(address _addr,uint256 _amount,uint256 _teamBonus,uint256 _inviteBonus,uint256 _lockIndex) private{
     for (uint i = 0; i<InviteList[_addr].length; i++){
         require(TotalUsers[InviteList[_addr][i]] > 0);
         TotalUsers[InviteList[_addr][i]] -= 1;
         //给上面的加入团队总金额
         TotalLockingAmount[InviteList[_addr][i]] = TotalLockingAmount[InviteList[_addr][i]].sub(_amount);
         queryAndSetLevelN(InviteList[_addr][i]);
+        LockTeamBonus[_addr][_lockIndex].totalTeamBonus = 0;
+        LockTeamBonus[_addr][_lockIndex].totalInviteBonus =0;
+        uint256 last = LockTeamBonus[_addr].length -1;
+        //
+        for (uint j = _lockIndex+1; j<=last; j++){
+          LockTeamBonus[_addr][j].theDayTeamBonus -= ABTeamBonus[_addr][InviteList[_addr][i]];
+          LockTeamBonus[_addr][j].totalTeamBonus -=_teamBonus;
+          LockTeamBonus[_addr][j].theDayInviteBonus -= ABInviteBonus[_addr][InviteList[_addr][i]];
+          LockTeamBonus[_addr][j].totalInviteBonus -=_inviteBonus;
+        }
+        ABTeamBonus[_addr][InviteList[_addr][i]] =0;
+        ABInviteBonus[_addr][InviteList[_addr][i]] =0;
     }
   }
   /**
@@ -377,7 +407,97 @@ contract KOLPro is Ownable{
       //给上面的加入团队总金额
       TotalLockingAmount[InviteList[msg.sender][i]] = TotalLockingAmount[InviteList[msg.sender][i]].add(_amount);
       queryAndSetLevelN(InviteList[msg.sender][i]);
+      calcuTopTeamBonus(msg.sender,InviteList[msg.sender][i],_amount,i);
+
     }
+  }
+  function calcuDiffAmount(address _selfAddr,address _topAddr,uint256 _amount) internal view returns(uint256){
+    //计算网体收益加速额。
+    uint256 topDayLockBalance = queryLockBalance(_topAddr,now);
+    uint256 selfDayLockBalance = queryLockBalance(_selfAddr,now);
+    uint256 minAmount;
+    if (topDayLockBalance >= selfDayLockBalance){
+      minAmount = _amount;
+    }else{
+      uint256 diff = selfDayLockBalance - topDayLockBalance;
+      if (diff >= _amount){
+        minAmount = 0;//完全烧伤
+        return;
+      }
+      else{
+        minAmount = diff;//部分烧伤
+      }
+    }
+    return minAmount.mul(3).div(1000);
+  }
+  function calcuTopTeamBonus(address _selfAddr,address _topAddr,uint256 _amount,uint256 _index) internal {
+    uint256 minAmount = calcuDiffAmount(_selfAddr,_topAddr,_amount);
+    //准备好前后的数据
+    //index = 0（上级），2（上级的上级），3（上级的上级以及上级）
+    uint256 lastDayLastSecond;
+    uint256 lastDayTeamBonus;
+    uint256 lastDayTeamTotalBonus;
+    uint256 lastDayInviteBonus;
+    uint256 lastDayInviteTotalBonus;
+    uint8 lastDayRate;
+    uint8 inviteRate;
+    bool isNew;
+    uint256 lastingDays;
+    uint256 tomorrowLastSecond = getYestodayLastSecond(now) + 2 * every;
+
+    if (_index == 0){
+      inviteRate = userLevel1;
+    }else if(_index ==1){
+      inviteRate = userLevel2;
+    }else{
+      inviteRate = 0;
+    }
+
+    if (LockTeamBonus[_topAddr].length == 0) {
+      lastDayTeamBonus = 0;
+      lastDayTeamTotalBonus=0;
+      lastDayInviteBonus =0;
+      lastDayInviteTotalBonus =0;
+      lastDayRate =0;
+      isNew = true;
+    }else{
+      uint256 last = LockTeamBonus[_topAddr].length -1;
+      lastDayLastSecond = LockTeamBonus[_topAddr][last].theDayLastSecond;
+      lastDayTeamBonus = LockTeamBonus[_topAddr][last].theDayTeamBonus;
+      lastDayTeamTotalBonus = LockTeamBonus[_topAddr][last].totalTeamBonus;
+      lastDayInviteBonus = LockTeamBonus[_topAddr][last].theDayInviteBonus;
+      lastDayInviteTotalBonus =  LockTeamBonus[_topAddr][last].totalInviteBonus;
+      lastDayRate = LockTeamBonus[_topAddr][last].theDayRate;
+      if (lastDayLastSecond < tomorrowLastSecond){
+        isNew = true;
+        lastingDays = (tomorrowLastSecond - lastDayLastSecond) % every;
+      }
+    }
+    uint8 newRate = levelRate[isLevelN[_topAddr]];
+    uint256 newDayTeamBonus = minAmount + lastDayTeamBonus;
+    ABTeamBonus[_selfAddr][_topAddr] += minAmount;
+    uint256 newDayTeamTotalBonus = (lastingDays * lastDayTeamBonus * lastDayRate) + minAmount * newRate + lastDayTeamTotalBonus;
+    uint256 newDayInviteBonus = minAmount * inviteRate + lastDayInviteBonus;
+    ABInviteBonus[_selfAddr][_topAddr] += minAmount * inviteRate;
+    uint256 newDayInviteTotalBonus = (lastingDays * lastDayInviteBonus) + minAmount * inviteRate + lastDayInviteTotalBonus;
+
+    if (isNew){
+      LockTeamBonus[_topAddr].push(dayBonus(tomorrowLastSecond,
+                                                  newDayTeamBonus,
+                                                  newDayTeamTotalBonus,
+                                                  newDayInviteBonus,
+                                                  newDayInviteTotalBonus,
+                                                  newRate));
+
+    }else{
+      //必然就都是明天。
+      LockTeamBonus[_topAddr][last].theDayTeamBonus = newDayTeamBonus;
+      LockTeamBonus[_topAddr][last].totalTeamBonus = newDayTeamTotalBonus;
+      LockTeamBonus[_topAddr][last].theDayInviteBonus = newDayInviteBonus;
+      LockTeamBonus[_topAddr][last].totalInviteBonus = newDayInviteTotalBonus;
+      LockTeamBonus[_topAddr][last].theDayRate = newRate;
+    }
+
   }
   /**
    * title 查询并设置用户的身份级别
@@ -411,44 +531,35 @@ contract KOLPro is Ownable{
     }
   }
   /**
-   * title 查询到指定时间点，当天用户的持币生息收益，建议输入时间为当天的11点59分
+   * title 查询到指定时间点，用户累计的持币生息收益，建议输入时间为当天的11点59分
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function calcuBonus(address _addr,uint256 _queryTime) private view returns(uint256) {
-    //输入参数为查询的时间。
+    // 一会儿再来修改。-- 4.28输入参数为查询的时间。
     //返回值为截止到查询时间之前当天的静态收益。
     //金本位考虑进来。
     require(_queryTime <= end);
     uint256 tmpBonus;
-    uint256 todayLastSecond;
+    uint256 yestodayLastSecond;
     uint256 theDaylastSecond;
     uint256 tmpCalcu;
     if (LockHistory[_addr].length > 0){
       for (uint i = 0; i<LockHistory[_addr].length; i++){
-
-        bool drawed = (LockHistory[_addr][i].withDrawed) &&
-                    (_queryTime >= LockHistory[_addr][i].begin) &&
-                    (_queryTime <= LockHistory[_addr][i].end);
-
-        bool noDrawed = (!LockHistory[_addr][i].withDrawed) &&
-                    (_queryTime >= LockHistory[_addr][i].begin);
-
-        if (drawed || noDrawed){
+        if  (!LockHistory[_addr][i].withDrawed){
+          if (_queryTime > LockHistory[_addr][i].begin){
+            uint256 lastingDays = (_queryTime - LockHistory[_addr][i].begin) % every;
             if (USDTOrCoin[_addr]){
-              //金本位
-              todayLastSecond = getYestodayLastSecond(_queryTime) + every;
+              yestodayLastSecond = getYestodayLastSecond(_queryTime);
               theDaylastSecond = getYestodayLastSecond(LockHistory[_addr][i].begin) + every;
-              tmpCalcu = LockHistory[_addr][i].amount;
-              tmpCalcu = tmpCalcu.mul(ClosePrice[theDaylastSecond]).mul(3).div(1000);
-              tmpCalcu = tmpCalcu.div(ClosePrice[todayLastSecond]);
-              tmpBonus += tmpCalcu;
+              for (uint j = theDaylastSecond; j<=yestodayLastSecond; j=j+every){
+                tmpCalcu += LockHistory[_addr][i].amount * 3 / 1000 * ClosePrice[theDaylastSecond] / ClosePrice[j];
+              }
             }else{
-              //币本位
-              tmpCalcu = LockHistory[_addr][i].amount;
-              tmpCalcu = tmpCalcu.mul(3).div(1000);
-              tmpBonus += tmpCalcu;
+              tmpCalcu += lastingDays * LockHistory[_addr][i].amount * 3 / 1000;
             }
+          }
         }
+
       }
     }
     return tmpBonus;
@@ -456,51 +567,6 @@ contract KOLPro is Ownable{
 
   function calcuBonusP(uint256 _queryTime) public view returns(uint256){
     return(calcuBonus(msg.sender,_queryTime));
-  }
-  /**
-   * title 查询到指定时间点，计算用户当天的推广收益
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function calcuInviteBonus(address _addr,uint256 _queryTime) private view returns(uint256) {
-    //直推，直推的直推，比较金额，计算佣金。
-    //先计算直推的
-    require(_queryTime <= end);
-    address[] childUser = ChildAddrs[_addr];
-
-    uint256 dayLockBalance;//先算出这一天他的有效锁仓余额是多少
-    uint256 childLockBalance;
-    uint256 child2LockBalance;
-
-    uint256 level1Bonus;
-    uint256 level2Bonus;
-
-    dayLockBalance = queryLockBalance(_addr,_queryTime);
-
-    for (uint i = 0; i<childUser.length; i++){
-      //每个直推独立计算
-      childLockBalance = queryLockBalance(childUser[i],_queryTime);
-      if (dayLockBalance >= childLockBalance){
-        level1Bonus += childLockBalance.mul(3).div(1000).mul(userLevel1).div(100);
-      }else{
-        level1Bonus += dayLockBalance.mul(3).div(1000).mul(userLevel1).div(100);
-      }
-      //再计算二级的
-      address[] child2User = ChildAddrs[childUser[i]];
-      for (uint j = 0; j<child2User.length; j++){
-        child2LockBalance = queryLockBalance(child2User[j],_queryTime);
-        if (dayLockBalance >= child2LockBalance){
-          level2Bonus += childLockBalance.mul(3).div(1000).mul(userLevel2).div(100);
-        }else{
-          level2Bonus += dayLockBalance.mul(3).div(1000).mul(userLevel2).div(100);
-        }
-      }
-    }
-    return (level1Bonus.add(level2Bonus));
-
-  }
-
-  function calcuInviteBonusP(uint256 _queryTime) public view returns(uint256){
-    return(calcuInviteBonus(msg.sender,_queryTime));
   }
   /**
    * title 查询指定时间用户的有效锁仓余额
@@ -532,54 +598,44 @@ contract KOLPro is Ownable{
    * title 查询并计算用户的网体收益
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function calcuTeamBonus(address _addr,uint256 _queryTime) private view returns(uint256) {
+  function calcuTeamBonus(address _addr,uint256 _queryTime) private view returns(uint256,uint256,uint256) {
     require(_queryTime <= end);
-    uint256 index = getTeamRateList(_addr,_queryTime);
-    if (index == 0) return (0);
-    uint8 rate = TeamRateList[_addr][index-1].rate;
-    if (rate>0){
-      //现在开始计算整个网体的奖励，从直推开始一路递归下去
-      //有一个问题没有考虑到，就是升级以前的网体收益是不同的。！！！
-      uint8 _rate;
-      if (rate == 1){
-        _rate = comLevel1;
-      }else if(rate == 2 ){
-        _rate = comLevel2;
-      }else if(rate == 3 ){
-        _rate = comLevel3;
+    dayBonus[] tmpStruct = LockTeamBonus[_addr];
+    uint256 last =tmpStruct.length -1;
+    uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
+    uint256 lastDayLastSecond;
+    uint256 theDay;
+    uint256 index;
+    for (uint i=last; i>=0; i--){
+      lastDayLastSecond=LockTeamBonus[_addr][i].theDayLastSecond;
+      if (lastDayLastSecond<=yestodayLastSecond){
+        theDay = lastDayLastSecond;
+        index = i;
+        break;
       }
-      uint256 dayLockBalance = queryLockBalance(_addr,_queryTime);
-      return levelBonus(dayLockBalance,_rate,_addr,_queryTime);
+    }
+    if (theDay > 0){
+      //找到了这样一条
+      uint256 lastingDays = (yestodayLastSecond - theDay) % every;
+      dayBonus theDayBonusStruct = LockTeamBonus[_addr][index];
+      uint256 teamBonus = lastingDays * theDayBonusStruct.theDayTeamBonus +  theDayBonusStruct.totalTeamBonus;
+      uint256 inviteBonus = lastingDays * theDayBonusStruct.theDayInviteBonus +  theDayBonusStruct.totalInviteBonus;
+      /* LockTeamBonus[_addr][index].totalTeamBonus = 0;
+      LockTeamBonus[_addr][index].totalInviteBonus =0;
+      for (i = index+1; i<=last; i++){
+        LockTeamBonus[_addr][i].totalTeamBonus -=teamBonus;
+        LockTeamBonus[_addr][i].totalInviteBonus -=inviteBonus;
+      } */
+      return(teamBonus,inviteBonus,index);
+
 
     }else{
-      return 0;
+      return (0,0,0);
     }
+
   }
-  function calcuTeamBonusP(uint256 _queryTime) public view returns(uint256){
+  function calcuTeamBonusP(uint256 _queryTime) public view returns(uint256,uint256,uint256){
     return(calcuTeamBonus(msg.sender,_queryTime));
-  }
-  /**
-   * title 递归计算直推网体奖励
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function levelBonus(uint256 _ancientBalance,uint8 _rate,address _addr,uint256 _queryTime) private view returns(uint256){
-    require(_queryTime <= end);
-    uint256 bonus;
-
-    if ( ChildAddrs[_addr].length > 0 ){
-      for (uint i = 0; i<ChildAddrs[_addr].length; i++){
-        uint256 childLockBalance = queryLockBalance(ChildAddrs[_addr][i],_queryTime);
-        if (_ancientBalance >= childLockBalance) {
-          bonus += childLockBalance.mul(3).div(1000).mul(_rate).div(100);
-        }else{
-          bonus += _ancientBalance.mul(3).div(1000).mul(_rate).div(100);
-        }
-        bonus += levelBonus(_ancientBalance,_rate,ChildAddrs[_addr][i],_queryTime);
-      }
-      return bonus;
-    }else{
-      return 0;
-    }
   }
   /**
    * title 根据给定时间计算出昨天的最后一秒
@@ -632,94 +688,45 @@ contract KOLPro is Ownable{
                 LockHistory[msg.sender][_index].withDrawed,
                 LockHistory[msg.sender].length);
   }
+
   /**
-   * title 把收益写入链上，在提现的时候好算账。
+   * title 查询自己过去每日的收益汇总。
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function settlement(uint256 maxdays) public{
-    require(LockHistory[msg.sender].length > 0);
-    uint256 currentTime;
-    if (now > end)
-      currentTime = end;
+  function getHistoryTeamBonus(address _addr,uint256 _index) private view returns(uint256,uint256,uint256,uint256,uint256){
+    //返回查询昨天的收益。
+    if (LockTeamBonus[_addr].length > _index){
+      return (LockTeamBonus[_addr][_index].theDayLastSecond,
+              LockTeamBonus[_addr][_index].theDayTeamBonus,
+              LockTeamBonus[_addr][_index].totalTeamBonus,
+              LockTeamBonus[_addr][_index].theDayRate,
+              LockTeamBonus[_addr].length);
+    }else{
+      return(0,0,0,0,0);
+    }
+  }
+  function getHistoryInviteBonus(address _addr,uint256 _index) private view returns(uint256,uint256,uint256,uint256,uint256){
+    //返回查询昨天的收益。
+    if (LockTeamBonus[_addr].length > _index){
+      return (LockTeamBonus[_addr][_index].theDayLastSecond,
+              LockTeamBonus[_addr][_index].theDayInviteBonus,
+              LockTeamBonus[_addr][_index].totalInviteBonus,
+              LockTeamBonus[_addr][_index].theDayRate,
+              LockTeamBonus[_addr].length);
+    }else{
+      return(0,0,0,0,0);
+    }
+  }
+  /**
+   * title 查询自己过去每日的收益汇总。
+   * dev visit: https://github.com/jackoelv/KOL/
+  */
+  function getMyHistoryBonus(uint256 _index,bool _type) public view returns(uint256,uint256,uint256,uint256,uint256){
+    //返回查询昨天的收益。
+    if (_type)
+      return (getHistoryTeamBonus(msg.sender,_index));
     else
-      currentTime = now;
-    uint256 self;
-    uint256 promotion;
-    uint256 team;
-    uint256 myBegin;
-    uint256 last;
-    if (LockHistoryBonus[msg.sender].length > 0){
-      last = LockHistoryBonus[msg.sender].length - 1;
-      myBegin = LockHistoryBonus[msg.sender][last].theDayLastSecond;//最后一次已经记过账的次日的凌晨0点0分0秒。
-    }else{
-      myBegin = LockHistory[msg.sender][0].begin;
-      myBegin = getYestodayLastSecond(myBegin) + every;
-    }
-    myBegin = myBegin + 1;//这是我入金的当晚的凌晨0点0分0秒。或者是上次计算过的最后一次的利息的当晚的凌晨
-    uint256 yestodayLastSecond = getYestodayLastSecond(currentTime);//昨天的最后一秒
-    uint256 lastingDays;
-    if (currentTime > myBegin){
-      lastingDays = currentTime.sub(myBegin) % every;
-      lastingDays = currentTime.sub(lastingDays).sub(myBegin);
-      lastingDays = lastingDays.div(every);
-    }
-    if (lastingDays > 0){
-      yestodayLastSecond -= (lastingDays-1) * every;
-      if (maxdays == 0) maxdays = maxSettleDays;
-      if (lastingDays > maxSettleDays) lastingDays = maxdays;//每次最多处理30天的数据，防止GAS超标。
-      for (uint i = 0 ; i<lastingDays; i++) {
-         uint256 yestodayAllBonus;
-         if (LockHistoryBonus[msg.sender].length > 0){
-           last = LockHistoryBonus[msg.sender].length - 1;
-           yestodayAllBonus = LockHistoryBonus[msg.sender][last].leftBonus;
-         }else{
-           yestodayAllBonus = 0;
-         }
-         if (USDTOrCoin[msg.sender] && (ClosePrice[yestodayLastSecond] == 0)){
-           //金本位但是没有价格信息，先暂停计算。就必须有个定时任务来跑这个价格信息上传上链。
-             break;
-         }
-         self = calcuBonus(msg.sender,yestodayLastSecond);
-         if (self > 0){
-              if (ChildAddrs[msg.sender].length > 0){
-                promotion = calcuInviteBonus(msg.sender,yestodayLastSecond);
-              }
-              if (TeamRateList[msg.sender].length > 0){
-                 team = calcuTeamBonus(msg.sender,yestodayLastSecond);
-              }
-
-              LockHistoryBonus[msg.sender].push(dayBonus(yestodayLastSecond,
-                                                         self+promotion+team,
-                                                         yestodayAllBonus+self+promotion+team));
-              totalBonus += self+promotion+team;
-
-         }
-         yestodayLastSecond = yestodayLastSecond.add(every);
-      }
-    }
-  }
-  /**
-   * title 查询自己过去每日的收益汇总。
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function getHistoryBonus(address _addr,uint256 _index) private view returns(uint256,uint256,uint256,uint256){
-    //返回查询昨天的收益。
-    if (LockHistoryBonus[_addr].length > _index){
-      return (LockHistoryBonus[_addr][_index].theDayLastSecond,
-              LockHistoryBonus[_addr][_index].theDayAllBonus,
-              LockHistoryBonus[_addr][_index].leftBonus,
-              LockHistoryBonus[_addr].length);
-    }else{
-      return(0,0,0,0);
-    }
-  }
-  /**
-   * title 查询自己过去每日的收益汇总。
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function getMyHistoryBonus(uint256 _index) public view returns(uint256,uint256,uint256,uint256){
-    //返回查询昨天的收益。
-    return (getHistoryBonus(msg.sender,_index));
+      return (getHistoryInviteBonus(msg.sender,_index));
   }
 
   /**
