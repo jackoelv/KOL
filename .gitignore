@@ -130,3 +130,4 @@ build/contracts/SafeMath.json
 build/contracts/StandardToken.json
 build/contracts/TetherToken.json
 build/contracts/UpgradedStandardToken.json
+build/applock2.js
