@@ -31,13 +31,39 @@ contract("testjoin",accounts => {
     let k = await KK.at("0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154");
     let p = await KOLP.at("0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2");
 
-    for (var time = 1588151820; time<1588151920; time+=10 ){
-      console.log("wokao");
-      let result = await p.getMyTeamRateList(time,{from:accounts[3]});
-      console.log("unixtime is: " + web3.utils.BN(result[1]));
-      console.log("time is: " + dateFtt(result[1]));
-      console.log("rate is: " +web3.utils.BN(result[0]));
+    let len = await p.getTeamRateList(accounts[1],0,{from:accounts[1]});
+    // console.log(len);
+    for (var i = 0; i<len[2]; i++){
+      let result = await p.getTeamRateList(accounts[1],i,{from:accounts[1]});
+      console.log(dateFtt(result[1])+","+web3.utils.BN(result[0]));
+      // console.log("unixtime is: " + web3.utils.BN(result[1]));
+      // console.log("time is: " + dateFtt(result[1]));
+      // console.log("rate is: " +web3.utils.BN(result[0]));
     }
+
+    let bonus = await p.getHistoryTeamBonus(accounts[1],0);
+    for (var n = 0; n<bonus[4]; n++){
+      let result = await p.getHistoryTeamBonus(accounts[1],n);
+      console.log(dateFtt(result[0])+","+web3.utils.fromWei(result[1],"ether")+","+web3.utils.fromWei(result[2],"ether")+","+ web3.utils.BN(result[3]));
+      // console.log("n is: " + n);
+      // console.log("the unix time is:" + web3.utils.BN(result[0]));
+      // console.log("the time is:" + dateFtt(result[0]));
+      // console.log("theDayTeamBonus :" +web3.utils.fromWei(result[1],"ether"));
+      // console.log("totalTeamBonus :" +web3.utils.fromWei(result[2],"ether"));
+      // console.log("theDayRate :" +web3.utils.BN(result[3]));
+    }
+
+    for (var j = 1; j<18; j++){
+      let lock = await p.getLockHistory(0,{from:accounts[j]});
+      console.log(dateFtt(lock[0])+","+j+","+web3.utils.fromWei(lock[2],"ether"));
+      // console.log("accounts is :" + j);
+      // console.log("begin is :" +dateFtt(lock[0]));
+      // console.log("begin unixtime is: " +web3.utils.BN(lock[0]));
+      // console.log("amount is :" + web3.utils.fromWei(lock[2],"ether"));
+      // console.log("length is :" + lock[4]);
+    }
+
+
 
     // for (var m = 1; m<4; m++){
     //   console.log("*****************************************");

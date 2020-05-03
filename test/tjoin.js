@@ -30,10 +30,13 @@ contract("testjoin",accounts => {
     await p.register(0,{from:accounts[1]});
     iCode=await p.getCode({from:accounts[1]});
     iCode = web3.utils.BN(iCode);
+    await k.transfer(accounts[1],web3.utils.toWei('20000','ether'),{from:accounts[4]});
+    await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[1]});
+    await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[1]});
 
     for (var m = 2; m<12; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(5000);
+      await sleep(3500);
       await p.register(iCode,{from:accounts[m]});
       // iCode= await p.getCode({from:accounts[m]});
       // iCode = web3.utils.BN(iCode);
@@ -48,9 +51,9 @@ contract("testjoin",accounts => {
     }
     iCode=await p.getCode({from:accounts[2]});
     iCode = web3.utils.BN(iCode);
-    for (var m = 15; m<17; m++){
+    for (var m = 12; m<15; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(5000);
+      await sleep(9000);
       await p.register(iCode,{from:accounts[m]});
       // iCode= await p.getCode({from:accounts[m]});
       // iCode = web3.utils.BN(iCode);
@@ -65,9 +68,9 @@ contract("testjoin",accounts => {
     }
     iCode=await p.getCode({from:accounts[3]});
     iCode = web3.utils.BN(iCode);
-    for (var m = 17; m<20; m++){
+    for (var m = 15; m<18; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(5000);
+      await sleep(8000);
       await p.register(iCode,{from:accounts[m]});
       // iCode= await p.getCode({from:accounts[m]});
       // iCode = web3.utils.BN(iCode);

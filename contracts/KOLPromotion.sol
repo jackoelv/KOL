@@ -325,7 +325,7 @@ contract KOLPro is Ownable{
     LockBalance[msg.sender] = LockBalance[msg.sender].add(_amount);
     totalBalance = totalBalance.add(_amount);
 
-    uint256 amount;
+    uint256 amount3;//amount*3/1000以后
 
     for (uint i = 0; i<InviteList[msg.sender].length; i++){
       if (i == maxlevel) break;
@@ -340,22 +340,22 @@ contract KOLPro is Ownable{
       TotalLockingAmount[InviteList[msg.sender][i]] = TotalLockingAmount[InviteList[msg.sender][i]].add(_amount);
       queryAndSetLevelN(InviteList[msg.sender][i]);
 
-      amount = calcuDiffAmount(msg.sender,InviteList[msg.sender][i],_amount);
+      amount3 = calcuDiffAmount(msg.sender,InviteList[msg.sender][i],_amount);
 
 
       if (i<2){
         if (LockInviteBonus[InviteList[msg.sender][i]].length == 0){
-          initInviteBonus(msg.sender,InviteList[msg.sender][i],amount,i);
+          initInviteBonus(msg.sender,InviteList[msg.sender][i],amount3,i);
         }else{
-          setTopInviteBonus(msg.sender,InviteList[msg.sender][i],_amount,i);
+          setTopInviteBonus(msg.sender,InviteList[msg.sender][i],amount3,i);
         }
       }
 
       if (i < maxlevel){
         if (LockTeamBonus[InviteList[msg.sender][i]].length == 0){
-          initTeamBonus(msg.sender,InviteList[msg.sender][i],amount);
+          initTeamBonus(msg.sender,InviteList[msg.sender][i],amount3);
         }else{
-          setTopTeamBonus(msg.sender,InviteList[msg.sender][i],_amount);
+          setTopTeamBonus(msg.sender,InviteList[msg.sender][i],amount3);
         }
       }
 
@@ -421,7 +421,7 @@ contract KOLPro is Ownable{
     uint256 lastDayTeamTotalBonus = LockTeamBonus[_topAddr][last].totalTeamBonus;
     uint8 lastDayRate = LockTeamBonus[_topAddr][last].theDayRate;
 
-    uint256 lastingDays = (tomorrowLastSecond - lastDayLastSecond) % every;
+    uint256 lastingDays = (tomorrowLastSecond - lastDayLastSecond) % every +1;
 
     uint8 level = isLevelN[_topAddr];
     uint8 newRate = levelRate[level];
