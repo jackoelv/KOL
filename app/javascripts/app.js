@@ -188,6 +188,7 @@ const App = {
       var balance = web3.utils.fromWei(bothbalance[0],"ether");
       var releasedKOL = web3.utils.fromWei(bothbalance[1],"ether");
       var freeBalance = Number(balance) * Number(rates) / 100 - Number(releasedKOL);
+      freeBalance = NP.strip(freeBalance);
     } catch (e) {
       console.log("no");
       console.log(e);
