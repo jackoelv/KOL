@@ -52,6 +52,18 @@ contract("testjoin",accounts => {
       // console.log("totalTeamBonus :" +web3.utils.fromWei(result[2],"ether"));
       // console.log("theDayRate :" +web3.utils.BN(result[3]));
     }
+    let inviteBonus = await p.getHistoryInviteBonus(accounts[1],0);
+    for (var w = 0; w<inviteBonus[3]; w++){
+      let result = await p.getHistoryInviteBonus(accounts[1],w);
+      console.log(dateFtt(result[0])+","+web3.utils.fromWei(result[1],"ether")+","+web3.utils.fromWei(result[2],"ether"));
+      // console.log("n is: " + n);
+      // console.log("the unix time is:" + web3.utils.BN(result[0]));
+      // console.log("the time is:" + dateFtt(result[0]));
+      // console.log("theDayTeamBonus :" +web3.utils.fromWei(result[1],"ether"));
+      // console.log("totalTeamBonus :" +web3.utils.fromWei(result[2],"ether"));
+      // console.log("theDayRate :" +web3.utils.BN(result[3]));
+    }
+
 
     for (var j = 1; j<18; j++){
       let lock = await p.getLockHistory(0,{from:accounts[j]});
