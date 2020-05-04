@@ -344,11 +344,7 @@ contract KOLPro is Ownable{
 
 
       if (i<2){
-        if (LockInviteBonus[InviteList[msg.sender][i]].length == 0){
-          initInviteBonus(msg.sender,InviteList[msg.sender][i],amount3,i);
-        }else{
-          setTopInviteBonus(msg.sender,InviteList[msg.sender][i],amount3,i);
-        }
+        setTopInviteBonus(msg.sender,InviteList[msg.sender][i],amount3,i);
       }
 
       if (i < maxlevel){
