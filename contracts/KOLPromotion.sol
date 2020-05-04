@@ -360,17 +360,21 @@ contract KOLPro is Ownable{
     if (topDayLockBalance >= selfDayLockBalance){
       minAmount = _amount;
     }else{
-      uint256 diff = selfDayLockBalance - topDayLockBalance;
-      if (diff >= _amount){
-        minAmount = 0;//完全烧伤
-        return;
-      }
-      else{
-        minAmount = diff;//部分烧伤
-      }
+        if(LockHistory[_selfAddr].length > 1){
+            uint256 previous = LockHistory[_selfAddr].length - 2;
+            uint256 theTime = LockHistory[_selfAddr][previous].begin;
+            uint256 previousLockBalance = queryLockBalance(_selfAddr,theTime);
+            if (topDayLockBalance > previousLockBalance){
+              //_amount + previousLockBalance 一定是大于topDayLockBalance的；
+              minAmount = topDayLockBalance - previousLockBalance;
+            }
+        }else{
+          minAmount = topDayLockBalance;
+        }
     }
     return minAmount.mul(3).div(1000);
   }
+
   function setTopTeamBonus(address _selfAddr,address _topAddr,uint256 _minAmount) internal {
     uint256 tomorrowLastSecond = getYestodayLastSecond(now) + (2 * every);
     uint8 level = isLevelN[_topAddr];
