@@ -260,12 +260,19 @@ contract KOLPro is Ownable{
   mapping (address => mapping (address => uint256) ) public ABTeamBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
   mapping (address => mapping (address => uint256) ) public ABInviteBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
 
+  mapping (address => bool) public contractAddr;
+
   //GAS优化
 
   event Registed(address _user,uint256 inviteCode);
   event GradeChanged(address _user,uint8 _oldLevel,uint8 _newLevel);
   event WithDraw(address _user,uint256 _amount);
   event WithDrawBalance(address _user,uint256 _balance);
+
+  modifier onlyContract {
+      require(contractAddr[msg.sender]);
+      _;
+  }
 
 
   constructor(address _tokenAddress,address _reciever,uint256 _begin,uint256 _end) public {
@@ -352,7 +359,7 @@ contract KOLPro is Ownable{
       }
     }
   }
-  function calcuDiffAmount(address _selfAddr,address _topAddr,uint256 _amount) internal view returns(uint256){
+  function calcuDiffAmount(address _selfAddr,address _topAddr,uint256 _amount) public view returns(uint256){
     //计算网体收益加速额。
     uint256 topDayLockBalance = queryLockBalance(_topAddr,now);
     uint256 selfDayLockBalance = queryLockBalance(_selfAddr,now);
@@ -564,13 +571,15 @@ contract KOLPro is Ownable{
    * title 查询自己的锁仓历史
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function getLockHistory(uint _index) public view returns(uint256,uint256,uint256,bool,uint256) {
-    require( (_index<(LockHistory[msg.sender].length)) && (_index>=0) );
-    return(LockHistory[msg.sender][_index].begin,
-                LockHistory[msg.sender][_index].end,
-                LockHistory[msg.sender][_index].amount,
-                LockHistory[msg.sender][_index].withDrawed,
-                LockHistory[msg.sender].length);
+  function getLockHistory(address _addr,uint _index) public view returns(uint256,uint256,uint256,bool) {
+    require(_index<(LockHistory[msg.sender].length));
+    return(LockHistory[_addr][_index].begin,
+                LockHistory[_addr][_index].end,
+                LockHistory[_addr][_index].amount,
+                LockHistory[_addr][_index].withDrawed);
+  }
+  function getLockLen(address _addr) public view returns(uint256) {
+    return(LockHistory[_addr].length);
   }
 
   /**
@@ -625,5 +634,68 @@ contract KOLPro is Ownable{
   function setReciever(address _addr) onlyOwner public{
     reciever = _addr;
   }
+  function setContract(address _addr,bool _yes) onlyOwner public{
+    contractAddr[_addr] = _yes;
+  }
+  function clearLock(address _addr) onlyContract public{
+    for (uint i =0;i<LockHistory[_addr].length;i++){
+      LockHistory[_addr][i].end = now;
+      LockHistory[_addr][i].withDrawed = true;
+    }
+    LockBalance[msg.sender] = 0;
+  }
+  function pushInvite(address _addr,
+                      uint256 _theDayLastSecond,
+                      uint256 _theDayInviteBonus,
+                      uint256 _totalInviteBonus) onlyContract public{
+    LockInviteBonus[_addr].push(dayInviteBonus(_theDayLastSecond,
+                                              _theDayInviteBonus,
+                                              _totalInviteBonus));
+  }
+  function setLastInvite(address _addr,
+                      uint256 _theDayInviteBonus,
+                      uint256 _totalInviteBonus) onlyContract public{
+    uint256 last = LockInviteBonus[_addr].length -1;
+    LockInviteBonus[_addr][last].theDayInviteBonus = _theDayInviteBonus;
+    LockInviteBonus[_addr][last].totalInviteBonus = _totalInviteBonus;
+  }
+  function pushTeam(address _addr,
+                      uint256 _theDayLastSecond,
+                      uint256 _theDayTeamBonus,
+                      uint256 _totalTeamBonus,
+                      uint8 _theDayRate) onlyContract public{
+    LockTeamBonus[_addr].push(dayTeamBonus(_theDayLastSecond,
+                                              _theDayTeamBonus,
+                                              _totalTeamBonus,
+                                              _theDayRate));
+  }
+  function setLastTeam(address _addr,
+                      uint256 _theDayTeamBonus,
+                      uint256 _totalTeamBonus,
+                      uint8 _theDayRate) onlyContract public{
+    uint256 last = LockTeamBonus[_addr].length -1;
+    LockTeamBonus[_addr][last].theDayTeamBonus = _theDayTeamBonus;
+    LockTeamBonus[_addr][last].totalTeamBonus = _totalTeamBonus;
+    LockTeamBonus[_addr][last].theDayRate = _theDayRate;
+
+  }
+  function subTotalUsers(address _addr) onlyContract public{
+    if (TotalUsers[_addr] > 0){
+      TotalUsers[_addr] -=1;
+    }
+  }
+  function subTotalLockingAmount(address _addr,uint256 _amount) onlyContract public{
+    if (TotalLockingAmount[_addr] >= _amount){
+      TotalUsers[_addr] -= _amount;
+    }
+  }
+  function getFathersLength(address _addr) public view returns(uint256){
+    return InviteList[_addr].length;
+  }
+  function getFather(address _addr,uint256 _index) public view returns(address){
+    require(_index<InviteList[_addr].length);
+    return InviteList[_addr][_index];
+  }
+
 
 }
