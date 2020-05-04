@@ -352,16 +352,8 @@ contract KOLPro is Ownable{
       }
 
       if (i < maxlevel){
-        if (LockTeamBonus[InviteList[msg.sender][i]].length == 0){
-          initTeamBonus(msg.sender,InviteList[msg.sender][i],amount3);
-        }else{
           setTopTeamBonus(msg.sender,InviteList[msg.sender][i],amount3);
-        }
       }
-
-
-
-
     }
   }
   function calcuDiffAmount(address _selfAddr,address _topAddr,uint256 _amount) internal view returns(uint256){
@@ -383,7 +375,7 @@ contract KOLPro is Ownable{
     }
     return minAmount.mul(3).div(1000);
   }
-  function initTeamBonus(address _selfAddr,address _topAddr,uint256 _minAmount) internal {
+  /* function initTeamBonus(address _selfAddr,address _topAddr,uint256 _minAmount) internal {
     uint256 tomorrowLastSecond = getYestodayLastSecond(now) + 2 * every;
     uint8 newRate = levelRate[isLevelN[_topAddr]];
     setTeamBonus(_selfAddr,_topAddr,_minAmount);
@@ -391,8 +383,73 @@ contract KOLPro is Ownable{
                                           _minAmount,
                                           _minAmount * newRate / 100,
                                           newRate));
+  } */
+
+  function setTopTeamBonus(address _selfAddr,address _topAddr,uint256 _minAmount) internal {
+    uint256 tomorrowLastSecond = getYestodayLastSecond(now) + (2 * every);
+    uint8 level = isLevelN[_topAddr];
+    uint8 newRate = levelRate[level];
+    uint256 newDayTeamTotalBonus = _minAmount * newRate / 100;
+    if (LockTeamBonus[_topAddr].length == 0){
+      LockTeamBonus[_topAddr].push(dayTeamBonus(tomorrowLastSecond,
+                                            _minAmount,
+                                            newDayTeamTotalBonus,
+                                            newRate));
+    }else{
+      uint256 last = LockTeamBonus[_topAddr].length -1;
+      uint256 lastDayLastSecond = LockTeamBonus[_topAddr][last].theDayLastSecond;
+      uint256 lastDayTeamBonus = LockTeamBonus[_topAddr][last].theDayTeamBonus;
+      uint256 lastDayTeamTotalBonus = LockTeamBonus[_topAddr][last].totalTeamBonus;
+      uint8 lastDayRate = LockTeamBonus[_topAddr][last].theDayRate;
+
+      uint256 lastingDays = (tomorrowLastSecond - lastDayLastSecond) / every;
+      uint256 newDayTeamBonus = _minAmount + lastDayTeamBonus;
+      setTeamBonus(_selfAddr,_topAddr,_minAmount);
+      newDayTeamTotalBonus = lastingDays * lastDayTeamBonus * lastDayRate/100;
+      newDayTeamTotalBonus += _minAmount * newRate / 100;
+      newDayTeamTotalBonus += lastDayTeamTotalBonus;
+        //必然就都是明天。
+      if(lastDayLastSecond < tomorrowLastSecond){
+        if (newRate > lastDayRate){
+
+        }
+        LockTeamBonus[_topAddr].push(dayTeamBonus(tomorrowLastSecond,
+                                              newDayTeamBonus,
+                                              newDayTeamTotalBonus,
+                                              newRate));
+      }else{
+        LockTeamBonus[_topAddr][last].theDayTeamBonus = newDayTeamBonus;
+        LockTeamBonus[_topAddr][last].totalTeamBonus = newDayTeamTotalBonus;
+        LockTeamBonus[_topAddr][last].theDayRate = newRate;
+      }
+    }
   }
-  function initInviteBonus(address _selfAddr,address _topAddr,uint256 _minAmount,uint256 _index) internal {
+  /* function test() public view returns(uint256,uint256) {
+    address _selfAddr = 0x2D56EcDCe8Fe8be4F28Ee2C997e4d5624DE7cEcc;
+    address _topAddr = 0xAf18075F9F36863cBb9c6Cf81f9F740316E003a3;
+    uint256 _minAmount = 15;
+    uint256 tomorrowLastSecond = getYestodayLastSecond(now) + (2 * every);
+    uint8 level = isLevelN[_topAddr];
+    uint8 newRate = levelRate[level];
+    uint256 newDayTeamTotalBonus = _minAmount * newRate / 100;
+
+    uint256 last = LockTeamBonus[_topAddr].length -1;
+
+    uint256 lastDayLastSecond = LockTeamBonus[_topAddr][last].theDayLastSecond;
+    uint256 lastDayTeamBonus = LockTeamBonus[_topAddr][last].theDayTeamBonus;
+    uint256 lastDayTeamTotalBonus = LockTeamBonus[_topAddr][last].totalTeamBonus;
+    uint8 lastDayRate = LockTeamBonus[_topAddr][last].theDayRate;
+
+    uint256 lastingDays = (tomorrowLastSecond - lastDayLastSecond) / every;
+    uint256 newDayTeamBonus = _minAmount + lastDayTeamBonus;
+    setTeamBonus(_selfAddr,_topAddr,_minAmount);
+    newDayTeamTotalBonus = lastingDays * lastDayTeamBonus * lastDayRate/100;
+    newDayTeamTotalBonus += _minAmount * newRate / 100;
+    newDayTeamTotalBonus += lastDayTeamTotalBonus;
+    return(now,lastingDays);
+
+  } */
+  /* function initInviteBonus(address _selfAddr,address _topAddr,uint256 _minAmount,uint256 _index) internal {
     uint8 inviteRate;
     if (_index == 0){
       inviteRate = userLevel1;
@@ -411,36 +468,7 @@ contract KOLPro is Ownable{
 
 
 
-  }
-  function setTopTeamBonus(address _selfAddr,address _topAddr,uint256 _minAmount) internal {
-    uint256 tomorrowLastSecond = getYestodayLastSecond(now) + 2 * every;
-    uint256 last = LockTeamBonus[_topAddr].length -1;
-
-    uint256 lastDayLastSecond = LockTeamBonus[_topAddr][last].theDayLastSecond;
-    uint256 lastDayTeamBonus = LockTeamBonus[_topAddr][last].theDayTeamBonus;
-    uint256 lastDayTeamTotalBonus = LockTeamBonus[_topAddr][last].totalTeamBonus;
-    uint8 lastDayRate = LockTeamBonus[_topAddr][last].theDayRate;
-
-    uint256 lastingDays = (tomorrowLastSecond - lastDayLastSecond) % every +1;
-
-    uint8 level = isLevelN[_topAddr];
-    uint8 newRate = levelRate[level];
-    uint256 newDayTeamBonus = _minAmount + lastDayTeamBonus;
-    setTeamBonus(_selfAddr,_topAddr,_minAmount);
-    uint256 newDayTeamTotalBonus = (lastingDays * lastDayTeamBonus * lastDayRate/100) + _minAmount * newRate / 100 + lastDayTeamTotalBonus;
-      //必然就都是明天。
-    if(lastDayLastSecond < tomorrowLastSecond){
-      LockTeamBonus[_topAddr].push(dayTeamBonus(tomorrowLastSecond,
-                                            newDayTeamBonus,
-                                            newDayTeamTotalBonus,
-                                            newRate));
-    }else{
-      LockTeamBonus[_topAddr][last].theDayTeamBonus = newDayTeamBonus;
-      LockTeamBonus[_topAddr][last].totalTeamBonus = newDayTeamTotalBonus;
-      LockTeamBonus[_topAddr][last].theDayRate = newRate;
-    }
-
-  }
+  } */
   function setTopInviteBonus(address _selfAddr,address _topAddr,uint256 _minAmount,uint256 _index) internal {
     uint8 inviteRate;
     if (_index == 0){
@@ -451,26 +479,33 @@ contract KOLPro is Ownable{
       return;
     }
     uint256 tomorrowLastSecond = getYestodayLastSecond(now) + 2 * every;
-    uint256 last = LockInviteBonus[_topAddr].length -1;
-
-    uint256 lastDayLastSecond = LockInviteBonus[_topAddr][last].theDayLastSecond;
-    uint256 lastDayInviteBonus = LockInviteBonus[_topAddr][last].theDayInviteBonus;
-    uint256 lastDayInviteTotalBonus = LockInviteBonus[_topAddr][last].totalInviteBonus;
-
-    uint256 lastingDays = (tomorrowLastSecond - lastDayLastSecond) % every;
-    uint256 newDayInviteBonus = _minAmount* inviteRate / 100 + lastDayInviteBonus;
-    setInviteBonus(_selfAddr,_topAddr,_minAmount);
-    uint256 newDayInviteTotalBonus = (lastingDays * lastDayInviteBonus * inviteRate / 100) + _minAmount * inviteRate /100 + lastDayInviteTotalBonus;
-      //必然就都是明天。
-    if(lastDayLastSecond < tomorrowLastSecond){
+    if (LockInviteBonus[_topAddr].length == 0){
+      setTeamBonus(_selfAddr,_topAddr,_minAmount);
       LockInviteBonus[_topAddr].push(dayInviteBonus(tomorrowLastSecond,
-                                            newDayInviteBonus,
-                                            newDayInviteTotalBonus));
+                                            _minAmount * inviteRate/100,
+                                            _minAmount * inviteRate/100));
     }else{
-      LockInviteBonus[_topAddr][last].theDayInviteBonus = newDayInviteBonus;
-      LockInviteBonus[_topAddr][last].totalInviteBonus = newDayInviteTotalBonus;
-    }
+      uint256 last = LockInviteBonus[_topAddr].length -1;
 
+      uint256 lastDayLastSecond = LockInviteBonus[_topAddr][last].theDayLastSecond;
+      uint256 lastDayInviteBonus = LockInviteBonus[_topAddr][last].theDayInviteBonus;
+      uint256 lastDayInviteTotalBonus = LockInviteBonus[_topAddr][last].totalInviteBonus;
+
+      uint256 lastingDays = (tomorrowLastSecond - lastDayLastSecond) / every;
+      uint256 newDayInviteBonus = _minAmount* inviteRate / 100 + lastDayInviteBonus;
+      setInviteBonus(_selfAddr,_topAddr,_minAmount);
+      uint256 newDayInviteTotalBonus = (lastingDays * lastDayInviteBonus * inviteRate / 100) + _minAmount * inviteRate /100 + lastDayInviteTotalBonus;
+        //必然就都是明天。
+      if(lastDayLastSecond < tomorrowLastSecond){
+        LockInviteBonus[_topAddr].push(dayInviteBonus(tomorrowLastSecond,
+                                              newDayInviteBonus,
+                                              newDayInviteTotalBonus));
+      }else{
+        LockInviteBonus[_topAddr][last].theDayInviteBonus = newDayInviteBonus;
+        LockInviteBonus[_topAddr][last].totalInviteBonus = newDayInviteTotalBonus;
+      }
+
+    }
   }
   function setTeamBonus(address _selfAddr,address _topAddr,uint256 _amount) internal {
     ABTeamBonus[_selfAddr][_topAddr] += _amount;

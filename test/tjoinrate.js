@@ -53,7 +53,7 @@ contract("testjoin",accounts => {
       // console.log("theDayRate :" +web3.utils.BN(result[3]));
     }
 
-    for (var j = 1; j<18; j++){
+    for (var j = 1; j<6; j++){
       let lock = await p.getLockHistory(0,{from:accounts[j]});
       console.log(dateFtt(lock[0])+","+j+","+web3.utils.fromWei(lock[2],"ether"));
       // console.log("accounts is :" + j);
