@@ -112,8 +112,6 @@ pragma solidity ^0.4.23;
    }
  }
  contract KOL is StandardToken {
-   function queryNode(address _addr) public view returns(bool);
-   function querySuperNode(address _addr) public view returns(bool);
  }
 
  /**
@@ -148,6 +146,7 @@ contract KOLPro is Ownable{
   string public name = "KOL Promotion";
   KOL public kol;
   address public reciever;
+  address public draw;
 
   uint256 public begin;//2020年4月22日0点0分0秒
   uint256 public end;
@@ -209,15 +208,7 @@ contract KOLPro is Ownable{
 
   }
 
-  struct inviteBonus{
-    uint256 begin;//网体开始时间
-    uint256 dayBonus;//网体当日加速
-    uint256 hisTotalBonus;
-  }
-  struct withDraws{
-    uint256 time;
-    uint256 amount;
-  }
+
   struct dayTeamBonus{
     uint256 theDayLastSecond;
     uint256 theDayTeamBonus;
@@ -242,9 +233,6 @@ contract KOLPro is Ownable{
   mapping (address => lock[]) public LockHistory;
   mapping (address => uint256) public LockBalance;
 
-  mapping (address => uint256) public InviteHistoryBonus;
-  mapping (address => uint256) public InviteCurrentDayBonus;
-
   mapping (address => address) public InviteRelation;//A=>B B is father;
   mapping (uint256 => uint256) public ClosePrice;//需要给个默认值，而且还允许修改，否则忘记就很麻烦了。
   mapping (address => uint256) public TotalUsers;
@@ -256,7 +244,6 @@ contract KOLPro is Ownable{
   mapping (uint8 => uint8) public levelRate;
   mapping (address => bool) public USDTOrCoin;
 
-  mapping (address => uint256) public WithDraws;
   mapping (address => mapping (address => uint256) ) public ABTeamBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
   mapping (address => mapping (address => uint256) ) public ABInviteBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
 
@@ -326,7 +313,7 @@ contract KOLPro is Ownable{
   function join(uint256 _amount,bool _usdtOrCoin) public {
     require(now <= end);
     if (LockBalance[msg.sender] == 0) USDTOrCoin[msg.sender] = _usdtOrCoin;
-    kol.transferFrom(msg.sender,address(this),_amount);
+    kol.transferFrom(msg.sender,draw,_amount);
     LockHistory[msg.sender].push(lock(now,_amount,0,false));
     uint256 oldBalance = LockBalance[msg.sender];
     LockBalance[msg.sender] = LockBalance[msg.sender].add(_amount);
@@ -401,7 +388,6 @@ contract KOLPro is Ownable{
 
       uint256 lastingDays = (tomorrowLastSecond - lastDayLastSecond) / every;
       uint256 newDayTeamBonus = _minAmount + lastDayTeamBonus;
-      setTeamBonus(_selfAddr,_topAddr,_minAmount);
       newDayTeamTotalBonus = lastingDays * lastDayTeamBonus * lastDayRate/100;
       newDayTeamTotalBonus += _minAmount * newRate / 100;
       newDayTeamTotalBonus += lastDayTeamTotalBonus;
@@ -432,7 +418,6 @@ contract KOLPro is Ownable{
     }
     uint256 tomorrowLastSecond = getYestodayLastSecond(now) + 2 * every;
     if (LockInviteBonus[_topAddr].length == 0){
-      setInviteBonus(_selfAddr,_topAddr,_minAmount);
       LockInviteBonus[_topAddr].push(dayInviteBonus(tomorrowLastSecond,
                                             _minAmount * inviteRate/100,
                                             _minAmount * inviteRate/100));
@@ -445,7 +430,6 @@ contract KOLPro is Ownable{
 
       uint256 lastingDays = (tomorrowLastSecond - lastDayLastSecond) / every;
       uint256 newDayInviteBonus = _minAmount* inviteRate / 100 + lastDayInviteBonus;
-      setInviteBonus(_selfAddr,_topAddr,_minAmount);
       uint256 newDayInviteTotalBonus = (lastingDays * lastDayInviteBonus) + _minAmount * inviteRate /100 + lastDayInviteTotalBonus;
         //必然就都是明天。
       if(lastDayLastSecond < tomorrowLastSecond){
@@ -458,12 +442,6 @@ contract KOLPro is Ownable{
       }
 
     }
-  }
-  function setTeamBonus(address _selfAddr,address _topAddr,uint256 _amount) internal {
-    ABTeamBonus[_selfAddr][_topAddr] += _amount;
-  }
-  function setInviteBonus(address _selfAddr,address _topAddr,uint256 _amount) internal {
-    ABInviteBonus[_selfAddr][_topAddr] += _amount;
   }
   /**
    * title 查询并设置用户的身份级别
@@ -536,90 +514,12 @@ contract KOLPro is Ownable{
     require(_queryTime <= (end + every));
     return (_queryTime.sub(_queryTime.sub(begin) % every) - 1);
   }
-  /**
-   * title 获得自己的邀请码
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function getCode() public view returns(uint256) {
-    return (RInviteCode[msg.sender]);
-  }
-  /**
-   * title 查询自己的直推下级
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function getTeam() public view returns(address[]) {
-    return (ChildAddrs[msg.sender]);
-  }
-  function getFathers() public view returns(address[]) {
-    return (InviteList[msg.sender]);
-  }
-  /**
-   * title 查询自己的网体人数
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function getTeamTotalUsers() public view returns(uint256) {
-    return (TotalUsers[msg.sender]);
-  }
-  /**
-   * title 查询自己的网体金额
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function getTeamTotalAmount() public view returns(uint256) {
-    return (TotalLockingAmount[msg.sender]);
-  }
-  /**
-   * title 查询自己的锁仓历史
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function getLockHistory(address _addr,uint _index) public view returns(uint256,uint256,uint256,bool) {
-    require(_index<(LockHistory[msg.sender].length));
-    return(LockHistory[_addr][_index].begin,
-                LockHistory[_addr][_index].end,
-                LockHistory[_addr][_index].amount,
-                LockHistory[_addr][_index].withDrawed);
-  }
+
   function getLockLen(address _addr) public view returns(uint256) {
     return(LockHistory[_addr].length);
   }
 
-  /**
-   * title 查询自己过去每日的收益汇总。
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function getHistoryTeamBonus(address _addr,uint256 _index) public view returns(uint256,uint256,uint256,uint256,uint256){
-    //返回查询昨天的收益。
-    if (LockTeamBonus[_addr].length > _index){
-      return (LockTeamBonus[_addr][_index].theDayLastSecond,
-              LockTeamBonus[_addr][_index].theDayTeamBonus,
-              LockTeamBonus[_addr][_index].totalTeamBonus,
-              LockTeamBonus[_addr][_index].theDayRate,
-              LockTeamBonus[_addr].length);
-    }else{
-      return(0,0,0,0,0);
-    }
-  }
-  function getHistoryInviteBonus(address _addr,uint256 _index) public view returns(uint256,uint256,uint256,uint256){
-    //返回查询昨天的收益。
-    if (LockInviteBonus[_addr].length > _index){
-      return (LockInviteBonus[_addr][_index].theDayLastSecond,
-              LockInviteBonus[_addr][_index].theDayInviteBonus,
-              LockInviteBonus[_addr][_index].totalInviteBonus,
-              LockInviteBonus[_addr].length);
-    }else{
-      return(0,0,0,0);
-    }
-  }
 
-  /**
-   * title 查询某个特定时间用户的等级
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function getTeamRateList(address _addr,uint256 _index) public view returns(uint256,uint256,uint256){
-    require(_index < TeamRateList[msg.sender].length);
-    return(TeamRateList[msg.sender][_index].rate,
-          TeamRateList[msg.sender][_index].changeTime,
-          TeamRateList[msg.sender].length);
-  }
   /**
    * title 录入KOL的收盘价
    * dev visit: https://github.com/jackoelv/KOL/
@@ -636,6 +536,7 @@ contract KOLPro is Ownable{
   }
   function setContract(address _addr,bool _yes) onlyOwner public{
     contractAddr[_addr] = _yes;
+    draw = _addr;
   }
   function clearLock(address _addr) onlyContract public{
     for (uint i =0;i<LockHistory[_addr].length;i++){
@@ -696,6 +597,13 @@ contract KOLPro is Ownable{
     require(_index<InviteList[_addr].length);
     return InviteList[_addr][_index];
   }
+  function getLockTeamBonusLen(address _addr) public view returns(uint256){
+    return(LockTeamBonus[_addr].length);
+  }
+  function getLockInviteBonusLen(address _addr) public view returns(uint256){
+    return(LockInviteBonus[_addr].length);
+  }
+
 
 
 }

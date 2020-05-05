@@ -191,11 +191,6 @@ pragma solidity ^0.4.23;
    function queryAndSetLevelN(address _addr) public;
    function queryLockBalance(address _addr,uint256 _queryTime) public view returns(uint256);
    function getYestodayLastSecond(uint256 _queryTime) public view returns(uint256);
-   function getCode() public view returns(uint256);
-   function getTeam() public view returns(address[]);
-   function getFathers() public view returns(address[]);
-   function getTeamTotalUsers() public view returns(uint256);
-   function getTeamTotalAmount() public view returns(uint256);
    function getLockHistory(address _addr,uint _index) public view returns(uint256,uint256,uint256,bool);
    function getLockLen(address _addr) public view returns(uint256);
    function getHistoryTeamBonus(address _addr,uint256 _index) public view returns(uint256,uint256,uint256,uint256,uint256);
@@ -223,6 +218,8 @@ pragma solidity ^0.4.23;
    function subTotalLockingAmount(address _addr,uint256 _amount) onlyContract public ;
    function getFathersLength(address _addr) public view returns(uint256);
    function getFather(address _addr,uint256 _index) public view returns(address);
+   function getLockTeamBonusLen(address _addr) public view returns(uint256);
+   function getLockInviteBonusLen(address _addr) public view returns(uint256);
 }
 
  /**
@@ -257,17 +254,17 @@ contract KOLWithDraw is Ownable{
   string public name = "KOL Promotion";
   KOL public kol;
   KOLP public kolp;
-  address public reciever;
+  /* address public reciever;
 
   uint256 public begin;//2020年4月22日0点0分0秒
   uint256 public end;
 
-  uint256 public iCode;
+  uint256 public iCode; */
   uint256 public every = 10 seconds;//1 days;
-  uint256 public maxSettleDays = 1;
+  /* uint256 public maxSettleDays = 1;
   uint256 public totalRegister;
   uint256 public totalBalance;
-  uint256 public totalBonus;
+  uint256 public totalBonus; */
 
 
 
@@ -375,14 +372,13 @@ contract KOLWithDraw is Ownable{
   mapping (address => uint256) public InviteDrawAmount;
   mapping (address => uint256) public TeamDrawAmount;
   //GAS优化
+  event WithDrawed(address _user,uint256 _amount);
 
   constructor(address _kolAddress,address _kolpAddress) public {
     kol = KOL(_kolAddress);
     kolp = KOLP(_kolpAddress);
   }
-
-
-  function querySelfBonus(address _addr) internal view returns(uint256){
+  function querySelfBonus(address _addr) public view returns(uint256){
     uint256 begin;
     uint256 end;
     uint256 amount;
@@ -391,11 +387,11 @@ contract KOLWithDraw is Ownable{
     require(len > 0);
     uint256 selfBonus;
     for (uint i=0; i<len; i++){
-      (begin,end,amount,withDrawed) = kolp.getLockHistory(_addr,i);
+      (begin,amount,end,withDrawed) = kolp.LockHistory(_addr,i);
       if (!withDrawed){
         if (DrawTime[msg.sender] > begin) begin = DrawTime[msg.sender];
         uint256 lastingDays = (now - begin) % every;
-        lastingDays = (now - lastingDays) / every;
+        lastingDays = (now - lastingDays - begin) / every;
         if (kolp.USDTOrCoin(_addr)){
           begin = kolp.getYestodayLastSecond(begin) + every;
           for (uint j=0;j<lastingDays;j++){
@@ -407,49 +403,44 @@ contract KOLWithDraw is Ownable{
         }
       }
     }
-    DrawTime[msg.sender] = now;
-    return selfBonus;
+    return (selfBonus);
   }
-  function queryInviteBonus(address _addr) internal view returns(uint256){
-    uint256 last = LockInviteBonus[_addr].length - 1;
+  function queryInviteBonus(address _addr) public returns(uint256){
+    uint256 last = kolp.getLockInviteBonusLen(_addr) - 1;
     uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
-    uint256 lastDayLastSecond = LockInviteBonus[_addr][last].theDayLastSecond;
-    uint256 lastDayInviteBonus = LockInviteBonus[_addr][last].theDayInviteBonus;
-    uint256 lastDayInviteTotalBonus = LockInviteBonus[_addr][last].totalInviteBonus;
+    uint256 lastDayLastSecond;
+    uint256 lastDayInviteBonus;
+    uint256 lastDayInviteTotalBonus;
+    (lastDayLastSecond,lastDayInviteBonus,lastDayInviteTotalBonus) = kolp.LockInviteBonus(_addr,last);
     uint256 lastingDays;
     uint256 newDayInviteTotalBonus;
     if (lastDayLastSecond < yestodayLastSecond){
       //计算 然后Push一条记录
       lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
       newDayInviteTotalBonus = (lastingDays * lastDayInviteBonus) + lastDayInviteTotalBonus;
-      kolp.pushInvite(_addr,yestodayLastSecond,lastDayInviteBonus,0);
-      return newDayInviteTotalBonus;
+      return (newDayInviteTotalBonus);
     }else{
-      //就是当天，直接取结果
-      kolp.setLastInvite(_addr,lastDayInviteBonus,0);
-      return lastDayInviteTotalBonus;
+      return (lastDayInviteTotalBonus);
     }
-
   }
-  function queryTeamBonus(address _addr) internal view returns(uint256){
-    uint256 last = LockTeamBonus[_addr].length - 1;
+  function queryTeamBonus(address _addr) public returns(uint256){
+    uint256 last = kolp.getLockTeamBonusLen(_addr) - 1;
     uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
-    uint256 lastDayLastSecond = LockTeamBonus[_addr][last].theDayLastSecond;
-    uint256 lastDayTeamBonus = LockTeamBonus[_addr][last].theDayTeamBonus;
-    uint256 lastDayTeamTotalBonus = LockTeamBonus[_addr][last].totalTeamBonus;
-    uint8 theDayRate = LockTeamBonus[_addr][last].theDayRate;
+    uint256 lastDayLastSecond;
+    uint256 lastDayTeamBonus;
+    uint256 lastDayTeamTotalBonus;
+    uint8 theDayRate;
+    (lastDayLastSecond,lastDayTeamBonus,lastDayTeamTotalBonus,theDayRate) = kolp.LockTeamBonus(_addr,last);
+
     uint256 lastingDays;
     uint256 newDayTeamTotalBonus;
     if (lastDayLastSecond < yestodayLastSecond){
       //计算 然后Push一条记录
       lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
-      newDayTeamTotalBonus = (lastingDays * lastDayTeamBonus) + lastDayTeamTotalBonus;
-      kolp.pushTeam(_addr,yestodayLastSecond,lastDayTeamBonus,0,theDayRate);
-      return newDayTeamTotalBonus;
+      newDayTeamTotalBonus = (lastingDays * lastDayTeamBonus * theDayRate / 100 ) + lastDayTeamTotalBonus;
+      return (newDayTeamTotalBonus);
     }else{
-      //就是当天，直接取结果
-      kolp.setLastTeam(_addr,lastDayTeamBonus,0,theDayRate);
-      return newDayTeamTotalBonus;
+      return (lastDayTeamTotalBonus);
     }
   }
   function afterWithdraw(address _addr,uint256 _amount) internal {
@@ -466,22 +457,73 @@ contract KOLWithDraw is Ownable{
   }
   function withdraw(bool _onlyBonus) public{
     //true: Only Bonus;false:all;
-    uint256 selfBonus;
-    uint256 inviteBonus;
-    uint256 teamBonus;
-    uint256 balance;
-
-    selfBonus = querySelfBonus(msg.sender);
-    inviteBonus = queryInviteBonus(msg.sender);
-    teamBonus = queryTeamBonus(msg.sender);
-
-    uint256 allBonus = selfBonus.add(inviteBonus).add(teamBonus);
+    uint256 bonus = querySelfBonus(msg.sender);
+    DrawTime[msg.sender] = now;
+    uint256 last = kolp.getLockInviteBonusLen(msg.sender) - 1;
+    uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
+    uint256 lastDayLastSecond;
+    uint256 lastDayBonus;
+    uint256 lastDayTotalBonus;
+    (lastDayLastSecond,lastDayBonus,lastDayTotalBonus) = kolp.LockInviteBonus(msg.sender,last);
+    uint256 lastingDays;
+    if (lastDayLastSecond < yestodayLastSecond){
+      //计算 然后Push一条记录
+      lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
+      bonus += (lastingDays * lastDayBonus) + lastDayTotalBonus;
+      kolp.pushInvite(msg.sender,yestodayLastSecond,lastDayBonus,0);
+    }else{
+      kolp.setLastInvite(msg.sender,lastDayBonus,0);
+      bonus += lastDayTotalBonus;
+    }
+    last = kolp.getLockTeamBonusLen(msg.sender) - 1;
+    uint8 theDayRate;
+    (lastDayLastSecond,lastDayBonus,lastDayTotalBonus,theDayRate) = kolp.LockTeamBonus(msg.sender,last);
+    if (lastDayLastSecond < yestodayLastSecond){
+      lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
+      bonus  += (lastingDays * lastDayBonus * theDayRate / 100 ) + lastDayTotalBonus;
+      kolp.pushTeam(msg.sender,yestodayLastSecond,lastDayBonus,0,theDayRate);
+    }else{
+      kolp.setLastTeam(msg.sender,lastDayBonus,0,theDayRate);
+      bonus += lastDayTotalBonus;
+    }
     if (!_onlyBonus){
-      allBonus += LockBalance[msg.sender];
-      afterWithdraw(msg.sender,LockBalance[msg.sender]);
+      uint256 balance = kolp.LockBalance(msg.sender);
+      bonus += balance;
+      afterWithdraw(msg.sender,balance);
       kolp.clearLock(msg.sender);
     }
-    kol.transfer(msg.sender,allBonus);
+    kol.transfer(msg.sender,bonus);
+    emit WithDrawed(msg.sender,bonus);
   }
+  function withdrawCheck(bool _onlyBonus) public view returns(uint256){
+    //true: Only Bonus;false:all;
+    uint256 bonus = querySelfBonus(msg.sender);
+    /* DrawTime[msg.sender] = now; */
+    uint256 last = kolp.getLockInviteBonusLen(msg.sender) - 1;
+    uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
+    uint256 lastDayLastSecond;
+    uint256 lastDayBonus;
+    uint256 lastDayTotalBonus;
+    (lastDayLastSecond,lastDayBonus,lastDayTotalBonus) = kolp.LockInviteBonus(msg.sender,last);
+    uint256 lastingDays;
+    if (lastDayLastSecond < yestodayLastSecond){
+      lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
+      bonus += (lastingDays * lastDayBonus) + lastDayTotalBonus;
+    }else{
+      bonus += lastDayTotalBonus;
+    }
 
+    last = kolp.getLockTeamBonusLen(msg.sender) - 1;
+    uint8 theDayRate;
+    (lastDayLastSecond,lastDayBonus,lastDayTotalBonus,theDayRate) = kolp.LockTeamBonus(msg.sender,last);
+    if (lastDayLastSecond < yestodayLastSecond){
+      lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
+      bonus  += (lastingDays * lastDayBonus * theDayRate / 100 ) + lastDayTotalBonus;
+    }else{
+      bonus += lastDayTotalBonus;
+    }
+
+    if (!_onlyBonus) bonus += kolp.LockBalance(msg.sender);
+    return bonus;
+  }
 }
