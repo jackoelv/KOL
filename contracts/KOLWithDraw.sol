@@ -117,6 +117,7 @@ pragma solidity ^0.4.23;
  }
  contract KOLP is StandardToken {
 
+   address public draw;
    struct lock{
      uint256 begin;
      uint256 amount;
@@ -173,8 +174,6 @@ pragma solidity ^0.4.23;
    mapping (address => bool) public USDTOrCoin;
 
    mapping (address => uint256) public WithDraws;
-   mapping (address => mapping (address => uint256) ) public ABTeamBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
-   mapping (address => mapping (address => uint256) ) public ABInviteBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
    mapping (address => bool) public contractAddr;
 
    //GAS优化
@@ -184,7 +183,7 @@ pragma solidity ^0.4.23;
    event WithDraw(address _user,uint256 _amount);
    event WithDrawBalance(address _user,uint256 _balance);
    modifier onlyContract {
-       require(contractAddr[msg.sender]);
+       require(msg.sender == draw);
        _;
    }
    function calcuDiffAmount(address _selfAddr,address _topAddr,uint256 _amount) public view returns(uint256);
@@ -217,7 +216,7 @@ pragma solidity ^0.4.23;
    function subTotalUsers(address _addr) onlyContract public ;
    function subTotalLockingAmount(address _addr,uint256 _amount) onlyContract public ;
    function getFathersLength(address _addr) public view returns(uint256);
-   function getFather(address _addr,uint256 _index) public view returns(address);
+   /* function getFather(address _addr,uint256 _index) public view returns(address); */
    function getLockTeamBonusLen(address _addr) public view returns(uint256);
    function getLockInviteBonusLen(address _addr) public view returns(uint256);
 }
@@ -254,123 +253,32 @@ contract KOLWithDraw is Ownable{
   string public name = "KOL Promotion";
   KOL public kol;
   KOLP public kolp;
-  /* address public reciever;
 
-  uint256 public begin;//2020年4月22日0点0分0秒
-  uint256 public end;
-
-  uint256 public iCode; */
-  uint256 public every = 10 seconds;//1 days;
-  /* uint256 public maxSettleDays = 1;
-  uint256 public totalRegister;
-  uint256 public totalBalance;
-  uint256 public totalBonus; */
-
-
-
-  uint8 public constant userLevel1 = 20;
-  uint8 public constant userLevel2 = 10;
-  uint8 public maxlevel = 9;
+  uint256 public every = 60 seconds;//1 days;
 
   /* uint16 public constant comLevel1Users = 100;
   uint16 public constant comLevel2Users = 300;
   uint16 public constant comLevel3Users = 500; */
 
   //测试的时候就把数字变小一点。
-  uint16 public constant comLevel1Users = 2;
-  uint16 public constant comLevel2Users = 3;
-  uint16 public constant comLevel3Users = 4;
+
 
   uint256 public constant comLevel1Amount = 10000 * (10 ** 18);
   uint256 public constant comLevel2Amount = 30000 * (10 ** 18);
   uint256 public constant comLevel3Amount = 50000 * (10 ** 18);
 
-  uint8 public constant comLevel1 = 3;
-  uint8 public constant comLevel2 = 5;
-  uint8 public constant comLevel3 = 10;
-  uint8 public constant inviteLevel1 = 3;//直推3个才能升级网体1
-  uint8 public constant inviteLevel2 = 5;
-  uint8 public constant inviteLevel3 = 10;
+
   uint8 public constant withDrawRate = 5;
   uint8 public constant fee = 5;
 
   /* uint256 public constant withDrawDays = 30 days; */
   //测试限制5分钟
-  uint256 public constant withDrawDays = 2 minutes;
-
-  /* address[] private inviteAddr;// A->B->C: inviteAddr= B,A
-  address[] private childAddr;// A-->B,A-->C,childAddr= B, C */
-
-
-
-  struct lock{
-    uint256 begin;
-    uint256 amount;
-    uint256 end;
-    bool withDrawed;
-  }
-
-  struct teamRate{
-    uint8 rate;
-    uint256 changeTime;
-
-  }
-
-  struct inviteBonus{
-    uint256 begin;//网体开始时间
-    uint256 dayBonus;//网体当日加速
-    uint256 hisTotalBonus;
-  }
-  struct withDraws{
-    uint256 time;
-    uint256 amount;
-  }
-  struct dayTeamBonus{
-    uint256 theDayLastSecond;
-    uint256 theDayTeamBonus;
-    uint256 totalTeamBonus;
-    uint8 theDayRate;
-  }
-  struct dayInviteBonus{
-    uint256 theDayLastSecond;
-    uint256 theDayInviteBonus;
-    uint256 totalInviteBonus;
-  }
-
-
-
-  mapping (address => dayTeamBonus[]) public LockTeamBonus;
-  mapping (address => dayInviteBonus[]) public LockInviteBonus;
-
-
-  mapping (address => address[]) public InviteList;
-  mapping (address => address[]) public ChildAddrs;
-  mapping (address => teamRate[]) public TeamRateList;
-  mapping (address => lock[]) public LockHistory;
-  mapping (address => uint256) public LockBalance;
-
-  mapping (address => uint256) public InviteHistoryBonus;
-  mapping (address => uint256) public InviteCurrentDayBonus;
-
-  mapping (address => address) public InviteRelation;//A=>B B is father;
-  mapping (uint256 => uint256) public ClosePrice;//需要给个默认值，而且还允许修改，否则忘记就很麻烦了。
-  mapping (address => uint256) public TotalUsers;
-  mapping (address => uint256) public TotalLockingAmount;
-  mapping (uint256 => address) public InviteCode;
-  mapping (address => uint256) public RInviteCode;
-
-  mapping (address => uint8) public isLevelN;
-  mapping (uint8 => uint8) public levelRate;
-  mapping (address => bool) public USDTOrCoin;
+  uint256 public constant withDrawDays = 20 minutes;
 
   mapping (address => uint256) public WithDraws;
-  mapping (address => mapping (address => uint256) ) public ABTeamBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
-  mapping (address => mapping (address => uint256) ) public ABInviteBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
 
   //上面是从原来的合约移植过来的，下面的是本合约自己需要的
   mapping (address => uint256) public DrawTime;
-  mapping (address => uint256) public InviteDrawAmount;
-  mapping (address => uint256) public TeamDrawAmount;
   //GAS优化
   event WithDrawed(address _user,uint256 _amount);
 
@@ -448,15 +356,32 @@ contract KOLWithDraw is Ownable{
     address father;
     uint256 fathersLen = kolp.getFathersLength(_addr);
     for (uint i = 0; i<fathersLen; i++){
-      father = kolp.getFather(_addr,i);
+      father = kolp.InviteList(_addr,i);
       kolp.subTotalUsers(father);
       kolp.subTotalLockingAmount(father,_amount);
       kolp.queryAndSetLevelN(father);
     }
 
   }
+  function checkDraw(address _addr) private view returns(bool) {
+    uint256 teamAmount = kolp.TotalLockingAmount(_addr) ;
+    uint256 myBalance = kolp.LockBalance(_addr) * withDrawRate;
+    uint256 myBegin;
+    uint256 amount;
+    uint256 end;
+    bool withDrawed;
+    ( myBegin, amount, end, withDrawed) = kolp.LockHistory(_addr,0);
+    uint256 diff = now - myBegin;
+    if ((myBalance <= teamAmount) || (diff > withDrawDays)) {
+      return true;
+    }else{
+      return false;
+    }
+
+  }
   function withdraw(bool _onlyBonus) public{
     //true: Only Bonus;false:all;
+    require(checkDraw(msg.sender));
     uint256 bonus = querySelfBonus(msg.sender);
     DrawTime[msg.sender] = now;
     uint256 last = kolp.getLockInviteBonusLen(msg.sender) - 1;

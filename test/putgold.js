@@ -42,6 +42,10 @@ function now()
    fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
    return fmt;
 }
+function lastsecond(time){
+  let begin = 1588742580;
+  return(time - (time-begin) % 60-1);
+}
 
 contract("test",accounts => {
     before(async () => {
@@ -55,45 +59,51 @@ contract("test",accounts => {
     unixTimeNow = Math.round(unixTimeNow / 1000);
 
     let theSecond = unixTimeNow;
-    let target = accounts[2];
-    let every = 10;
+    let target = accounts[1];
+    let every = 60;
 
 
     console.log("****************查询一下第一个起息的时间****************");
-    let a1result = await p.getMyHistoryBonus(0,{from:target});
+    let a1result = await p.LockHistory(target,0);
     let begin = web3.utils.BN(a1result[0]);
     console.log("开始时间是："+begin);
     console.log("本地时间是：" + dateFtt(begin));
     let price = 0;
     let tmp = parseInt(begin);
     console.log("tmp is:" +tmp);
-
-
-
-
+    tmp = lastsecond(tmp);
+    console.log("tmp is:" +tmp);
     nextBegin = tmp-every;
-    for (var j = tmp-every; j<unixTimeNow ;j=j+every){
+    for (var i = nextBegin-every; i < unixTimeNow + 12 *every; i = i+every){
+      await p.putClosePrice(10000,i+2);
+      console.log("wokao");
+    }
+
+
+
+
+    for (var j = tmp-every; j<unixTimeNow+ 12 *every ;j=j+every){
         price = await p.ClosePrice(j);
-        console.log("i is :" + j + "price is :" + price);
-        if (price == 0){
-          nextBegin = j;
-          break;
-        }
+        console.log("j is :" + dateFtt(j) + "price is :" + price);
+        // if (price == 0){
+        //   nextBegin = j;
+        //   break;
+        // }
     }
-    console.log("nextbegin is: "+ nextBegin);
-
-    for (var i = nextBegin; i < unixTimeNow + 12 *every; i = i+every){
-      await p.putClosePrice(5000,i+2);
-    }
-
-    for (var jj = tmp-every; jj<unixTimeNow ;jj=jj+every){
-        price = await p.ClosePrice(jj);
-        console.log("jj is :" + jj + "price is :" + price);
-        if (price == 0){
-          // nextBegin = j;
-          break;
-        }
-    }
+    // console.log("nextbegin is: "+ nextBegin);
+    //
+    // for (var i = nextBegin; i < unixTimeNow + 12 *every; i = i+every){
+    //   await p.putClosePrice(10000,i+2);
+    // }
+    //
+    // for (var jj = tmp-every; jj<unixTimeNow ;jj=jj+every){
+    //     price = await p.ClosePrice(jj);
+    //     console.log("jj is :" + jj + "price is :" + price);
+    //     if (price == 0){
+    //       // nextBegin = j;
+    //       break;
+    //     }
+    // }
 
     });
     it('Check whether the contract has been issued successfully', async () => {

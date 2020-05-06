@@ -4,6 +4,11 @@ const KOLD = artifacts.require("KOLWithDraw");
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
+function diff(a,b){
+  var df = parseInt(b) - parseInt(a);
+  var df2 = df % 60;
+  return ((df-df2)/60);
+}
 function dateFtt(dd)
 { //author: meizz
    dd = dd +"000";
@@ -36,88 +41,121 @@ contract("testjoin",accounts => {
     let pro = "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154";
     let draw = "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651";
 
-    let target = pro;
+    // let target = pro;
+    // let balance =await k.balanceOf(target);
+    // balance = web3.utils.BN(balance);
+    // balance = web3.utils.fromWei(balance,"ether");
+    // console.log("########################################");
+    // console.log("pro balance is: "+balance);
+    // console.log("########################################");
+    // console.log("*                                      *");
+    // console.log("*                                      *");
+    // console.log("*                                      *");
+    let target = draw;
     let balance =await k.balanceOf(target);
-    balance = web3.utils.BN(balance);
-    balance = web3.utils.fromWei(balance,"ether");
-    console.log("########################################");
-    console.log("pro balance is: "+balance);
-    console.log("########################################");
-
-    target = draw;
-    balance =await k.balanceOf(target);
     balance = web3.utils.BN(balance);
     balance = web3.utils.fromWei(balance,"ether");
     console.log("########################################");
     console.log("draw  balance is: "+balance);
     console.log("########################################");
 
-    let teamLen = await p.getLockTeamBonusLen(accounts[1]);
-    let inviteLen = await p.getLockInviteBonusLen(accounts[1]);
+    console.log("*                                      *");
+    console.log("*                                      *");
+    console.log("*                                      *");
+
+    var time = new Date();
+    var unixTime = time.getTime();
+    unixTime = Math.round(unixTime / 1000);
+      console.log("humantime now is             :" +dateFtt(unixTime));
+      console.log("unixtime now is              :" +unixTime);
+
+    target = accounts[1];
+    let lock = await p.LockHistory(target,0);
+    let lockBegin = web3.utils.BN(lock[0]);
+      console.log("lock begin is                :" +dateFtt(lockBegin)+ " diff: " +diff(lockBegin,unixTime) +" days");
+      // console.log("lock begin is                :" +diff(lockBegin,unixTime) +" days");
+
+    lock = await p.LockHistory(accounts[2],0);
+    lockBegin = web3.utils.BN(lock[0]);
+        console.log("lock begin is                :" +dateFtt(lockBegin)+ " diff: " +diff(lockBegin,unixTime) +" days");
+
+    let teamLen = await p.getLockTeamBonusLen(target);
+    let inviteLen = await p.getLockInviteBonusLen(target);
 
     for (var pp = 0;pp<teamLen; pp++){
-      let teamresult = await p.LockTeamBonus(accounts[1],pp);
-      console.log("team theDayLastSecond :" +web3.utils.BN(teamresult[0]));
-      console.log("team theDayTeamBonus :" +web3.utils.fromWei(teamresult[1],"ether"));
-      console.log("team totalTeamBonus :" +web3.utils.fromWei(teamresult[2],"ether"));
-      console.log("team theDayRate :" +web3.utils.BN(teamresult[3]));
+      let teamresult = await p.LockTeamBonus(target,pp);
+      console.log("team theDayLastSecond        :" +dateFtt(teamresult[0]));
+      console.log("team theDayTeamBonus         :" +web3.utils.fromWei(teamresult[1],"ether"));
+      console.log("team totalTeamBonus          :" +web3.utils.fromWei(teamresult[2],"ether"));
+      console.log("team theDayRate              :" +web3.utils.BN(teamresult[3]));
     }
 
     for (var qq = 0;qq<inviteLen; qq++){
-      let inviteresult = await p.LockInviteBonus(accounts[1],qq);
-      console.log("invite theDayLastSecond :" +web3.utils.BN(inviteresult[0]));
-      console.log("invite theDayTeamBonus :" +web3.utils.fromWei(inviteresult[1],"ether"));
-      console.log("invite totalTeamBonus :" +web3.utils.fromWei(inviteresult[2],"ether"));
+      let inviteresult = await p.LockInviteBonus(target,qq);
+      console.log("invite theDayLastSecond  :" +dateFtt(inviteresult[0]));
+      console.log("invite theDayTeamBonus   :" +web3.utils.fromWei(inviteresult[1],"ether"));
+      console.log("invite totalTeamBonus    :" +web3.utils.fromWei(inviteresult[2],"ether"));
     }
 
-    target = accounts[1];
+
     balance =await k.balanceOf(target);
     balance = web3.utils.BN(balance);
     balance = web3.utils.fromWei(balance,"ether");
+    console.log("*                                      *");
+    console.log("*                                      *");
+    console.log("*                                      *");
     console.log("******************************************");
     console.log("before draw accounts balance is: "+balance);
     console.log("******************************************");
-    let drawbonus = await d.withdrawCheck(true,{from:accounts[1]});
+    console.log("*                                      *");
+    console.log("*                                      *");
+    console.log("*                                      *");
+    let drawbonus = await d.withdrawCheck(true,{from:target});
     drawbonus = web3.utils.BN(drawbonus);
     drawbonus = web3.utils.fromWei(drawbonus,"ether");
-    console.log("true drawbonus is: "+drawbonus);
+      console.log("true drawbonus is        :"+drawbonus);
 
-    drawbonus = await d.withdrawCheck(false,{from:accounts[1]});
+    drawbonus = await d.withdrawCheck(false,{from:target});
     drawbonus = web3.utils.BN(drawbonus);
     drawbonus = web3.utils.fromWei(drawbonus,"ether");
-    console.log("false drawbonus is: "+drawbonus);
+      console.log("false drawbonus is       :"+drawbonus);
 
-    await d.withdraw(true,{from:accounts[1]});
+    // await d.withdraw(true,{from:target});
 
 
     balance = await k.balanceOf(target);
     balance = web3.utils.BN(balance);
     balance = web3.utils.fromWei(balance,"ether");
+    console.log("*                                      *");
+    console.log("*                                      *");
+    console.log("*                                      *");
     console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
     console.log("after draw accounts balance is: "+balance);
     console.log("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$");
+    console.log("*                                      *");
+    console.log("*                                      *");
+    console.log("*                                      *");
 
-    let drawtime = await d.DrawTime(accounts[1]);
+    let drawtime = await d.DrawTime(target);
     drawtime = web3.utils.BN(drawtime);
-    console.log("draw time is: " +drawtime);
-    console.log("draw human time is: " +dateFtt(drawtime));
-
-    let teamLen2 = await p.getLockTeamBonusLen(accounts[1]);
-    let inviteLen2 = await p.getLockInviteBonusLen(accounts[1]);
+      console.log("draw time is             :" +drawtime);
+      console.log("draw human time is       :" +dateFtt(drawtime)+ " diff: " +diff(drawtime,unixTime) +" days");
+    let teamLen2 = await p.getLockTeamBonusLen(target);
+    let inviteLen2 = await p.getLockInviteBonusLen(target);
 
     for (var pp2 = 0;pp2<teamLen2; pp2++){
-      let teamresult2 = await p.LockTeamBonus(accounts[1],pp2);
-      console.log("team theDayLastSecond :" +web3.utils.BN(teamresult2[0]));
-      console.log("team theDayTeamBonus :" +web3.utils.fromWei(teamresult2[1],"ether"));
-      console.log("team totalTeamBonus :" +web3.utils.fromWei(teamresult2[2],"ether"));
-      console.log("team theDayRate :" +web3.utils.BN(teamresult2[3]));
+      let teamresult2 = await p.LockTeamBonus(target,pp2);
+      console.log("team theDayLastSecond   :" +dateFtt(teamresult2[0]));
+      console.log("team theDayTeamBonus    :" +web3.utils.fromWei(teamresult2[1],"ether"));
+      console.log("team totalTeamBonus     :" +web3.utils.fromWei(teamresult2[2],"ether"));
+      console.log("team theDayRate         :" +web3.utils.BN(teamresult2[3]));
     }
 
     for (var qq2 = 0;qq2<inviteLen2; qq2++){
-      let inviteresult2 = await p.LockInviteBonus(accounts[1],qq2);
-      console.log("invite theDayLastSecond :" +web3.utils.BN(inviteresult2[0]));
-      console.log("invite theDayTeamBonus :" +web3.utils.fromWei(inviteresult2[1],"ether"));
-      console.log("invite totalTeamBonus :" +web3.utils.fromWei(inviteresult2[2],"ether"));
+      let inviteresult2 = await p.LockInviteBonus(target,qq2);
+      console.log("invite theDayLastSecond :" +dateFtt(inviteresult2[0]));
+      console.log("invite theDayTeamBonus  :" +web3.utils.fromWei(inviteresult2[1],"ether"));
+      console.log("invite totalTeamBonus   :" +web3.utils.fromWei(inviteresult2[2],"ether"));
     }
 
 

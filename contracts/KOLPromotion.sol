@@ -152,13 +152,9 @@ contract KOLPro is Ownable{
   uint256 public end;
 
   uint256 public iCode;
-  uint256 public every = 10 seconds;//1 days;
-  uint256 public maxSettleDays = 1;
+  uint256 public every = 60 seconds;//1 days;
   uint256 public totalRegister;
   uint256 public totalBalance;
-  uint256 public totalBonus;
-
-
 
   uint8 public constant userLevel1 = 20;
   uint8 public constant userLevel2 = 10;
@@ -183,17 +179,12 @@ contract KOLPro is Ownable{
   uint8 public constant inviteLevel1 = 3;//直推3个才能升级网体1
   uint8 public constant inviteLevel2 = 5;
   uint8 public constant inviteLevel3 = 10;
-  uint8 public constant withDrawRate = 5;
+
   uint8 public constant fee = 5;
 
   /* uint256 public constant withDrawDays = 30 days; */
   //测试限制5分钟
   uint256 public constant withDrawDays = 2 minutes;
-
-  /* address[] private inviteAddr;// A->B->C: inviteAddr= B,A
-  address[] private childAddr;// A-->B,A-->C,childAddr= B, C */
-
-
 
   struct lock{
     uint256 begin;
@@ -207,7 +198,6 @@ contract KOLPro is Ownable{
     uint256 changeTime;
 
   }
-
 
   struct dayTeamBonus{
     uint256 theDayLastSecond;
@@ -244,20 +234,15 @@ contract KOLPro is Ownable{
   mapping (uint8 => uint8) public levelRate;
   mapping (address => bool) public USDTOrCoin;
 
-  mapping (address => mapping (address => uint256) ) public ABTeamBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
-  mapping (address => mapping (address => uint256) ) public ABInviteBonus;//A是下级，B是上级，ABBonus就是A给B加速的总数。
-
-  mapping (address => bool) public contractAddr;
 
   //GAS优化
 
   event Registed(address _user,uint256 inviteCode);
+  event Joined(address _user,uint256 _theTime,uint256 _amount,bool _usdtOrCoin);
   event GradeChanged(address _user,uint8 _oldLevel,uint8 _newLevel);
-  event WithDraw(address _user,uint256 _amount);
-  event WithDrawBalance(address _user,uint256 _balance);
 
   modifier onlyContract {
-      require(contractAddr[msg.sender]);
+      require(msg.sender == draw);
       _;
   }
 
@@ -289,7 +274,7 @@ contract KOLPro is Ownable{
     emit Registed(msg.sender,iCode);
     totalRegister ++;
     address father = InviteCode[_fInviteCode];
-    InviteRelation[msg.sender] = father;
+    /* InviteRelation[msg.sender] = father; */
 
     ChildAddrs[father].push(msg.sender);
     if (InviteList[msg.sender].length < 9){
@@ -318,6 +303,7 @@ contract KOLPro is Ownable{
     uint256 oldBalance = LockBalance[msg.sender];
     LockBalance[msg.sender] = LockBalance[msg.sender].add(_amount);
     totalBalance = totalBalance.add(_amount);
+    emit Joined(msg.sender,now,_amount,_usdtOrCoin);
 
     uint256 amount3;//amount*3/1000以后
 
@@ -338,11 +324,11 @@ contract KOLPro is Ownable{
 
 
       if (i<2){
-        setTopInviteBonus(msg.sender,InviteList[msg.sender][i],amount3,i);
+        setTopInviteBonus(InviteList[msg.sender][i],amount3,i);
       }
 
       if (i < maxlevel){
-        setTopTeamBonus(msg.sender,InviteList[msg.sender][i],amount3);
+        setTopTeamBonus(InviteList[msg.sender][i],amount3);
       }
     }
   }
@@ -369,7 +355,7 @@ contract KOLPro is Ownable{
     return minAmount.mul(3).div(1000);
   }
 
-  function setTopTeamBonus(address _selfAddr,address _topAddr,uint256 _minAmount) internal {
+  function setTopTeamBonus(address _topAddr,uint256 _minAmount) internal {
     uint256 tomorrowLastSecond = getYestodayLastSecond(now) + (2 * every);
     uint8 level = isLevelN[_topAddr];
     uint8 newRate = levelRate[level];
@@ -407,7 +393,7 @@ contract KOLPro is Ownable{
       }
     }
   }
-  function setTopInviteBonus(address _selfAddr,address _topAddr,uint256 _minAmount,uint256 _index) internal {
+  function setTopInviteBonus(address _topAddr,uint256 _minAmount,uint256 _index) internal {
     uint8 inviteRate;
     if (_index == 0){
       inviteRate = userLevel1;
@@ -514,12 +500,6 @@ contract KOLPro is Ownable{
     require(_queryTime <= (end + every));
     return (_queryTime.sub(_queryTime.sub(begin) % every) - 1);
   }
-
-  function getLockLen(address _addr) public view returns(uint256) {
-    return(LockHistory[_addr].length);
-  }
-
-
   /**
    * title 录入KOL的收盘价
    * dev visit: https://github.com/jackoelv/KOL/
@@ -534,8 +514,7 @@ contract KOLPro is Ownable{
   function setReciever(address _addr) onlyOwner public{
     reciever = _addr;
   }
-  function setContract(address _addr,bool _yes) onlyOwner public{
-    contractAddr[_addr] = _yes;
+  function setContract(address _addr) onlyOwner public{
     draw = _addr;
   }
   function clearLock(address _addr) onlyContract public{
@@ -590,12 +569,16 @@ contract KOLPro is Ownable{
       TotalUsers[_addr] -= _amount;
     }
   }
-  function getFathersLength(address _addr) public view returns(uint256){
-    return InviteList[_addr].length;
-  }
-  function getFather(address _addr,uint256 _index) public view returns(address){
+
+  /* function getFather(address _addr,uint256 _index) public view returns(address){
     require(_index<InviteList[_addr].length);
     return InviteList[_addr][_index];
+  } */
+  function getLockLen(address _addr) public view returns(uint256) {
+    return(LockHistory[_addr].length);
+  }
+  function getFathersLength(address _addr) public view returns(uint256){
+    return InviteList[_addr].length;
   }
   function getLockTeamBonusLen(address _addr) public view returns(uint256){
     return(LockTeamBonus[_addr].length);
