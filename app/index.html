@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
-        <title>批量转币BTT</title>
+        <title>KOL共识裂变</title>
         <!-- 引入 WeUI -->
         <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.3/weui.min.css"/>
 
@@ -13,42 +13,102 @@
         <div class="container" id="container"></div>
         <div class="page" style="background-color:rgb(237, 237, 237)">
             <div class="page__hd" style="padding:40px">
-                <h1 class="page__title">批量转币</h1>
-                <p class="page__desc">BTT是一个简单好用省钱的批量转币的Dapp--社区KOL联盟 Jack 出品</p>
+                <h1 class="page__title">KOL共识裂变计划</h1>
+                <p class="page__desc">KOL持币生息--社区KOL联盟出品</p>
             </div>
             <div class="page__bd">
 
-                <div class="weui-cells__title">设置基本信息</div>
+                <div class="weui-cells__title">基本资料</div>
                 <div class="weui-cells weui-cells_form">
+                  <div class="weui-cell">
+                      <div class="weui-cell__hd"><label class="weui-label" style="width:66px">钱包</label></div>
+                      <div class="weui-cell__bd">
+                          <input class="weui-input"  type="text" name="addr" style="font-size: 8px" placeholder="0x0000000000000000000000000000000000000000"/>
+                      </div>
+                  </div>
+                  <div class="weui-cells__title" style="background-color:rgb(237, 237, 237)">DASHBOARD</div>
                     <div class="weui-cell">
-                        <div class="weui-cell__hd"><label class="weui-label" style="width:46px">合约</label></div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">本金</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="tokenAddress"  id="autocomplete" style="font-size:12px;z-index:2;" autocomplete="off" value = "0x0946e36c2887025c389ef85ea5f9150e0bed4d69" placeholder="0x0946e36c2887025c389ef85ea5f9150e0bed4d69"/>
+                            <input class="weui-input"  type="text" name="lock"  value = "0" placeholder="0"/>
+                        </div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">收益</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="bonus"  value = "0" placeholder="0"/>
                         </div>
                     </div>
                     <div class="weui-cell">
-                        <div class="weui-cell__hd"><label class="weui-label" style="width:46px">精度</label></div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">直推</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input" type="text" name="decimal" pattern="[0-9]*" value="18" placeholder="18"/>
+                            <input class="weui-input"  type="text" name="childs"  value = "0" placeholder="0"/>
+                        </div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">团队</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="teamusers"  value = "0" placeholder="0"/>
                         </div>
                     </div>
-
-                </div>
-
-                <div class="weui-cells__title">粘贴批量转账收款名单和数量,不可以超过200</div>
-                <div class="weui-cells weui-cells_form">
                     <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">级别</label></div>
                         <div class="weui-cell__bd">
-                            <textarea class="weui-textarea" style="font-size:12px" name="addressList"
-                            placeholder="0xEDe59E683F59519eeAbD9C872633e68ed2F17F46,240" rows="10"></textarea>
+                            <input class="weui-input"  type="text" name="level"  value = "0" placeholder="0"/>
+                        </div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">网体</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="teamamount"  value = "0" placeholder="0"/>
                         </div>
                     </div>
-                </div>
-                <div class="weui-cells__tips">格式为:地址,数量</div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">已提现</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="totaldraws"  value = "0" placeholder="0"/>
+                        </div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">邀请码</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="iCode"  value = "0" placeholder="0"/>
+                        </div>
+                    </div>
+                    <div class="weui-cells__title" style="background-color:rgb(237, 237, 237)">操作区</div>
+                    <div class="weui-cell" id="registerpanel">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">邀请码</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="iCodeRegister"  value = "0" placeholder="0"/>
+                        </div>
+                    </div>
+                    <div class="weui-btn-area">
+                        <a class="weui-btn weui-btn_primary" id="Register" onclick="App.reg()">注册</a>
+                    </div>
 
-                <div class="weui-btn-area">
-                    <a class="weui-btn weui-btn_primary" id="showTooltips" onclick="App.readTarget()">第一步：预览合约转账</a>
+
+                    <div class="weui-cell" id="joinpanel">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">金额</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" id="joinAmount"  value = "0" placeholder="0"/>
+                        </div>
+                        <div class="weui-cell__bd">
+                        </div>
+                    </div>
+                    <div class="weui-cell weui-cell_switch">
+                        <div class="weui-cell__bd">选择金本位</div>
+                        <div class="weui-cell__ft">
+                            <input class="weui-switch" id="usdtcoin" type="checkbox" />
+                        </div>
+                    </div>
+                    <div class="weui-btn-area">
+                        <a class="weui-btn weui-btn_primary" id="Join" onclick="App.approve()">入金授权</a>
+                    </div>
+                    <div class="weui-btn-area">
+                        <a class="weui-btn weui-btn_primary" id="Join" onclick="App.join()">入金</a>
+                    </div>
+                    <div class="weui-cells weui-cells_form">
+
+
+                    <div class="weui-btn-area">
+                        <a class="weui-btn weui-btn_warn" id="Draw" onclick="App.draw()">提现</a>
+                  </div>
                 </div>
+
+
+
                 <div id="list">
                 </div>
             </div>
