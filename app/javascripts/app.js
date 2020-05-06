@@ -32,7 +32,7 @@ const App = {
       this.account = accounts[0];
       // this.initial();
 
-      // this.initial();
+      this.initial();
       // this.setmStatus("链上数据加载成功！");
     } catch (error) {
       // this.setmStatus("连接以太坊网络失败，请刷新重试");
@@ -40,6 +40,36 @@ const App = {
     };
 
     console.log("finished");
+  },
+  diff: function(a,b){
+    var df = parseInt(b) - parseInt(a);
+    var df2 = df % 60;
+    return ((df-df2)/60);
+  },
+  dateFtt: function(dd,current){ //author: meizz
+     dd = dd +"000";
+     var fmt = "yyyy-MM-dd hh:mm:ss";
+     var date
+     if (current == 0){
+       date = new Date();
+     }else{
+       date = new Date(parseInt(dd));
+     }
+     var o = {
+     "M+" : date.getMonth()+1,     //月份
+     "d+" : date.getDate(),     //日
+     "h+" : date.getHours(),     //小时
+     "m+" : date.getMinutes(),     //分
+     "s+" : date.getSeconds(),     //秒
+     "q+" : Math.floor((date.getMonth()+3)/3), //季度
+     "S" : date.getMilliseconds()    //毫秒
+     };
+     if(/(y+)/.test(fmt))
+     fmt=fmt.replace(RegExp.$1, (date.getFullYear()+"").substr(4 - RegExp.$1.length));
+     for(var k in o)
+     if(new RegExp("("+ k +")").test(fmt))
+     fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
+     return fmt;
   },
 
   initial: async function(){
@@ -52,50 +82,112 @@ const App = {
     const { RInviteCode } = this.metaP.methods;
     const { isLevelN } = this.metaP.methods;
     const { TotalWithDraws } = this.metaD.methods;
+    const { balanceOf } = this.metaK.methods;
+
+    const { querySelfBonus } = this.metaD.methods;
+    const { queryInviteBonus } = this.metaD.methods;
+    const { queryTeamBonus } = this.metaD.methods;
+
+    const { LockHistory } = this.metaP.methods;
+
+    console.log(this.account);
+
+    var balance = await balanceOf(this.account).call();
+    if (balance != 0){
+      balance = web3.utils.fromWei(balance,"ether");
+    }
+
+    console.log("11111");
 
     var lock = await LockBalance(this.account).call();
-    lock = web3.utils.BN(lock);
-    lock = web3.utils.fromWei(lock,"ether");
+    if (lock != 0){
+      lock = web3.utils.fromWei(lock,"ether");
+    }
+    var bonusbb =0;
+    try{
+        bonusbb = await withdrawCheck(true).call();
+        console.log(bonusbb);
+        if (bonusbb != 0){
+          bonusbb = web3.utils.fromWei(bonusbb,"ether");
+        }
+    }catch(e){
+      console.log("xxxxx");
+    }
 
+    var self = await querySelfBonus(this.account).call();
+    self = web3.utils.fromWei(self,"ether");
 
-    var bonus = await withdrawCheck(this.account).call();
-    bonus = web3.utils.BN(bonus);
-    bonus = web3.utils.fromWei(bonus,"ether");
+    var invite = await queryInviteBonus(this.account).call();
+    invite = web3.utils.fromWei(invite,"ether");
+
+    var team = await queryTeamBonus(this.account).call();
+    team = web3.utils.fromWei(team,"ether");
+
+    var bonus = Number(self) + Number(invite) + Number(team);
+
 
     var childs = await getChildsLen(this.account).call();
-    childs = web3.utils.BN(childs);
 
 
     var teamusers = await TotalUsers(this.account).call();
-    teamusers = web3.utils.BN(teamusers);
 
     var teamamount = await TotalLockingAmount(this.account).call();
-    teamamount = web3.utils.BN(teamamount);
-    teamamount = web3.utils.fromWei(teamamount,"ether");
-
+    if (teamamount !=0 ){
+      teamamount = web3.utils.fromWei(teamamount,"ether");
+    }
     var level = await isLevelN(this.account).call();
-    level = web3.utils.BN(level);
+    // level = web3.utils.BN(level);
 
     var iCode = await RInviteCode(this.account).call();
-    iCode = web3.utils.BN(iCode);
+    console.log(iCode);
+
+
 
     var totaldraws = await TotalWithDraws(this.account).call();
-    totaldraws = web3.utils.BN(totaldraws);
-    totaldraws = web3.utils.fromWei(totaldraws,"ether");
+    if (totaldraws !=0 ){
+      totaldraws = web3.utils.fromWei(totaldraws,"ether");
+    }
 
 
+
+    var time = new Date();
+    var unixTime = time.getTime();
+    unixTime = Math.round(unixTime / 1000);
+    var current = this.dateFtt(unixTime,1);
+
+    var first;
+    var lastingDays;
+    try{
+      first = await LockHistory(this.account,0).call();
+      first = first[0];
+      lastingDays = this.diff(first,unixTime);
+      first = this.dateFtt(first,1);
+    }catch(e){
+      console.log("error 2");
+    };
 
 
 
     $("input[name='addr']").val(this.account);
+    $("input[name='balance']").val(balance);
     $("input[name='lock']").val(lock);
+
     $("input[name='bonus']").val(bonus);
+
+
+    $("input[name='self']").val(self);
+    $("input[name='invite']").val(invite);
+    $("input[name='team']").val(team);
+
     $("input[name='childs']").val(childs);
     $("input[name='teamusers']").val(teamusers);
     $("input[name='teamamount']").val(teamamount);
     $("input[name='level']").val(level);
     $("input[name='iCode']").val(iCode);
     $("input[name='totaldraws']").val(totaldraws);
+
+    $("input[name='current']").val(current);
+    $("input[name='lastingDays']").val(lastingDays);
 
   },
 
@@ -115,7 +207,7 @@ const App = {
       let result = await register(iCode).send({from:this.account,
                                   gasPrice:gasPrice,
                                   gas:gaslimit});
-      console.log(result);
+      console.log(result.transactionHash);
       //取得这个txHash，然后去每隔一秒去取一下他的状态，如果成功了，就提示成功，否则就等待.
 
     }
@@ -123,49 +215,63 @@ const App = {
 
  // 授权合约转账
  approve: async function(){
-   if (this.ready){
-     const { web3 } = this;
-     var BN = web3.utils.BN;
-     let amount = $("input[name='joinAmount']").val();
-     amount = web3.utils.toWei(amount,"ether");
-
-     let usdtorcoin = $("input[name='usdtcoin']").val();
-     let gasPrice = await web3.eth.getGasPrice();
-     const { approve } = this.metaK.methods;
-      try
-      {
-        let tran = await approve(this.paddr,amount).send({from: this.account,
-                                                         gasPrice:price,
-                                                         gas:80000});
-        if (tran === null){
-          console.log("approve false,try again");
-        }else{
-          // console.log("transction is :" + tran.blockHash);
-          // while (tran.blockHash === null){
-          //   //waitting
-          //   await sleep(1000);
-          //   console.log("sleeping 1s... why? It`s impossible. no Useful");
-          //
-          // }
-          this.setActionBtn();
-          console.log("授权成功！");
-        }
-
-      }catch(error){
-        console.log("授权异常，稍后检查确认一下是否已成功");
-      }
-
-
-
-
+   const { web3 } = this;
+   let amount = $("input[name='joinAmount']").val();
+   console.log(amount);
+   amount = web3.utils.toWei(amount,"ether");
+   let gasPrice = await web3.eth.getGasPrice();
+   const { approve } = this.metaK.methods;
+    try
+    {
+      let tran = await approve(this.paddr,amount).send({from: this.account,
+                                                       gasPrice:gasPrice,
+                                                       gas:80000});
+      console.log(tran.transactionHash);
+    }catch(error){
+      console.log("授权异常，稍后检查确认一下是否已成功");
+    }
+ },
+ join: async function(){
+   const { web3 } = this;
+   const { join } = this.metaP.methods;
+   let amount = $("input[name='joinAmount']").val();
+   amount = web3.utils.toWei(amount,"ether");
+   let usdtorcoin = $("input[name='usdtcoin']:checked").val();
+   let gasPrice = await web3.eth.getGasPrice();
+   let gaslimit = 6000000;
+   console.log(usdtorcoin);
+   try
+   {
+     let result = await join(amount,usdtorcoin).send({from: this.account,
+                                                      gasPrice:gasPrice,
+                                                      gas:gaslimit});
+     console.log(result.transactionHash);
+   }catch(error){
+     console.log("异常，稍后检查确认一下是否已成功");
+   }
+ },
+ draw: async function(){
+   const { web3 } = this;
+   const { withdraw } = this.metaD.methods;
+   let gasPrice = await web3.eth.getGasPrice();
+   let gaslimit = 6000000;
+   let allbonus = $("input[name='usdtcoin']:checked").val();
+   console.log(allbonus);
+   try
+   {
+     let result = await withdraw(!allbonus).send({from: this.account,
+                                                      gasPrice:gasPrice,
+                                                      gas:gaslimit});
+     console.log(result);
+   }catch(error){
+     console.log("异常，稍后检查确认一下是否已成功");
    }
 
 
  },
  sleep: async function(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
-}
-
+},
 
 };
 
@@ -184,6 +290,5 @@ window.addEventListener("load", function() {
     // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
 
   }
-
   App.start();
 });

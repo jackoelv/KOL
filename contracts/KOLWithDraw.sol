@@ -173,7 +173,6 @@ pragma solidity ^0.4.23;
    mapping (uint8 => uint8) public levelRate;
    mapping (address => bool) public USDTOrCoin;
 
-   mapping (address => uint256) public WithDraws;
    mapping (address => bool) public contractAddr;
 
    //GAS优化
@@ -275,7 +274,7 @@ contract KOLWithDraw is Ownable{
   //测试限制5分钟
   uint256 public constant withDrawDays = 20 minutes;
 
-  mapping (address => uint256) public WithDraws;
+  mapping (address => uint256) public TotalWithDraws;
 
   //上面是从原来的合约移植过来的，下面的是本合约自己需要的
   mapping (address => uint256) public DrawTime;
@@ -287,6 +286,7 @@ contract KOLWithDraw is Ownable{
     kolp = KOLP(_kolpAddress);
   }
   function querySelfBonus(address _addr) public view returns(uint256){
+    //这里还有点问题。
     uint256 begin;
     uint256 end;
     uint256 amount;
@@ -297,7 +297,7 @@ contract KOLWithDraw is Ownable{
     for (uint i=0; i<len; i++){
       (begin,amount,end,withDrawed) = kolp.LockHistory(_addr,i);
       if (!withDrawed){
-        if (DrawTime[msg.sender] > begin) begin = DrawTime[msg.sender];
+        if (DrawTime[_addr] > begin) begin = DrawTime[_addr];
         uint256 lastingDays = (now - begin) % every;
         lastingDays = (now - lastingDays - begin) / every;
         if (kolp.USDTOrCoin(_addr)){
@@ -366,6 +366,7 @@ contract KOLWithDraw is Ownable{
   function checkDraw(address _addr) private view returns(bool) {
     uint256 teamAmount = kolp.TotalLockingAmount(_addr) ;
     uint256 myBalance = kolp.LockBalance(_addr) * withDrawRate;
+    if (myBalance == 0) return false;
     uint256 myBegin;
     uint256 amount;
     uint256 end;
@@ -418,37 +419,42 @@ contract KOLWithDraw is Ownable{
       kolp.clearLock(msg.sender);
     }
     kol.transfer(msg.sender,bonus);
+    TotalWithDraws[msg.sender] += bonus;
     emit WithDrawed(msg.sender,bonus);
   }
   function withdrawCheck(bool _onlyBonus) public view returns(uint256){
     //true: Only Bonus;false:all;
+    //很奇葩的是为啥在网页里面测试这个函数总是失败？在终端就可以？
     uint256 bonus = querySelfBonus(msg.sender);
     /* DrawTime[msg.sender] = now; */
-    uint256 last = kolp.getLockInviteBonusLen(msg.sender) - 1;
-    uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
-    uint256 lastDayLastSecond;
-    uint256 lastDayBonus;
-    uint256 lastDayTotalBonus;
-    (lastDayLastSecond,lastDayBonus,lastDayTotalBonus) = kolp.LockInviteBonus(msg.sender,last);
-    uint256 lastingDays;
-    if (lastDayLastSecond < yestodayLastSecond){
-      lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
-      bonus += (lastingDays * lastDayBonus) + lastDayTotalBonus;
-    }else{
-      bonus += lastDayTotalBonus;
-    }
+    uint256 last = kolp.getLockInviteBonusLen(msg.sender);
+    if (last > 0){
+      last = last - 1;
+      uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
+      uint256 lastDayLastSecond;
+      uint256 lastDayBonus;
+      uint256 lastDayTotalBonus;
+      (lastDayLastSecond,lastDayBonus,lastDayTotalBonus) = kolp.LockInviteBonus(msg.sender,last);
+      uint256 lastingDays;
+      if (lastDayLastSecond < yestodayLastSecond){
+        lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
+        bonus += (lastingDays * lastDayBonus) + lastDayTotalBonus;
+      }else{
+        bonus += lastDayTotalBonus;
+      }
 
-    last = kolp.getLockTeamBonusLen(msg.sender) - 1;
-    uint8 theDayRate;
-    (lastDayLastSecond,lastDayBonus,lastDayTotalBonus,theDayRate) = kolp.LockTeamBonus(msg.sender,last);
-    if (lastDayLastSecond < yestodayLastSecond){
-      lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
-      bonus  += (lastingDays * lastDayBonus * theDayRate / 100 ) + lastDayTotalBonus;
-    }else{
-      bonus += lastDayTotalBonus;
-    }
+      last = kolp.getLockTeamBonusLen(msg.sender) - 1;
+      uint8 theDayRate;
+      (lastDayLastSecond,lastDayBonus,lastDayTotalBonus,theDayRate) = kolp.LockTeamBonus(msg.sender,last);
+      if (lastDayLastSecond < yestodayLastSecond){
+        lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
+        bonus  += (lastingDays * lastDayBonus * theDayRate / 100 ) + lastDayTotalBonus;
+      }else{
+        bonus += lastDayTotalBonus;
+      }
 
-    if (!_onlyBonus) bonus += kolp.LockBalance(msg.sender);
+      if (!_onlyBonus) bonus += kolp.LockBalance(msg.sender);
+    }
     return bonus;
   }
 }

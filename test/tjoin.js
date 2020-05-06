@@ -37,7 +37,7 @@ contract("testjoin",accounts => {
     await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[1]});
     await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[1]});
 
-    for (var m = 2; m<5; m++){
+    for (var m = 2; m<9; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
       await sleep(1000);
       await p.register(iCode,{from:accounts[m]});

@@ -157,6 +157,8 @@ contract("testjoin",accounts => {
       console.log("invite theDayTeamBonus  :" +web3.utils.fromWei(inviteresult2[1],"ether"));
       console.log("invite totalTeamBonus   :" +web3.utils.fromWei(inviteresult2[2],"ether"));
     }
+    let self = await d.querySelfBonus(target);
+      console.log("self Bonus              :" +web3.utils.fromWei(self,"ether"));
 
 
 

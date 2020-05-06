@@ -12,7 +12,7 @@ module.exports = {
       accounts: 300,
       defaultEtherBalance: 100,
       host: 'localhost',
-      port: 8545,
+      port: 7545,
       network_id: '*',
       gas: 80000000
     },

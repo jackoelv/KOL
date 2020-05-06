@@ -20,53 +20,92 @@
 
                 <div class="weui-cells__title">基本资料</div>
                 <div class="weui-cells weui-cells_form">
-                  <div class="weui-cell">
+                  <div class="weui-cell weui-cell_readonly">
                       <div class="weui-cell__hd"><label class="weui-label" style="width:66px">钱包</label></div>
+                  </div>
+                  <div class="weui-cell weui-cell_readonly">
                       <div class="weui-cell__bd">
-                          <input class="weui-input"  type="text" name="addr" style="font-size: 8px" placeholder="0x0000000000000000000000000000000000000000"/>
+                          <input class="weui-input"  type="text" name="addr" style="font-size: 12px" placeholder="0x0000000000000000000000000000000000000000" readonly/>
+                      </div>
+                  </div>
+                  <div class="weui-cell weui-cell_readonly">
+                      <div class="weui-cell__hd"><label class="weui-label" style="width:66px">余额</label></div>
+                      <div class="weui-cell__bd">
+                          <input class="weui-input"  type="text" name="balance" placeholder="0" readonly/>
+                      </div>
+                  </div>
+                  <div class="weui-cell weui-cell_readonly">
+                      <div class="weui-cell__hd"><label class="weui-label" style="width:66px">现在</label></div>
+                      <div class="weui-cell__bd">
+                          <input class="weui-input"  type="text" name="current" placeholder="0" readonly/>
+                      </div>
+                  </div>
+                  <div class="weui-cell weui-cell_readonly">
+                      <div class="weui-cell__hd"><label class="weui-label" style="width:66px">周期</label></div>
+                      <div class="weui-cell__bd">
+                          <input class="weui-input"  type="text" name="lastingDays" placeholder="0" readonly/>
                       </div>
                   </div>
                   <div class="weui-cells__title" style="background-color:rgb(237, 237, 237)">DASHBOARD</div>
-                    <div class="weui-cell">
+                    <div class="weui-cell weui-cell_readonly">
                         <div class="weui-cell__hd"><label class="weui-label" style="width:66px">本金</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="lock"  value = "0" placeholder="0"/>
+                            <input class="weui-input"  type="text" name="lock"  value = "0" placeholder="0" readonly/>
                         </div>
-                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">收益</label></div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:46px">收益</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="bonus"  value = "0" placeholder="0"/>
+                            <input class="weui-input"  type="text" name="bonus"  value = "0" placeholder="0" readonly/>
                         </div>
                     </div>
-                    <div class="weui-cell">
+                    <div class="weui-cell weui-cell_readonly">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:46px">生息</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="self"  value = "0" placeholder="0" readonly/>
+                        </div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:46px">推广</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="invite"  value = "0" placeholder="0" readonly/>
+                        </div>
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:46px">网体</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="team"  value = "0" placeholder="0" readonly/>
+                        </div>
+                    </div>
+                    <div class="weui-cells__title" style="background-color:rgb(237, 237, 237)">TEAM</div>
+                    <div class="weui-cell weui-cell_readonly">
                         <div class="weui-cell__hd"><label class="weui-label" style="width:66px">直推</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="childs"  value = "0" placeholder="0"/>
+                            <input class="weui-input"  type="text" name="childs"  value = "0" placeholder="0" readonly/>
                         </div>
                         <div class="weui-cell__hd"><label class="weui-label" style="width:66px">团队</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="teamusers"  value = "0" placeholder="0"/>
+                            <input class="weui-input"  type="text" name="teamusers"  value = "0" placeholder="0" readonly/>
                         </div>
                     </div>
-                    <div class="weui-cell">
+                    <div class="weui-cell weui-cell_readonly">
                         <div class="weui-cell__hd"><label class="weui-label" style="width:66px">级别</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="level"  value = "0" placeholder="0"/>
+                            <input class="weui-input"  type="text" name="level"  value = "0" placeholder="0" readonly/>
                         </div>
                         <div class="weui-cell__hd"><label class="weui-label" style="width:66px">网体</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="teamamount"  value = "0" placeholder="0"/>
+                            <input class="weui-input"  type="text" name="teamamount"  value = "0" placeholder="0" readonly/>
                         </div>
                     </div>
-                    <div class="weui-cell">
-                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">已提现</label></div>
+                    <div class="weui-cell weui-cell_readonly">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:108px">已提现收益：</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="totaldraws"  value = "0" placeholder="0"/>
+                            <input class="weui-input"  type="text" name="totaldraws"  value = "0" placeholder="0" readonly/>
                         </div>
-                        <div class="weui-cell__hd"><label class="weui-label" style="width:66px">邀请码</label></div>
+
+                    </div>
+                    <div class="weui-cell weui-cell_readonly">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:108px">我的邀请码：</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="iCode"  value = "0" placeholder="0"/>
+                            <input class="weui-input"  type="text" name="iCode"  value = "0" placeholder="0" readonly/>
                         </div>
                     </div>
+
                     <div class="weui-cells__title" style="background-color:rgb(237, 237, 237)">操作区</div>
                     <div class="weui-cell" id="registerpanel">
                         <div class="weui-cell__hd"><label class="weui-label" style="width:66px">邀请码</label></div>
@@ -82,7 +121,7 @@
                     <div class="weui-cell" id="joinpanel">
                         <div class="weui-cell__hd"><label class="weui-label" style="width:66px">金额</label></div>
                         <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" id="joinAmount"  value = "0" placeholder="0"/>
+                            <input class="weui-input"  type="text" name="joinAmount"  value = "0" placeholder="0"/>
                         </div>
                         <div class="weui-cell__bd">
                         </div>
@@ -101,7 +140,12 @@
                     </div>
                     <div class="weui-cells weui-cells_form">
 
-
+                      <div class="weui-cell weui-cell_switch">
+                          <div class="weui-cell__bd" id="bonustip">只提收益</div>
+                          <div class="weui-cell__ft">
+                              <input class="weui-switch" id="allbonus" type="checkbox" checked="true" />
+                          </div>
+                      </div>
                     <div class="weui-btn-area">
                         <a class="weui-btn weui-btn_warn" id="Draw" onclick="App.draw()">提现</a>
                   </div>

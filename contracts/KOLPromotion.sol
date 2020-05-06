@@ -586,6 +586,9 @@ contract KOLPro is Ownable{
   function getLockInviteBonusLen(address _addr) public view returns(uint256){
     return(LockInviteBonus[_addr].length);
   }
+  function getChildsLen(address _addr) public view returns(uint256){
+  return(ChildAddrs[_addr].length);
+  }
 
 
 
