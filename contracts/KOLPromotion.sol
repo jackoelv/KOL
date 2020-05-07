@@ -145,14 +145,13 @@ contract KOLPro is Ownable{
   using SafeMath for uint256;
   string public name = "KOL Promotion";
   KOL public kol;
-  address public reciever;
   address public draw;
 
   uint256 public begin;//2020年4月22日0点0分0秒
   uint256 public end;
 
   uint256 public iCode;
-  uint256 public every = 60 seconds;//1 days;
+  uint256 public every = 5 minutes;//1 days;
   uint256 public totalRegister;
   uint256 public totalBalance;
 
@@ -247,12 +246,10 @@ contract KOLPro is Ownable{
   }
 
 
-  constructor(address _tokenAddress,address _reciever,uint256 _begin,uint256 _end) public {
+  constructor(address _tokenAddress,uint256 _begin,uint256 _end) public {
     kol = KOL(_tokenAddress);
     begin = _begin;
-    begin = _begin;
     end = _end;
-    reciever = _reciever;
     InviteCode[0] = owner;
     levelRate[0] = 0;
     levelRate[1] = comLevel1;
@@ -511,9 +508,7 @@ contract KOLPro is Ownable{
     ClosePrice[yestodayLastSecond] = price;
 
   }
-  function setReciever(address _addr) onlyOwner public{
-    reciever = _addr;
-  }
+
   function setContract(address _addr) onlyOwner public{
     draw = _addr;
   }

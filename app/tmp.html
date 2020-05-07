@@ -1,0 +1,47 @@
+<div class="weui-cells__title" style="background-color:rgb(237, 237, 237)">操作区</div>
+<div class="weui-cell">
+    <div class="weui-cell__hd"><label class="weui-label" style="width:66px">邀请码</label></div>
+    <div class="weui-cell__bd">
+        <input class="weui-input"  type="text" name="iCodeRegister"  value = "0" placeholder="0"/>
+    </div>
+</div>
+<div class="weui-btn-area">
+    <a class="weui-btn weui-btn_primary" id="Register" onclick="App.reg()">注册</a>
+</div>
+
+
+
+
+
+<div class="weui-cell">
+    <div class="weui-cell__hd"><label class="weui-label" style="width:66px">金额</label></div>
+    <div class="weui-cell__bd">
+        <input class="weui-input"  type="text" name="joinAmount"  value = "0" placeholder="0"/>
+    </div>
+    <div class="weui-cell__bd">
+    </div>
+</div>
+<div class="weui-cell weui-cell_switch">
+    <div class="weui-cell__bd">选择金本位</div>
+    <div class="weui-cell__ft">
+        <input class="weui-switch" id="usdtcoin" type="checkbox" />
+    </div>
+</div>
+<div class="weui-btn-area">
+    <a class="weui-btn weui-btn_primary" id="Join" onclick="App.approve()">入金授权</a>
+</div>
+<div class="weui-btn-area">
+    <a class="weui-btn weui-btn_primary" id="Join" onclick="App.join()">入金</a>
+</div>
+
+
+
+<div class="weui-cell weui-cell_switch">
+    <div class="weui-cell__bd" id="bonustip">只提收益</div>
+    <div class="weui-cell__ft">
+        <input class="weui-switch" id="allbonus" type="checkbox" checked="true" />
+    </div>
+</div>
+<div class="weui-btn-area">
+    <a class="weui-btn weui-btn_warn" id="Draw" onclick="App.draw()">提现</a>
+</div>

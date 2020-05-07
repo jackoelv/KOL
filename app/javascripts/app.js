@@ -3,6 +3,7 @@ import KOLPro from '../../build/contracts/KOLPro.json';
 import KOLWithDraw from '../../build/contracts/KOLWithDraw.json';
 import KOLVote from '../../build/contracts/KOLVote.json';
 
+
 const App = {
   web3: null,
   account: null,
@@ -14,8 +15,8 @@ const App = {
   kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
   diff: function(a,b){
     var df = parseInt(b) - parseInt(a);
-    var df2 = df % 60;
-    return ((df-df2)/60);
+    var df2 = df % 300;
+    return ((df-df2)/300);
   },
   dateFtt: function(dd,current){ //author: meizz
      dd = dd +"000";
@@ -61,34 +62,15 @@ const App = {
       let accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
 
-      const { getBlockTime } = this.metaD.methods;
-      let result = await getBlockTime().call();
-      console.log("now is       :" + this.dateFtt(result,1));
-
-      try{
-        const { testcal } = this.metaD.methods;
-        let re = await testcal().call({from:this.account});
-        console.log("msg.sender   is       :" + re[0]);
-        console.log("testcal addr is       :" + re[1]);
-        console.log("testcal len is        :" + re[2]);
-      }catch(e){
-        console.log(e);
-
-      }
-      try{
-        const { wokao } = this.metaD.methods;
-        let rer = await wokao(this.account).call();
-        console.log("addr is       :" + rer[0]);
-        console.log("len is       :" + rer[1]);
-      }catch(e){
-        console.log(e);
-
-      }
-
-
-
-
       this.initial();
+      var iCode = this.GetQueryValue("iCode");
+      console.log("GetQueryValue :" +iCode);
+
+      $("input[name='iCodeRegister']").val(iCode);
+
+      // weui.toast('操作成功', 3000);
+
+      // weui.topTips('请填写正确ddd 的字段');
       // this.setmStatus("链上数据加载成功！");
     } catch (error) {
       // this.setmStatus("连接以太坊网络失败，请刷新重试");
@@ -116,77 +98,135 @@ const App = {
 
     const { LockHistory } = this.metaP.methods;
 
-
-
-    console.log(this.account);
-
-    var balance = await balanceOf(this.account).call();
-    if (balance != 0){
-      balance = web3.utils.fromWei(balance,"ether");
-    }
-
-    console.log("11111");
-
-    var lock = await LockBalance(this.account).call();
-    if (lock != 0){
-      lock = web3.utils.fromWei(lock,"ether");
-    }
-
-
-    var self = await querySelfBonus(this.account).call();
-    console.log("here? self: "+self);
-    self = web3.utils.fromWei(self,"ether");
-
-    var invite = await queryInviteBonus(this.account).call();
-    invite = web3.utils.fromWei(invite,"ether");
-
-    var team = await queryTeamBonus(this.account).call();
-    team = web3.utils.fromWei(team,"ether");
-
-
-    let bonus = await calcuAllBonus(true).call({from:this.account});
-    bonus = web3.utils.fromWei(bonus,"ether");
-
-    var childs = await getChildsLen(this.account).call();
-
-
-    var teamusers = await TotalUsers(this.account).call();
-
-    var teamamount = await TotalLockingAmount(this.account).call();
-    if (teamamount !=0 ){
-      teamamount = web3.utils.fromWei(teamamount,"ether");
-    }
-    var level = await isLevelN(this.account).call();
-    // level = web3.utils.BN(level);
-
-    var iCode = await RInviteCode(this.account).call();
-    console.log(iCode);
-
-
-
-    var totaldraws = await TotalWithDraws(this.account).call();
-    if (totaldraws !=0 ){
-      totaldraws = web3.utils.fromWei(totaldraws,"ether");
-    }
-
-
-
+    var invite=0;
+    var self =0;
+    var team =0;
+    var bonus =0;
+    var childs =0;
+    var teamusers =0;
+    var teamamount =0;
+    var level =0;
+    var totaldraws =0;
     var time = new Date();
     var unixTime = time.getTime();
     unixTime = Math.round(unixTime / 1000);
     var current = this.dateFtt(unixTime,1);
 
     var first;
-    var lastingDays;
-    try{
-      first = await LockHistory(this.account,0).call();
-      first = first[0];
-      lastingDays = this.diff(first,unixTime);
-      first = this.dateFtt(first,1);
-    }catch(e){
-      console.log("error 2");
-    };
+    var lastingDays=0;
 
+    var iCode = await RInviteCode(this.account).call();
+    console.log("iCode is"+iCode);
+    if (iCode == 0){
+      //首次注册
+      document.getElementById("firstHide").style.display="none";
+      document.getElementById("joindrawpanel").style.display="none";
+    }else{
+      document.getElementById("firstRegister").style.display="none";
+
+
+    }
+    // document.getElementById("firstHide").style.display="none";
+    // document.getElementById("joindrawpanel").style.display="none";
+
+
+    var lock = await LockBalance(this.account).call();
+
+    if (lock != 0){
+      lock = web3.utils.fromWei(lock,"ether");
+      document.getElementById("ucfirst").style.display="none";
+      const { USDTOrCoin } = this.metaP.methods;
+      let usdtcoin = await USDTOrCoin(this.account).call();
+      var ucflag;
+      if(usdtcoin){
+        ucflag = "金本位";
+      }else{
+        ucflag = "币本位";
+      }
+      $("input[name='ucflag']").val(ucflag);
+      var joinbtn = document.getElementById("Join");
+      joinbtn.innerHTML = "再次参与";
+
+
+
+
+      try{
+        self = await querySelfBonus(this.account).call({from:this.account});
+        self = web3.utils.fromWei(self,"ether") * 0.95;
+      }catch(e){
+        console.log("haha,jinbenwei");
+      }
+
+
+      try{
+        invite = await queryInviteBonus(this.account).call();
+        invite = web3.utils.fromWei(invite,"ether") * 0.95;
+      }catch(e){
+
+      }
+
+      try{
+        team = await queryTeamBonus(this.account).call();
+        team = web3.utils.fromWei(team,"ether") * 0.95;
+      }catch(e){
+
+      }
+
+      try{
+        bonus = await calcuAllBonus(true).call({from:this.account});
+        bonus = web3.utils.fromWei(bonus,"ether");
+      }catch(e){
+        console.log("kkkk");
+      }
+
+
+      childs = await getChildsLen(this.account).call();
+
+
+      teamusers = await TotalUsers(this.account).call();
+
+      teamamount = await TotalLockingAmount(this.account).call();
+      if (teamamount !=0 ){
+        teamamount = web3.utils.fromWei(teamamount,"ether");
+      }
+      level = await isLevelN(this.account).call();
+      // level = web3.utils.BN(level);
+
+
+
+
+
+      totaldraws = await TotalWithDraws(this.account).call();
+      if (totaldraws !=0 ){
+        totaldraws = web3.utils.fromWei(totaldraws,"ether");
+      }
+
+
+
+
+      try{
+        first = await LockHistory(this.account,0).call();
+        first = first[0];
+        lastingDays = this.diff(first,unixTime);
+        first = this.dateFtt(first,1);
+      }catch(e){
+        console.log("error 2");
+      };
+
+
+    }else{
+      document.getElementById("uc").style.display="none";
+    }
+
+    var balance = await balanceOf(this.account).call();
+    if (balance != 0){
+      balance = web3.utils.fromWei(balance,"ether");
+    }
+
+
+    var url = "https://bonus.kols.club?iCode=" + iCode;
+    $('#qrcode').html('').qrcode({
+                        text: url});
 
 
     $("input[name='addr']").val(this.account);
@@ -208,7 +248,7 @@ const App = {
     $("input[name='totaldraws']").val(totaldraws);
 
     $("input[name='current']").val(current);
-    $("input[name='lastingDays']").val(lastingDays);
+    $("input[name='lastingDays']").val(lastingDays+"天");
 
   },
 
@@ -247,7 +287,30 @@ const App = {
       let tran = await approve(this.paddr,amount).send({from: this.account,
                                                        gasPrice:gasPrice,
                                                        gas:80000});
-      console.log(tran.transactionHash);
+
+      // console.log(tran.transactionHash);
+      console.log(tran);
+      var blockNumber = tran.blockNumber;
+      var tx = tran.transactionHash;
+      var loading = weui.loading('loading');
+      var time = 300000;
+      while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
+        let result = await web3.eth.getTransaction(tx);
+        console.log(result);
+        console.log("waitting");
+        blockNumber = result.blockNumber;
+        await sleep(3000);
+        time -=3000;
+      }
+      if (blockNumber > 0){
+        weui.topTips('交易已确认');
+        loading.hide();
+        this.join();
+      }else{
+        weui.topTips('交易未正常完成，请耐心等待');
+      }
+
+
     }catch(error){
       console.log("授权异常，稍后检查确认一下是否已成功");
     }
@@ -263,10 +326,29 @@ const App = {
    console.log(usdtorcoin);
    try
    {
-     let result = await join(amount,usdtorcoin).send({from: this.account,
+     let tran = await join(amount,usdtorcoin).send({from: this.account,
                                                       gasPrice:gasPrice,
                                                       gas:gaslimit});
-     console.log(result.transactionHash);
+     console.log(tran);
+     var blockNumber = tran.blockNumber;
+     var tx = tran.transactionHash;
+     var loading = weui.loading('loading');
+     var time = 300000;
+     while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
+       let result = await web3.eth.getTransaction(tx);
+       console.log(result);
+       console.log("waitting");
+       blockNumber = result.blockNumber;
+       await sleep(3000);
+       time -=3000;
+     }
+     if (blockNumber > 0){
+       weui.topTips('交易已确认');
+       loading.hide();
+       location.reload();
+     }else{
+       weui.topTips('交易未正常完成，请耐心等待');
+     }
    }catch(error){
      console.log("异常，稍后检查确认一下是否已成功");
    }
@@ -293,6 +375,21 @@ const App = {
  sleep: async function(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 },
+/**
+2  * [通过参数名获取url中的参数值]
+3  * 示例URL:http://htmlJsTest/getrequest.html?uid=admin&rid=1&fid=2&name=小明
+4  * @param  {[string]} queryName [参数名]
+5  * @return {[string]}           [参数值]
+6  */
+GetQueryValue: function(queryName) {
+    var query = decodeURI(window.location.search.substring(1));
+    var vars = query.split("&");
+     for (var i = 0; i < vars.length; i++) {
+         var pair = vars[i].split("=");
+         if (pair[0] == queryName) { return pair[1]; }
+     }
+     return null;
+ },
 
 };
 
