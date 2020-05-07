@@ -569,11 +569,6 @@ contract KOLPro is Ownable{
       TotalUsers[_addr] -= _amount;
     }
   }
-
-  /* function getFather(address _addr,uint256 _index) public view returns(address){
-    require(_index<InviteList[_addr].length);
-    return InviteList[_addr][_index];
-  } */
   function getLockLen(address _addr) public view returns(uint256) {
     return(LockHistory[_addr].length);
   }

@@ -12,35 +12,6 @@ const App = {
   paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
   daddr: "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
   kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
-
-  start: async function() {
-    const { web3 } = this;
-    try {
-      this.metaK = new web3.eth.Contract(
-        KOLVote.abi,
-        this.kaddr,
-      );
-      this.metaP = new web3.eth.Contract(
-        KOLPro.abi,
-        this.paddr,
-      );
-      this.metaD = new web3.eth.Contract(
-        KOLWithDraw.abi,
-        this.daddr,
-      );
-      let accounts = await web3.eth.getAccounts();
-      this.account = accounts[0];
-      // this.initial();
-
-      this.initial();
-      // this.setmStatus("链上数据加载成功！");
-    } catch (error) {
-      // this.setmStatus("连接以太坊网络失败，请刷新重试");
-      console.log("error");
-    };
-
-    console.log("finished");
-  },
   diff: function(a,b){
     var df = parseInt(b) - parseInt(a);
     var df2 = df % 60;
@@ -72,10 +43,65 @@ const App = {
      return fmt;
   },
 
+  start: async function() {
+    const { web3 } = this;
+    try {
+      this.metaK = new web3.eth.Contract(
+        KOLVote.abi,
+        this.kaddr,
+      );
+      this.metaP = new web3.eth.Contract(
+        KOLPro.abi,
+        this.paddr,
+      );
+      this.metaD = new web3.eth.Contract(
+        KOLWithDraw.abi,
+        this.daddr,
+      );
+      let accounts = await web3.eth.getAccounts();
+      this.account = accounts[0];
+
+      const { getBlockTime } = this.metaD.methods;
+      let result = await getBlockTime().call();
+      console.log("now is       :" + this.dateFtt(result,1));
+
+      try{
+        const { testcal } = this.metaD.methods;
+        let re = await testcal().call({from:this.account});
+        console.log("msg.sender   is       :" + re[0]);
+        console.log("testcal addr is       :" + re[1]);
+        console.log("testcal len is        :" + re[2]);
+      }catch(e){
+        console.log(e);
+
+      }
+      try{
+        const { wokao } = this.metaD.methods;
+        let rer = await wokao(this.account).call();
+        console.log("addr is       :" + rer[0]);
+        console.log("len is       :" + rer[1]);
+      }catch(e){
+        console.log(e);
+
+      }
+
+
+
+
+      this.initial();
+      // this.setmStatus("链上数据加载成功！");
+    } catch (error) {
+      // this.setmStatus("连接以太坊网络失败，请刷新重试");
+      console.log("error? : " +error);
+    };
+
+    console.log("finished");
+  },
+
   initial: async function(){
     const { web3 } = this;
     const { LockBalance } = this.metaP.methods;
-    const { withdrawCheck } = this.metaD.methods;
+    const { calcuAllBonus } = this.metaD.methods;
     const { getChildsLen } = this.metaP.methods;
     const { TotalUsers } = this.metaP.methods;
     const { TotalLockingAmount } = this.metaP.methods;
@@ -90,6 +116,8 @@ const App = {
 
     const { LockHistory } = this.metaP.methods;
 
+
+
     console.log(this.account);
 
     var balance = await balanceOf(this.account).call();
@@ -103,18 +131,10 @@ const App = {
     if (lock != 0){
       lock = web3.utils.fromWei(lock,"ether");
     }
-    var bonusbb =0;
-    try{
-        bonusbb = await withdrawCheck(true).call();
-        console.log(bonusbb);
-        if (bonusbb != 0){
-          bonusbb = web3.utils.fromWei(bonusbb,"ether");
-        }
-    }catch(e){
-      console.log("xxxxx");
-    }
+
 
     var self = await querySelfBonus(this.account).call();
+    console.log("here? self: "+self);
     self = web3.utils.fromWei(self,"ether");
 
     var invite = await queryInviteBonus(this.account).call();
@@ -123,8 +143,9 @@ const App = {
     var team = await queryTeamBonus(this.account).call();
     team = web3.utils.fromWei(team,"ether");
 
-    var bonus = Number(self) + Number(invite) + Number(team);
 
+    let bonus = await calcuAllBonus(true).call({from:this.account});
+    bonus = web3.utils.fromWei(bonus,"ether");
 
     var childs = await getChildsLen(this.account).call();
 

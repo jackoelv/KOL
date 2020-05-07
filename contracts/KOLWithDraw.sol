@@ -189,8 +189,6 @@ pragma solidity ^0.4.23;
    function queryAndSetLevelN(address _addr) public;
    function queryLockBalance(address _addr,uint256 _queryTime) public view returns(uint256);
    function getYestodayLastSecond(uint256 _queryTime) public view returns(uint256);
-   function getLockHistory(address _addr,uint _index) public view returns(uint256,uint256,uint256,bool);
-   function getLockLen(address _addr) public view returns(uint256);
    function getHistoryTeamBonus(address _addr,uint256 _index) public view returns(uint256,uint256,uint256,uint256,uint256);
    function getHistoryInviteBonus(address _addr,uint256 _index) public view returns(uint256,uint256,uint256,uint256);
    function getTeamRateList(address _addr,uint256 _index) public view returns(uint256,uint256,uint256);
@@ -214,8 +212,8 @@ pragma solidity ^0.4.23;
 
    function subTotalUsers(address _addr) onlyContract public ;
    function subTotalLockingAmount(address _addr,uint256 _amount) onlyContract public ;
+   function getLockLen(address _addr) public view returns(uint256);
    function getFathersLength(address _addr) public view returns(uint256);
-   /* function getFather(address _addr,uint256 _index) public view returns(address); */
    function getLockTeamBonusLen(address _addr) public view returns(uint256);
    function getLockInviteBonusLen(address _addr) public view returns(uint256);
 }
@@ -275,6 +273,7 @@ contract KOLWithDraw is Ownable{
   uint256 public constant withDrawDays = 20 minutes;
 
   mapping (address => uint256) public TotalWithDraws;
+  mapping (address => uint256) public ForTest;
 
   //上面是从原来的合约移植过来的，下面的是本合约自己需要的
   mapping (address => uint256) public DrawTime;
@@ -285,15 +284,23 @@ contract KOLWithDraw is Ownable{
     kol = KOL(_kolAddress);
     kolp = KOLP(_kolpAddress);
   }
+
+  function getBlockTime() public view returns(uint256){
+    return now;
+  }
+  function setNewBlock() public{
+    ForTest[msg.sender] = now;
+  }
+
   function querySelfBonus(address _addr) public view returns(uint256){
     //这里还有点问题。
+    uint256 len = kolp.getLockLen(_addr);
+    require(len > 0,"why");
+    uint256 selfBonus;
     uint256 begin;
     uint256 end;
     uint256 amount;
     bool withDrawed;
-    uint256 len = kolp.getLockLen(_addr);
-    require(len > 0);
-    uint256 selfBonus;
     for (uint i=0; i<len; i++){
       (begin,amount,end,withDrawed) = kolp.LockHistory(_addr,i);
       if (!withDrawed){
@@ -313,8 +320,11 @@ contract KOLWithDraw is Ownable{
     }
     return (selfBonus);
   }
-  function queryInviteBonus(address _addr) public returns(uint256){
-    uint256 last = kolp.getLockInviteBonusLen(_addr) - 1;
+
+  function queryInviteBonus(address _addr) public view returns(uint256){
+    uint256 last = kolp.getLockInviteBonusLen(_addr);
+    require(last > 0,"invite last=0");
+    last = last -1;
     uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
     uint256 lastDayLastSecond;
     uint256 lastDayInviteBonus;
@@ -331,8 +341,10 @@ contract KOLWithDraw is Ownable{
       return (lastDayInviteTotalBonus);
     }
   }
-  function queryTeamBonus(address _addr) public returns(uint256){
-    uint256 last = kolp.getLockTeamBonusLen(_addr) - 1;
+  function queryTeamBonus(address _addr) public view returns(uint256){
+    uint256 last = kolp.getLockTeamBonusLen(_addr);
+    require(last > 0,"team last=0");
+    last = last-1;
     uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
     uint256 lastDayLastSecond;
     uint256 lastDayTeamBonus;
@@ -385,7 +397,9 @@ contract KOLWithDraw is Ownable{
     require(checkDraw(msg.sender));
     uint256 bonus = querySelfBonus(msg.sender);
     DrawTime[msg.sender] = now;
-    uint256 last = kolp.getLockInviteBonusLen(msg.sender) - 1;
+    uint256 last = kolp.getLockInviteBonusLen(msg.sender);
+    require(last > 0,"lockinvite last=0");
+    last = last -1;
     uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
     uint256 lastDayLastSecond;
     uint256 lastDayBonus;
@@ -401,7 +415,9 @@ contract KOLWithDraw is Ownable{
       kolp.setLastInvite(msg.sender,lastDayBonus,0);
       bonus += lastDayTotalBonus;
     }
-    last = kolp.getLockTeamBonusLen(msg.sender) - 1;
+    last = kolp.getLockTeamBonusLen(msg.sender);
+    require(last > 0,"lock team last=0");
+    last = last -1;
     uint8 theDayRate;
     (lastDayLastSecond,lastDayBonus,lastDayTotalBonus,theDayRate) = kolp.LockTeamBonus(msg.sender,last);
     if (lastDayLastSecond < yestodayLastSecond){
@@ -422,39 +438,61 @@ contract KOLWithDraw is Ownable{
     TotalWithDraws[msg.sender] += bonus;
     emit WithDrawed(msg.sender,bonus);
   }
-  function withdrawCheck(bool _onlyBonus) public view returns(uint256){
+  function wokao(address _addr) public view returns(address,uint256){
+    uint256 len = kolp.getLockLen(_addr);
+    return (_addr,len);
+  }
+  function testcal() public view returns(address,address,uint256){
+    uint256 bonus;
+    address addr;
+    (addr,bonus) = wokao(msg.sender);
+    return (msg.sender,addr,bonus);
+  }
+  function calcuAllBonus(bool _onlyBonus) public view returns(uint256){
     //true: Only Bonus;false:all;
-    //很奇葩的是为啥在网页里面测试这个函数总是失败？在终端就可以？
+    /* require(checkDraw(msg.sender)); */
     uint256 bonus = querySelfBonus(msg.sender);
     /* DrawTime[msg.sender] = now; */
     uint256 last = kolp.getLockInviteBonusLen(msg.sender);
-    if (last > 0){
-      last = last - 1;
-      uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
-      uint256 lastDayLastSecond;
-      uint256 lastDayBonus;
-      uint256 lastDayTotalBonus;
-      (lastDayLastSecond,lastDayBonus,lastDayTotalBonus) = kolp.LockInviteBonus(msg.sender,last);
-      uint256 lastingDays;
-      if (lastDayLastSecond < yestodayLastSecond){
-        lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
-        bonus += (lastingDays * lastDayBonus) + lastDayTotalBonus;
-      }else{
-        bonus += lastDayTotalBonus;
-      }
-
-      last = kolp.getLockTeamBonusLen(msg.sender) - 1;
-      uint8 theDayRate;
-      (lastDayLastSecond,lastDayBonus,lastDayTotalBonus,theDayRate) = kolp.LockTeamBonus(msg.sender,last);
-      if (lastDayLastSecond < yestodayLastSecond){
-        lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
-        bonus  += (lastingDays * lastDayBonus * theDayRate / 100 ) + lastDayTotalBonus;
-      }else{
-        bonus += lastDayTotalBonus;
-      }
-
-      if (!_onlyBonus) bonus += kolp.LockBalance(msg.sender);
+    require(last > 0,"calcu lock invite last=0");
+    last = last -1;
+    uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
+    uint256 lastDayLastSecond;
+    uint256 lastDayBonus;
+    uint256 lastDayTotalBonus;
+    (lastDayLastSecond,lastDayBonus,lastDayTotalBonus) = kolp.LockInviteBonus(msg.sender,last);
+    uint256 lastingDays;
+    if (lastDayLastSecond < yestodayLastSecond){
+      //计算 然后Push一条记录
+      lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
+      bonus += (lastingDays * lastDayBonus) + lastDayTotalBonus;
+      /* kolp.pushInvite(msg.sender,yestodayLastSecond,lastDayBonus,0); */
+    }else{
+      /* kolp.setLastInvite(msg.sender,lastDayBonus,0); */
+      bonus += lastDayTotalBonus;
     }
+    last = kolp.getLockTeamBonusLen(msg.sender);
+    require(last > 0,"calcu lock team last=0");
+    last = last -1;
+    uint8 theDayRate;
+    (lastDayLastSecond,lastDayBonus,lastDayTotalBonus,theDayRate) = kolp.LockTeamBonus(msg.sender,last);
+    if (lastDayLastSecond < yestodayLastSecond){
+      lastingDays = (yestodayLastSecond - lastDayLastSecond) / every;
+      bonus  += (lastingDays * lastDayBonus * theDayRate / 100 ) + lastDayTotalBonus;
+      /* kolp.pushTeam(msg.sender,yestodayLastSecond,lastDayBonus,0,theDayRate); */
+    }else{
+      /* kolp.setLastTeam(msg.sender,lastDayBonus,0,theDayRate); */
+      bonus += lastDayTotalBonus;
+    }
+    if (!_onlyBonus){
+      uint256 balance = kolp.LockBalance(msg.sender);
+      bonus += balance;
+      /* afterWithdraw(msg.sender,balance); */
+      /* kolp.clearLock(msg.sender); */
+    }
+    /* kol.transfer(msg.sender,bonus); */
+    /* TotalWithDraws[msg.sender] += bonus; */
+    /* emit WithDrawed(msg.sender,bonus); */
     return bonus;
   }
 }
