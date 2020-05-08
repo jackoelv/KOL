@@ -413,7 +413,6 @@ contract KOLWithDraw is Ownable{
   }
   function withdraw(bool _onlyBonus) public{
     //true: Only Bonus;false:all;
-    require(checkDraw(msg.sender));
     uint256 bonus = querySelfBonus(msg.sender);
     DrawTime[msg.sender] = now;
     uint256 last = kolp.getLockInviteBonusLen(msg.sender);
@@ -435,7 +434,6 @@ contract KOLWithDraw is Ownable{
         bonus += lastDayTotalBonus;
       }
     }
-
     last = kolp.getLockTeamBonusLen(msg.sender);
     if(last>0){
       last = last -1;
@@ -450,14 +448,17 @@ contract KOLWithDraw is Ownable{
         bonus += lastDayTotalBonus;
       }
     }
+    bonus=bonus*(100-fee)/100;
+    uint256 tax = bonus*fee/100;
     if (!_onlyBonus){
+      require(checkDraw(msg.sender));
       uint256 balance = kolp.LockBalance(msg.sender);
       bonus += balance;
       afterWithdraw(msg.sender,balance);
       kolp.clearLock(msg.sender);
     }
-    kol.transfer(msg.sender,bonus*(100-fee)/100);
-    kol.transfer(reciever,(bonus*fee)/100);
+    kol.transfer(msg.sender,bonus);
+    kol.transfer(reciever,tax);
     TotalWithDraws[msg.sender] += bonus;
     emit WithDrawed(msg.sender,bonus);
   }

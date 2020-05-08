@@ -11,8 +11,11 @@ const App = {
   metaD: null,
   metaK:null,
   paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
-  daddr: "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
+  daddr: "0xa874BF09C7b7d573B7f84f653cFEA6E0F707D157",
   kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+  load: null,
+  withDrawDays: 1200000,//线上改成30天。
+  canDraw:false,
   diff: function(a,b){
     var df = parseInt(b) - parseInt(a);
     var df2 = df % 300;
@@ -43,8 +46,30 @@ const App = {
      fmt = fmt.replace(RegExp.$1, (RegExp.$1.length==1) ? (o[k]) : (("00"+ o[k]).substr((""+ o[k]).length)));
      return fmt;
   },
+  getGasPrice: async function(){
+    const { web3 } = this;
+    var BN = web3.utils.BN;
+    let gasPrice = await web3.eth.getGasPrice();
+    let addGas = 10**9;
+    let newGas = new BN(gasPrice).add(new BN(addGas)).toString();
+    return newGas;
+  },
+  addGasLimit: function(gas){
+    const { web3 } = this;
+    var BN = web3.utils.BN;
+    let addGas = 100000;
+    let newGas = new BN(gas).add(new BN(addGas)).toString();
+    let maxGas = 6000000;
+    console.log("newGas is:" +newGas);
+    if (maxGas.cmp(newGas) === -1){
+      return maxGas;
+    }else{
+      return newGas;
+    }
+  },
 
   start: async function() {
+    this.load = weui.loading("链上数据加载进行中");
     const { web3 } = this;
     try {
       this.metaK = new web3.eth.Contract(
@@ -62,11 +87,13 @@ const App = {
       let accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
 
-      this.initial();
+      await this.initial();
       var iCode = this.GetQueryValue("iCode");
 
 
       $("input[name='iCodeRegister']").val(iCode);
+
+      this.load.hide();
 
       weui.toast('链上数据加载成功', 3000);
 
@@ -117,7 +144,6 @@ const App = {
     var lastingDays=0;
 
     var iCode = await RInviteCode(this.account).call();
-    // console.log("iCode is"+iCode);
     if (iCode == 0){
       //首次注册
       document.getElementById("firstHide").style.display="none";
@@ -182,6 +208,9 @@ const App = {
       if (teamamount !=0 ){
         teamamount = web3.utils.fromWei(teamamount,"ether");
       }
+
+
+
       level = await isLevelN(this.account).call();
 
       totaldraws = await TotalWithDraws(this.account).call();
@@ -190,12 +219,26 @@ const App = {
       }
 
       try{
-        first = await LockHistory(this.account,0).call();
-        first = first[0];
+        const { DrawTime } = this.metaD.methods;
+        let drawTime = await DrawTime(this.account).call();
+        if (drawTime == 0){
+          first = await LockHistory(this.account,0).call();
+          first = first[0];
+          let myself = lock*5;
+          let diff = unixTime - first;
+          if((teamamount < myself) && (diff<this.withDrawDays)){
+            this.canDraw = false;
+          }else{
+            this.canDraw = true;
+          }
+          console.log(this.canDraw);
+        }else{
+          first = drawTime;
+        }
         lastingDays = this.diff(first,unixTime);
         first = this.dateFtt(first,1);
       }catch(e){
-        console.log("error 2");
+        console.log(e);
       };
 
 
@@ -236,28 +279,6 @@ const App = {
     $("input[name='lastingDays']").val(lastingDays+"天");
 
   },
-  checkTxHash: async function(tran){
-    var blockNumber = tran.blockNumber;
-    var tx = tran.transactionHash;
-    var loading = weui.loading('loading');
-    var time = 300000;
-    while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
-      let result = await web3.eth.getTransaction(tx);
-      console.log(result);
-      console.log("waitting");
-      blockNumber = result.blockNumber;
-      await sleep(3000);
-      time -=3000;
-    }
-    if (blockNumber > 0){
-      weui.topTips('交易已确认');
-      loading.hide();
-      this.join();
-    }else{
-      weui.topTips('交易未正常完成，请耐心等待');
-    }
-  },
-
   reg: async function(){
     //页面注册按钮，先检查输入的验证码是否正确有效，然后提示成功或者失败。
     var iCode = $("input[name='iCodeRegister']").val();
@@ -267,14 +288,39 @@ const App = {
     var address = await InviteCode(iCode).call();
     if (address == 0){
       //回头再来处理这个错误提示和显示的问题。
-      console.log("地址错误");
+      weui.topTips('邀请码错误');
     }else{
-      let gasPrice = await web3.eth.getGasPrice();
-      let gaslimit = 6000000;
-      let result = await register(iCode).send({from:this.account,
+
+      var loading = weui.loading('链上注册进行中...');
+      let gasPrice = await this.getGasPrice();
+      var gaslimit;
+      try{
+        gaslimit = await register(iCode).estimateGas();
+        gaslimit = this.addGasLimit(gaslimit);
+      }catch(e){
+        gaslimit = 1000000;
+      }
+
+
+      let tran = await register(iCode).send({from:this.account,
                                   gasPrice:gasPrice,
                                   gas:gaslimit});
-      await checkTxHash(tran);
+      // await checkTxHash(tran);
+      var blockNumber = tran.blockNumber;
+      var tx = tran.transactionHash;
+
+      var time = 600000;
+      while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
+        let result = await web3.eth.getTransaction(tx);
+        console.log(result);
+        console.log("waitting");
+        blockNumber = result.blockNumber;
+        await sleep(5000);
+        time -=5000;
+      }
+      loading.hide();
+      weui.topTips('交易已确认');
+      location.reload();
       //取得这个txHash，然后去每隔一秒去取一下他的状态，如果成功了，就提示成功，否则就等待.
     }
   },
@@ -284,18 +330,30 @@ const App = {
  approve: async function(){
    const { web3 } = this;
    let amount = $("input[name='joinAmount']").val();
-   console.log(amount);
    amount = web3.utils.toWei(amount,"ether");
-   let gasPrice = await web3.eth.getGasPrice();
+   let gasPrice = await this.getGasPrice();
    const { approve } = this.metaK.methods;
+   var loading = weui.loading('链上授权进行中...');
     try
     {
       let tran = await approve(this.paddr,amount).send({from: this.account,
                                                        gasPrice:gasPrice,
                                                        gas:80000});
+      var blockNumber = tran.blockNumber;
+      var tx = tran.transactionHash;
 
-      // console.log(tran.transactionHash);
-      await checkTxHash(tran);
+      var time = 300000;
+      while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
+        let result = await web3.eth.getTransaction(tx);
+        console.log(result);
+        console.log("waitting");
+        blockNumber = result.blockNumber;
+        await sleep(3000);
+        time -=3000;
+      }
+      loading.hide();
+      weui.topTips('交易已确认');
+      this.join();
     }catch(error){
       weui.topTips('交易出现异常，请稍后重试');
     }
@@ -305,33 +363,85 @@ const App = {
    const { join } = this.metaP.methods;
    let amount = $("input[name='joinAmount']").val();
    amount = web3.utils.toWei(amount,"ether");
-   let usdtorcoin = $("input[name='usdtcoin']:checked").val();
-   let gasPrice = await web3.eth.getGasPrice();
-   let gaslimit = 6000000;
-   console.log(usdtorcoin);
+   var ck=document.getElementById("usdtcoin");
+   let usdtorcoin = ck.checked;
+   var loading = weui.loading('链上入金进行中...');
+
+   let gasPrice = await this.getGasPrice();
+   var gaslimit;
+   try{
+     gaslimit = await join(amount,usdtorcoin).estimateGas();
+     gaslimit = this.addGasLimit(gaslimit);
+   }catch(e){
+     gaslimit = 3000000;
+     console.log("estimateGas error");
+   }
    try
    {
      let tran = await join(amount,usdtorcoin).send({from: this.account,
                                                       gasPrice:gasPrice,
                                                       gas:gaslimit});
-     await checkTxHash(tran);
+     // await checkTxHash(tran);
+     var blockNumber = tran.blockNumber;
+     var tx = tran.transactionHash;
+
+     var time = 600000;
+     while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
+       let result = await web3.eth.getTransaction(tx);
+       console.log(result);
+       console.log("waitting");
+       console.log(time);
+       blockNumber = result.blockNumber;
+       await sleep(5000);
+       time -=5000;
+     }
+     loading.hide();
+     weui.topTips('交易已确认');
+     location.reload();
    }catch(e){
      weui.topTips('交易出现异常，请稍后重试');
    }
  },
  draw: async function(){
+
    const { web3 } = this;
    const { withdraw } = this.metaD.methods;
-   let gasPrice = await web3.eth.getGasPrice();
-   let gaslimit = 6000000;
-   let allbonus = $("input[name='usdtcoin']:checked").val();
+   var ck=document.getElementById("allbonus");
+   let allbonus = ck.checked;//$("input[name='usdtcoin']:checked").val();
+   if((!this.canDraw)&&(!allbonus)){
+     weui.topTips('不符合提现本金的条件');
+     return;
+   }
    console.log(allbonus);
+   let gasPrice = await this.getGasPrice();
+   var gaslimit;
+   try{
+     gaslimit = await withdraw(allbonus).estimateGas();
+     gaslimit = this.addGasLimit(gaslimit);
+   }catch(e){
+     gaslimit = 200000;
+   }
+   var loading = weui.loading('链上提现进行中...');
    try
    {
-     let result = await withdraw(!allbonus).send({from: this.account,
+     let tran = await withdraw(allbonus).send({from: this.account,
                                                       gasPrice:gasPrice,
                                                       gas:gaslimit});
-     await checkTxHash(result);
+     var blockNumber = tran.blockNumber;
+     var tx = tran.transactionHash;
+     var time = 600000;
+     while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
+       let result = await web3.eth.getTransaction(tx);
+       console.log(result);
+       console.log("waitting");
+       console.log(time);
+       blockNumber = result.blockNumber;
+       await sleep(5000);
+       time -=5000;
+     }
+     loading.hide();
+     weui.topTips('交易已确认');
+     location.reload();
    }catch(error){
      weui.topTips('交易出现异常，请稍后重试');
    }
