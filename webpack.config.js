@@ -20,6 +20,7 @@ module.exports = {
       { from: './app/javascripts/zepto.min.js', to: "zepto.min.js" },
       { from: './app/javascripts/example.js', to: "example.js" },
       { from: './app/javascripts/jquery.qrcode.min.js', to: "jquery.qrcode.min.js" },
+      { from: './app/javascripts/number.js', to: "number.js" },
 
     ]),
   ],

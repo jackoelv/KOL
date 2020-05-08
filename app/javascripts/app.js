@@ -64,16 +64,17 @@ const App = {
 
       this.initial();
       var iCode = this.GetQueryValue("iCode");
-      console.log("GetQueryValue :" +iCode);
+
 
       $("input[name='iCodeRegister']").val(iCode);
 
-      // weui.toast('操作成功', 3000);
+      weui.toast('链上数据加载成功', 3000);
 
       // weui.topTips('请填写正确ddd 的字段');
       // this.setmStatus("链上数据加载成功！");
     } catch (error) {
       // this.setmStatus("连接以太坊网络失败，请刷新重试");
+      weui.topTips('连接以太坊网络失败，请刷新重试');
       console.log("error? : " +error);
     };
 
@@ -116,22 +117,15 @@ const App = {
     var lastingDays=0;
 
     var iCode = await RInviteCode(this.account).call();
-    console.log("iCode is"+iCode);
+    // console.log("iCode is"+iCode);
     if (iCode == 0){
       //首次注册
       document.getElementById("firstHide").style.display="none";
       document.getElementById("joindrawpanel").style.display="none";
     }else{
       document.getElementById("firstRegister").style.display="none";
-
-
     }
-    // document.getElementById("firstHide").style.display="none";
-    // document.getElementById("joindrawpanel").style.display="none";
-
-
     var lock = await LockBalance(this.account).call();
-
     if (lock != 0){
       lock = web3.utils.fromWei(lock,"ether");
       document.getElementById("ucfirst").style.display="none";
@@ -146,13 +140,10 @@ const App = {
       $("input[name='ucflag']").val(ucflag);
       var joinbtn = document.getElementById("Join");
       joinbtn.innerHTML = "再次参与";
-
-
-
-
       try{
         self = await querySelfBonus(this.account).call({from:this.account});
         self = web3.utils.fromWei(self,"ether") * 0.95;
+        self = NP.strip(self);
       }catch(e){
         console.log("haha,jinbenwei");
       }
@@ -161,6 +152,7 @@ const App = {
       try{
         invite = await queryInviteBonus(this.account).call();
         invite = web3.utils.fromWei(invite,"ether") * 0.95;
+        invite = NP.strip(invite);
       }catch(e){
 
       }
@@ -168,6 +160,7 @@ const App = {
       try{
         team = await queryTeamBonus(this.account).call();
         team = web3.utils.fromWei(team,"ether") * 0.95;
+        team = NP.strip(team);
       }catch(e){
 
       }
@@ -175,8 +168,8 @@ const App = {
       try{
         bonus = await calcuAllBonus(true).call({from:this.account});
         bonus = web3.utils.fromWei(bonus,"ether");
+        bonus = NP.strip(bonus);
       }catch(e){
-        console.log("kkkk");
       }
 
 
@@ -190,19 +183,11 @@ const App = {
         teamamount = web3.utils.fromWei(teamamount,"ether");
       }
       level = await isLevelN(this.account).call();
-      // level = web3.utils.BN(level);
-
-
-
-
 
       totaldraws = await TotalWithDraws(this.account).call();
       if (totaldraws !=0 ){
         totaldraws = web3.utils.fromWei(totaldraws,"ether");
       }
-
-
-
 
       try{
         first = await LockHistory(this.account,0).call();
@@ -251,6 +236,27 @@ const App = {
     $("input[name='lastingDays']").val(lastingDays+"天");
 
   },
+  checkTxHash: async function(tran){
+    var blockNumber = tran.blockNumber;
+    var tx = tran.transactionHash;
+    var loading = weui.loading('loading');
+    var time = 300000;
+    while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
+      let result = await web3.eth.getTransaction(tx);
+      console.log(result);
+      console.log("waitting");
+      blockNumber = result.blockNumber;
+      await sleep(3000);
+      time -=3000;
+    }
+    if (blockNumber > 0){
+      weui.topTips('交易已确认');
+      loading.hide();
+      this.join();
+    }else{
+      weui.topTips('交易未正常完成，请耐心等待');
+    }
+  },
 
   reg: async function(){
     //页面注册按钮，先检查输入的验证码是否正确有效，然后提示成功或者失败。
@@ -268,11 +274,11 @@ const App = {
       let result = await register(iCode).send({from:this.account,
                                   gasPrice:gasPrice,
                                   gas:gaslimit});
-      console.log(result.transactionHash);
+      await checkTxHash(tran);
       //取得这个txHash，然后去每隔一秒去取一下他的状态，如果成功了，就提示成功，否则就等待.
-
     }
   },
+
 
  // 授权合约转账
  approve: async function(){
@@ -289,30 +295,9 @@ const App = {
                                                        gas:80000});
 
       // console.log(tran.transactionHash);
-      console.log(tran);
-      var blockNumber = tran.blockNumber;
-      var tx = tran.transactionHash;
-      var loading = weui.loading('loading');
-      var time = 300000;
-      while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
-        let result = await web3.eth.getTransaction(tx);
-        console.log(result);
-        console.log("waitting");
-        blockNumber = result.blockNumber;
-        await sleep(3000);
-        time -=3000;
-      }
-      if (blockNumber > 0){
-        weui.topTips('交易已确认');
-        loading.hide();
-        this.join();
-      }else{
-        weui.topTips('交易未正常完成，请耐心等待');
-      }
-
-
+      await checkTxHash(tran);
     }catch(error){
-      console.log("授权异常，稍后检查确认一下是否已成功");
+      weui.topTips('交易出现异常，请稍后重试');
     }
  },
  join: async function(){
@@ -329,28 +314,9 @@ const App = {
      let tran = await join(amount,usdtorcoin).send({from: this.account,
                                                       gasPrice:gasPrice,
                                                       gas:gaslimit});
-     console.log(tran);
-     var blockNumber = tran.blockNumber;
-     var tx = tran.transactionHash;
-     var loading = weui.loading('loading');
-     var time = 300000;
-     while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
-       let result = await web3.eth.getTransaction(tx);
-       console.log(result);
-       console.log("waitting");
-       blockNumber = result.blockNumber;
-       await sleep(3000);
-       time -=3000;
-     }
-     if (blockNumber > 0){
-       weui.topTips('交易已确认');
-       loading.hide();
-       location.reload();
-     }else{
-       weui.topTips('交易未正常完成，请耐心等待');
-     }
-   }catch(error){
-     console.log("异常，稍后检查确认一下是否已成功");
+     await checkTxHash(tran);
+   }catch(e){
+     weui.topTips('交易出现异常，请稍后重试');
    }
  },
  draw: async function(){
@@ -365,9 +331,9 @@ const App = {
      let result = await withdraw(!allbonus).send({from: this.account,
                                                       gasPrice:gasPrice,
                                                       gas:gaslimit});
-     console.log(result);
+     await checkTxHash(result);
    }catch(error){
-     console.log("异常，稍后检查确认一下是否已成功");
+     weui.topTips('交易出现异常，请稍后重试');
    }
 
 
@@ -390,6 +356,9 @@ GetQueryValue: function(queryName) {
      }
      return null;
  },
+ invite: function(){
+   document.getElementById("qr").style.display="block";
+ },
 
 };
 
@@ -400,7 +369,6 @@ window.addEventListener("load", function() {
     // use MetaMask's provider
     App.web3 = new Web3(window.ethereum);
     window.ethereum.enable(); // get permission to access accounts
-    console.log("haha");
   } else {
     console.warn(
       "No web3 detected. Falling back to http://127.0.0.1:8545. You should remove this fallback when you deploy live",

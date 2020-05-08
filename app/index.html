@@ -172,13 +172,21 @@
                           <input class="weui-input"  type="text" name="iCode"  value = "0" placeholder="0" readonly/>
                       </div>
                   </div>
-                  <div class="weui-btn-area">
-                      <a class="weui-btn weui-btn_default" id="Draw" onclick="App.draw()" style="background-color:#181B46;color:#FFFFFF">邀请</a>
+                  <div class="weui-btn-area scroll">
+                      <a class="weui-btn weui-btn_default" id="invite" onclick="App.invite()" style="background-color:#181B46;color:#FFFFFF">邀请</a>
                   </div>
-
+                  <div id="qr" style="display:none;height:660px">
+                    <div class="weui-cell weui-cell_readonly">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:300px;text-align: center">邀请好友用imtoken扫码参与</label></div>
+                    </div>
+                    <div id="qrcode" style="text-align: center"></div>
+                    <div class="weui-btn-area">
+                        <a class="weui-btn weui-btn_default" id="top">返回顶部</a>
+                    </div>
                   </div>
+                </div>
 
-                  <div id="qrcode" style="text-align: center"></div>
+
           </div><!-- joindrawpanel-->
         </div><!-- page__hd -->
         </div>
@@ -190,6 +198,7 @@
 <script src="jquery.autocomplete.js"></script>
 <script src="app.js"></script>
 <script src="jquery.qrcode.min.js"></script>
+<script src="number.js"></script>
 <script type="text/javascript">
 var countries = [
     { value: 'Andorra', data: 'AD' },
@@ -227,5 +236,21 @@ $(function(){
         }
     });
 });
+
+$('#invite').click(function(){
+    window.scrollTo({
+      top: 3000,
+      behavior: "smooth"
+    });
+ });
+
+ $('#top').click(function(){
+     window.scrollTo({
+       top: 0,
+       behavior: "smooth"
+     });
+  });
+
+
 </script>
 </html>

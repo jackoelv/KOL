@@ -37,7 +37,7 @@ contract("testjoin",accounts => {
     await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[1]});
     await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[1]});
 
-    for (var m = 2; m<9; m++){
+    for (var m = 2; m<12; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
       await sleep(1000);
       await p.register(iCode,{from:accounts[m]});
@@ -46,7 +46,7 @@ contract("testjoin",accounts => {
       await k.transfer(accounts[m],web3.utils.toWei('20000','ether'),{from:accounts[4]});
       await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[m]});
       if ((m % 2) == 1){
-        await p.join(web3.utils.toWei('5000','ether'),true,{from:accounts[m]});
+        await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m]});
       }
       else {
         await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m]});
