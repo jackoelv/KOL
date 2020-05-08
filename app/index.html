@@ -211,20 +211,10 @@ var countries = [
     // ...
     { value: 'Zimbabwe', data: 'ZZ' }
 ];
-// window.setInterval(function(){
-//
-//     var _date = App.dateFtt(0,0);
-//     $("input[name='current']").val(_date);
-//     //下面这些内容在正式环境不需要了。
-//     var begin=1588856099;
-//     var time = new Date();
-//     var unixTimeNow = time.getTime();
-//     unixTimeNow = Math.round(unixTimeNow / 1000);
-//     if((unixTimeNow-begin) % 300 == 10){
-//       location.reload();
-//       console.log("reload");
-//     }
-// }, 1000);
+window.setInterval(function(){
+    var _date = App.dateFtt(0,0);
+    $("input[name='current']").val(_date);
+}, 1000);
 $('#autocomplete').autocomplete({
     lookup: countries,
     onSelect: function (suggestion) {
