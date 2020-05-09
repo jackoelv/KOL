@@ -155,13 +155,13 @@ contract KOLPro is Ownable{
   uint256 public totalRegister;
   uint256 public totalBalance;
 
-  uint8 public constant userLevel1 = 20;
-  uint8 public constant userLevel2 = 10;
+  uint8 public  userLevel1 = 20;
+  uint8 public  userLevel2 = 10;
   uint8 public maxlevel = 9;
 
-  uint16 public constant comLevel1Users = 100;
-  uint16 public constant comLevel2Users = 300;
-  uint16 public constant comLevel3Users = 500;
+  uint16 public  comLevel1Users = 100;
+  uint16 public  comLevel2Users = 300;
+  uint16 public  comLevel3Users = 500;
 
   //测试的时候就把数字变小一点。
   /* uint16 public  comLevel1Users = 2;
@@ -593,7 +593,7 @@ contract KOLPro is Ownable{
   function getChildsLen(address _addr) public view returns(uint256){
   return(ChildAddrs[_addr].length);
   }
-  function setLevelN(uint8 _level,uint16 _users,uint256 _amount) onlyOwner public{
+  function setLevelC(uint8 _level,uint16 _users,uint256 _amount) onlyOwner public{
     if (_level == 1){
       comLevel1Users = _users;
       comLevel1Amount = _amount;

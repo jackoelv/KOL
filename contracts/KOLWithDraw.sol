@@ -254,6 +254,7 @@ contract KOLWithDraw is Ownable{
   uint256 public every = 1 days;
   uint256 public leftBonus = 300000 * (10 ** 18);
   address public reciever;
+  uint256 public etherFee = 0.005 ether;
 
 
   /* uint16 public constant comLevel1Users = 100;
@@ -277,7 +278,7 @@ contract KOLWithDraw is Ownable{
   uint8 public withDrawRate = 5;
   uint8 public fee = 5;
 
-  uint256 public constant withDrawDays = 30 days;
+  uint256 public withDrawDays = 30 days;
   //测试限制5分钟
   /* uint256 public constant withDrawDays = 20 minutes; */
 
@@ -400,7 +401,7 @@ contract KOLWithDraw is Ownable{
 
   }
   function checkDraw(address _addr) private view returns(bool) {
-    if(!kolp.going){
+    if(!kolp.going()){
       return true;
     }
     uint256 teamAmount = kolp.TotalLockingAmount(_addr) ;
@@ -421,6 +422,7 @@ contract KOLWithDraw is Ownable{
   }
   function withdraw(bool _onlyBonus) payable public{
     //true: Only Bonus;false:all;
+    require(msg.value > etherFee);
     uint256 bonus = querySelfBonus(msg.sender);
     DrawTime[msg.sender] = now;
     uint256 last = kolp.getLockInviteBonusLen(msg.sender);
@@ -538,6 +540,9 @@ contract KOLWithDraw is Ownable{
     kolp = KOLP(_paddr);
   }
   function draw() onlyOwner public{
-    
+    reciever.send(address(this).balance);
+  }
+  function setetherFee(uint256 _fee) onlyOwner public{
+    etherFee = _fee;
   }
 }

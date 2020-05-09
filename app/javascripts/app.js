@@ -344,34 +344,51 @@ const App = {
  // 授权合约转账
  approve: async function(){
    const { web3 } = this;
+   const { allowance } = this.metaK.methods;
+   this.load = weui.loading('链上操作进行中...');
+   let allowed = await allowance(this.account,this.paddr).call();
+   this.load.hide();
+   console.log("allowed"+allowed);
+   if (allowed != 0){
+     allowed = web3.utils.fromWei(allowed,"ether");
+   }
    let amount = $("input[name='joinAmount']").val();
-   amount = web3.utils.toWei(amount,"ether");
-   let gasPrice = await this.getGasPrice();
-   const { approve } = this.metaK.methods;
-   var loading = weui.loading('链上授权进行中...');
-    try
-    {
-      let tran = await approve(this.paddr,amount).send({from: this.account,
-                                                       gasPrice:gasPrice,
-                                                       gas:80000});
-      var blockNumber = tran.blockNumber;
-      var tx = tran.transactionHash;
+   console.log("allowed"+allowed);
+   console.log("amount"+amount);
+   if (parseFloat(allowed) >= parseFloat(amount)){
+     this.join();
+   }else{
+     amount = web3.utils.toWei(amount,"ether");
 
-      var time = 300000;
-      while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
-        let result = await web3.eth.getTransaction(tx);
-        console.log(result);
-        console.log("waitting");
-        blockNumber = result.blockNumber;
-        await sleep(3000);
-        time -=3000;
+     let gasPrice = await this.getGasPrice();
+     const { approve } = this.metaK.methods;
+     this.load = weui.loading('链上操作进行中...');
+      try
+      {
+        let tran = await approve(this.paddr,amount).send({from: this.account,
+                                                         gasPrice:gasPrice,
+                                                         gas:80000});
+        var blockNumber = tran.blockNumber;
+        var tx = tran.transactionHash;
+
+        var time = 300000;
+        while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
+          let result = await web3.eth.getTransaction(tx);
+          console.log(result);
+          console.log("waitting");
+          blockNumber = result.blockNumber;
+          await sleep(3000);
+          time -=3000;
+        }
+        // loading.hide();
+        weui.topTips('继续下一步完成操作！');
+        this.join();
+      }catch(error){
+        weui.topTips('交易出现异常，请稍后重试');
       }
-      loading.hide();
-      weui.topTips('交易已确认');
-      this.join();
-    }catch(error){
-      weui.topTips('交易出现异常，请稍后重试');
-    }
+
+   }
+
  },
  join: async function(){
    const { web3 } = this;
@@ -380,7 +397,7 @@ const App = {
    amount = web3.utils.toWei(amount,"ether");
    var ck=document.getElementById("usdtcoin");
    let usdtorcoin = ck.checked;
-   var loading = weui.loading('链上入金进行中...');
+   this.load = weui.loading('链上入金进行中...');
 
    let gasPrice = await this.getGasPrice();
    var gaslimit = 3000000;
@@ -410,7 +427,7 @@ const App = {
        await sleep(5000);
        time -=5000;
      }
-     loading.hide();
+     this.load.hide();
      weui.topTips('交易已确认');
      location.reload();
    }catch(e){
