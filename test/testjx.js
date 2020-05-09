@@ -64,7 +64,7 @@ contract("testjoin",accounts => {
     console.log("*                                         *");
     console.log("*                                         *");
 
-    for (var i=1;i<22;i++){
+    for (var i=1;i<3;i++){
       let result = await p.LockHistory(accounts[i],0);
       console.log("begin time  is    :"+dateFtt(result[0]));
     }

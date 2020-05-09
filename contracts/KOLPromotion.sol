@@ -179,7 +179,9 @@ contract KOLPro is Ownable{
   uint8 public constant inviteLevel2 = 5;
   uint8 public constant inviteLevel3 = 10;
 
+
   uint8 public constant fee = 5;
+  bool public going = true;
 
   /* uint256 public constant withDrawDays = 30 days; */
   //测试限制5分钟
@@ -234,6 +236,8 @@ contract KOLPro is Ownable{
   mapping (address => bool) public USDTOrCoin;
 
 
+
+
   //GAS优化
 
   event Registed(address _user,uint256 inviteCode);
@@ -258,6 +262,7 @@ contract KOLPro is Ownable{
   }
 
   function register(uint256 _fInviteCode) public {
+    require(going);
     require(now <= end);
     require(RInviteCode[msg.sender] == 0);
     uint256 random = uint256(keccak256(now, msg.sender)) % 100;
@@ -293,6 +298,7 @@ contract KOLPro is Ownable{
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function join(uint256 _amount,bool _usdtOrCoin) public {
+    require(going);
     require(now <= end);
     if (LockBalance[msg.sender] == 0) USDTOrCoin[msg.sender] = _usdtOrCoin;
     kol.transferFrom(msg.sender,draw,_amount);
@@ -503,6 +509,12 @@ contract KOLPro is Ownable{
   function setContract(address _addr) onlyOwner public{
     draw = _addr;
   }
+  function setGoing(bool _going) onlyOwner public{
+    going = _going;
+  }
+  function setEnd(uint256 _end) onlyOwner public{
+    end = end;
+  }
   function clearLock(address _addr) onlyContract public{
     for (uint i =0;i<LockHistory[_addr].length;i++){
       LockHistory[_addr][i].end = now;
@@ -555,6 +567,10 @@ contract KOLPro is Ownable{
       TotalUsers[_addr] -= _amount;
     }
   }
+  function subTotalBalance(uint256 _amount) onlyContract public{
+    totalBalance-=_amount;
+  }
+
   function getLockLen(address _addr) public view returns(uint256) {
     return(LockHistory[_addr].length);
   }

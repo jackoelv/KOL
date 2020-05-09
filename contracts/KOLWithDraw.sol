@@ -118,6 +118,7 @@ pragma solidity ^0.4.23;
  contract KOLP is StandardToken {
 
    address public draw;
+   bool public going;
    struct lock{
      uint256 begin;
      uint256 amount;
@@ -212,6 +213,7 @@ pragma solidity ^0.4.23;
 
    function subTotalUsers(address _addr) onlyContract public ;
    function subTotalLockingAmount(address _addr,uint256 _amount) onlyContract public ;
+   function subTotalBalance(uint256 _amount) onlyContract public;
    function getLockLen(address _addr) public view returns(uint256);
    function getFathersLength(address _addr) public view returns(uint256);
    function getLockTeamBonusLen(address _addr) public view returns(uint256);
@@ -247,12 +249,14 @@ pragma solidity ^0.4.23;
  //测试说明，把一天改成1分钟。提现限制为5分钟。
 contract KOLWithDraw is Ownable{
   using SafeMath for uint256;
-  string public name = "KOL Promotion";
+  string public name = "KOL Withdraw";
   KOL public kol;
   KOLP public kolp;
 
   uint256 public every = 5 minutes;//1 days;
+  uint256 public leftBonus = 300000 * (10 ** 18);
   address public reciever;
+
 
   /* uint16 public constant comLevel1Users = 100;
   uint16 public constant comLevel2Users = 300;
@@ -272,13 +276,8 @@ contract KOLWithDraw is Ownable{
   }
 
 
-  uint256 public constant comLevel1Amount = 10000 * (10 ** 18);
-  uint256 public constant comLevel2Amount = 30000 * (10 ** 18);
-  uint256 public constant comLevel3Amount = 50000 * (10 ** 18);
-
-
-  uint8 public constant withDrawRate = 5;
-  uint8 public constant fee = 5;
+  uint8 public withDrawRate = 5;
+  uint8 public fee = 5;
 
   /* uint256 public constant withDrawDays = 30 days; */
   //测试限制5分钟
@@ -403,6 +402,9 @@ contract KOLWithDraw is Ownable{
 
   }
   function checkDraw(address _addr) private view returns(bool) {
+    if(!kolp.going){
+      return true;
+    }
     uint256 teamAmount = kolp.TotalLockingAmount(_addr) ;
     uint256 myBalance = kolp.LockBalance(_addr) * withDrawRate;
     if (myBalance == 0) return false;
@@ -464,12 +466,14 @@ contract KOLWithDraw is Ownable{
       }
 
     }
+    leftBonus= leftBonus.sub(bonus);
     bonus=bonus*(100-fee)/100;
     uint256 tax = bonus*fee/100;
     if (!_onlyBonus){
       require(checkDraw(msg.sender));
       uint256 balance = kolp.LockBalance(msg.sender);
       bonus += balance;
+      kolp.subTotalBalance(balance);
       afterWithdraw(msg.sender,balance);
       kolp.clearLock(msg.sender);
     }
@@ -519,5 +523,20 @@ contract KOLWithDraw is Ownable{
       bonus += balance;
     }
     return bonus;
+  }
+  function setBonus(uint256 _amount) onlyOwner public{
+    leftBonus = _amount;
+  }
+  function setWithdrawDays(uint256 _seconds) onlyOwner public{
+    withDrawDays = _seconds;
+  }
+  function setDrawRate(uint8 _rate) onlyOwner public{
+    withDrawRate = _rate;
+  }
+  function setFee(uint8 _fee) onlyOwner public{
+    fee = _fee;
+  }
+  function setKOLP(address _paddr) onlyOwner public{
+    kolp = KOLP(_paddr);
   }
 }

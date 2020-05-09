@@ -10,17 +10,25 @@ const App = {
   metaP: null,
   metaD: null,
   metaK:null,
-  paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
+  // paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
   // daddr: "0xa874BF09C7b7d573B7f84f653cFEA6E0F707D157",
-  daddr: "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
   kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+  paddr: "0x3779B8EEbAf4737681007E88C2a99cc99043A590",
+  daddr: "0x4d361603fF0485F5CC935431027488FC67E0178D",
+
   load: null,
   withDrawDays: 1200000,//线上改成30天。
   canDraw:false,
   diff: function(a,b){
-    var df = parseInt(b) - parseInt(a);
-    var df2 = df % 300;
-    return ((df-df2)/300);
+    var begin =1589022299+1;
+    var aNum=parseInt(a);
+    var bNum=parseInt(b);
+    var extra = (aNum-begin)% 300;
+    var aNight= aNum-extra;
+
+    extra = (bNum-begin)% 300;
+    var bNight=bNum -extra;
+    return ((bNight-aNight)/300);
   },
   dateFtt: function(dd,current){ //author: meizz
      dd = dd +"000";
@@ -170,7 +178,6 @@ const App = {
       joinbtn.innerHTML = "再次参与";
       try{
         self = await querySelfBonus(this.account).call({from:this.account});
-        console.log(self);
         self = web3.utils.fromWei(self,"ether") * 0.95;
         // self = web3.utils.fromWei(self,"ether");
         self = NP.round(self,2);
@@ -182,7 +189,6 @@ const App = {
       try{
         invite = await queryInviteBonus(this.account).call({from:this.account});
         invite = web3.utils.fromWei(invite,"ether") * 0.95;
-        // invite = web3.utils.fromWei(invite,"ether");
         invite = NP.round(invite,2);
       }catch(e){
 
@@ -191,7 +197,6 @@ const App = {
       try{
         team = await queryTeamBonus(this.account).call({from:this.account});
         team = web3.utils.fromWei(team,"ether") * 0.95;
-        // team = web3.utils.fromWei(team,"ether");
         team = NP.round(team,2);
       }catch(e){
 
@@ -378,14 +383,14 @@ const App = {
    var loading = weui.loading('链上入金进行中...');
 
    let gasPrice = await this.getGasPrice();
-   var gaslimit;
-   try{
-     gaslimit = await join(amount,usdtorcoin).estimateGas();
-     gaslimit = this.addGasLimit(gaslimit);
-   }catch(e){
-     gaslimit = 3000000;
-     console.log("estimateGas error");
-   }
+   var gaslimit = 3000000;
+   // try{
+   //   gaslimit = await join(amount,usdtorcoin).estimateGas();
+   //   gaslimit = this.addGasLimit(gaslimit);
+   // }catch(e){
+   //   gaslimit = 3000000;
+   //   console.log("estimateGas error");
+   // }
    try
    {
      let tran = await join(amount,usdtorcoin).send({from: this.account,
