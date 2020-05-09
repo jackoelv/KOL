@@ -12,10 +12,10 @@ contract("testjoin",accounts => {
     let p = await KOLP.at("0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2");
     let d = await KOLD.at("0x46Ba0c589c0E0531319809BcA37db878Eb4CC651");
 
-    for (var i = 0; i<3000; i+=30){
+    for (var i = 0; i<30; i++){
       await d.setNewBlock();
-      console.log("waitting for 30s!!!")
-      await sleep(30000);
+      console.log("waitting for 60s!!!")
+      await sleep(60000);
     }
 
     });

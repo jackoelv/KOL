@@ -351,42 +351,33 @@ contract KOLPro is Ownable{
     }
     return minAmount.mul(3).div(1000);
   }
+  function setTopTeamBonus(address _topAddr,uint256 _minAmount) public returns(uint8){
+    uint8 newRate = levelRate[isLevelN[_topAddr]];
+    dayTeamBonus memory theDayTB =dayTeamBonus(0,0,0,0);
+    uint256 tomorrowLastSecond =getYestodayLastSecond(now) +  every;
 
-  function setTopTeamBonus(address _topAddr,uint256 _minAmount) internal {
-    uint256 tomorrowLastSecond = getYestodayLastSecond(now) + (2 * every);
-    uint8 level = isLevelN[_topAddr];
-    uint8 newRate = levelRate[level];
-    uint256 newDayTeamTotalBonus = _minAmount * newRate / 100;
     if (LockTeamBonus[_topAddr].length == 0){
-      LockTeamBonus[_topAddr].push(dayTeamBonus(tomorrowLastSecond,
-                                            _minAmount,
-                                            newDayTeamTotalBonus,
-                                            newRate));
+      theDayTB.theDayLastSecond = tomorrowLastSecond;
+      theDayTB.theDayTeamBonus = _minAmount;
+      theDayTB.totalTeamBonus = _minAmount * newRate / 100;
+      theDayTB.theDayRate = newRate;
+      LockTeamBonus[_topAddr].push(theDayTB);
     }else{
       uint256 last = LockTeamBonus[_topAddr].length -1;
-      uint256 lastDayLastSecond = LockTeamBonus[_topAddr][last].theDayLastSecond;
-      uint256 lastDayTeamBonus = LockTeamBonus[_topAddr][last].theDayTeamBonus;
-      uint256 lastDayTeamTotalBonus = LockTeamBonus[_topAddr][last].totalTeamBonus;
-      uint8 lastDayRate = LockTeamBonus[_topAddr][last].theDayRate;
+      theDayTB = LockTeamBonus[_topAddr][last];
 
-      uint256 lastingDays = (tomorrowLastSecond - lastDayLastSecond) / every;
-      uint256 newDayTeamBonus = _minAmount + lastDayTeamBonus;
-      newDayTeamTotalBonus = lastingDays * lastDayTeamBonus * lastDayRate/100;
-      newDayTeamTotalBonus += _minAmount * newRate / 100;
-      newDayTeamTotalBonus += lastDayTeamTotalBonus;
+      uint256 lastingDays = (tomorrowLastSecond - theDayTB.theDayLastSecond) / every;
+
+      theDayTB.totalTeamBonus = lastingDays * theDayTB.theDayTeamBonus * theDayTB.theDayRate/100;//这里不好解决啊
+      theDayTB.totalTeamBonus += _minAmount * newRate / 100;
+      theDayTB.theDayTeamBonus += _minAmount;
+      theDayTB.theDayRate = newRate;
         //必然就都是明天。
-      if(lastDayLastSecond < tomorrowLastSecond){
-        if (newRate > lastDayRate){
-
-        }
-        LockTeamBonus[_topAddr].push(dayTeamBonus(tomorrowLastSecond,
-                                              newDayTeamBonus,
-                                              newDayTeamTotalBonus,
-                                              newRate));
+      if(theDayTB.theDayLastSecond < tomorrowLastSecond){
+        theDayTB.theDayLastSecond = tomorrowLastSecond;
+        LockTeamBonus[_topAddr].push(theDayTB);
       }else{
-        LockTeamBonus[_topAddr][last].theDayTeamBonus = newDayTeamBonus;
-        LockTeamBonus[_topAddr][last].totalTeamBonus = newDayTeamTotalBonus;
-        LockTeamBonus[_topAddr][last].theDayRate = newRate;
+        LockTeamBonus[_topAddr][last]=theDayTB;
       }
     }
   }
@@ -399,7 +390,7 @@ contract KOLPro is Ownable{
     }else{
       return;
     }
-    uint256 tomorrowLastSecond = getYestodayLastSecond(now) + 2 * every;
+    uint256 tomorrowLastSecond = getYestodayLastSecond(now) + every;
     if (LockInviteBonus[_topAddr].length == 0){
       LockInviteBonus[_topAddr].push(dayInviteBonus(tomorrowLastSecond,
                                             _minAmount * inviteRate/100,

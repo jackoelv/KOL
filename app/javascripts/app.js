@@ -11,7 +11,8 @@ const App = {
   metaD: null,
   metaK:null,
   paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
-  daddr: "0xa874BF09C7b7d573B7f84f653cFEA6E0F707D157",
+  // daddr: "0xa874BF09C7b7d573B7f84f653cFEA6E0F707D157",
+  daddr: "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
   kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
   load: null,
   withDrawDays: 1200000,//线上改成30天。
@@ -146,6 +147,7 @@ const App = {
     var iCode = await RInviteCode(this.account).call();
     if (iCode == 0){
       //首次注册
+      document.getElementById("firstRegister").style.display="block";
       document.getElementById("firstHide").style.display="none";
       document.getElementById("joindrawpanel").style.display="none";
     }else{
@@ -168,25 +170,29 @@ const App = {
       joinbtn.innerHTML = "再次参与";
       try{
         self = await querySelfBonus(this.account).call({from:this.account});
+        console.log(self);
         self = web3.utils.fromWei(self,"ether") * 0.95;
-        self = NP.strip(self);
+        // self = web3.utils.fromWei(self,"ether");
+        self = NP.round(self,2);
       }catch(e){
         console.log("haha,jinbenwei");
       }
 
 
       try{
-        invite = await queryInviteBonus(this.account).call();
+        invite = await queryInviteBonus(this.account).call({from:this.account});
         invite = web3.utils.fromWei(invite,"ether") * 0.95;
-        invite = NP.strip(invite);
+        // invite = web3.utils.fromWei(invite,"ether");
+        invite = NP.round(invite,2);
       }catch(e){
 
       }
 
       try{
-        team = await queryTeamBonus(this.account).call();
+        team = await queryTeamBonus(this.account).call({from:this.account});
         team = web3.utils.fromWei(team,"ether") * 0.95;
-        team = NP.strip(team);
+        // team = web3.utils.fromWei(team,"ether");
+        team = NP.round(team,2);
       }catch(e){
 
       }
@@ -194,7 +200,7 @@ const App = {
       try{
         bonus = await calcuAllBonus(true).call({from:this.account});
         bonus = web3.utils.fromWei(bonus,"ether");
-        bonus = NP.strip(bonus);
+        bonus = NP.round(bonus,2);
       }catch(e){
       }
 
@@ -224,6 +230,7 @@ const App = {
         if (drawTime == 0){
           first = await LockHistory(this.account,0).call();
           first = first[0];
+
           let myself = lock*5;
           let diff = unixTime - first;
           if((teamamount < myself) && (diff<this.withDrawDays)){
@@ -236,7 +243,10 @@ const App = {
           first = drawTime;
         }
         lastingDays = this.diff(first,unixTime);
+        console.log(first);
+        console.log("Locking Time is: " +this.dateFtt(first,1))
         first = this.dateFtt(first,1);
+
       }catch(e){
         console.log(e);
       };
