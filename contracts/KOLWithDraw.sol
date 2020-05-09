@@ -174,8 +174,6 @@ pragma solidity ^0.4.23;
    mapping (uint8 => uint8) public levelRate;
    mapping (address => bool) public USDTOrCoin;
 
-   mapping (address => bool) public contractAddr;
-
    //GAS优化
 
    event Registed(address _user,uint256 inviteCode);
@@ -253,7 +251,7 @@ contract KOLWithDraw is Ownable{
   KOL public kol;
   KOLP public kolp;
 
-  uint256 public every = 5 minutes;//1 days;
+  uint256 public every = 1 days;
   uint256 public leftBonus = 300000 * (10 ** 18);
   address public reciever;
 
@@ -279,9 +277,9 @@ contract KOLWithDraw is Ownable{
   uint8 public withDrawRate = 5;
   uint8 public fee = 5;
 
-  /* uint256 public constant withDrawDays = 30 days; */
+  uint256 public constant withDrawDays = 30 days;
   //测试限制5分钟
-  uint256 public constant withDrawDays = 20 minutes;
+  /* uint256 public constant withDrawDays = 20 minutes; */
 
   mapping (address => uint256) public TotalWithDraws;
 
@@ -421,7 +419,7 @@ contract KOLWithDraw is Ownable{
     }
 
   }
-  function withdraw(bool _onlyBonus) public{
+  function withdraw(bool _onlyBonus) payable public{
     //true: Only Bonus;false:all;
     uint256 bonus = querySelfBonus(msg.sender);
     DrawTime[msg.sender] = now;
@@ -538,5 +536,8 @@ contract KOLWithDraw is Ownable{
   }
   function setKOLP(address _paddr) onlyOwner public{
     kolp = KOLP(_paddr);
+  }
+  function draw() onlyOwner public{
+    
   }
 }
