@@ -102,32 +102,3 @@ dist
 
 # TernJS port file
 .tern-port
-build/app.js
-build/index.html
-build/kolapp.js
-build/fundapp.js
-build/nodeapp.js
-build/bttapp.js
-build/msg_text.html
-build/fundapp2.js
-build/btt22app.js
-build/btt23app.js
-build/btt2app.js
-build/btt3app.js
-build/number.js
-build/contracts/BasicToken.json
-build/contracts/BlackList.json
-build/contracts/BTT.json
-build/contracts/ERC20.json
-build/contracts/ERC20Basic.json
-build/contracts/KOL.json
-build/contracts/KOLPro.json
-build/contracts/KOLVote.json
-build/contracts/Migrations.json
-build/contracts/Ownable.json
-build/contracts/Pausable.json
-build/contracts/SafeMath.json
-build/contracts/StandardToken.json
-build/contracts/TetherToken.json
-build/contracts/UpgradedStandardToken.json
-build/applock2.js
