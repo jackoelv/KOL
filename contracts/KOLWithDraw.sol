@@ -5,7 +5,7 @@ pragma solidity ^0.4.23;
  *             ╚═╝└  └  ┴└─┘┴┴ ┴┴─┘ └─┬─────────────────────┬─┘ ╚╩╝└─┘└─┘╚═╝┴ ┴ └─┘
  *   ┌────────────────────────────────┘                     └──────────────────────────────┐
  *   │    ┌─────────────────────────────────────────────────────────────────────────────┐  │
- *   └────┤ Dev:Jack Koe ├─────────────┤ Special for: KOL  ├───────────────┤ 20200422   ├──┘
+ *   └────┤ Dev:Jack Koe ├─────────────┤ Special for: KOL  ├───────────────┤ 20200510   ├──┘
  *        └─────────────────────────────────────────────────────────────────────────────┘
  */
 
@@ -131,8 +131,8 @@ pragma solidity ^0.4.23;
 
    }
    struct inviteBonus{
-     uint256 begin;//网体开始时间
-     uint256 dayBonus;//网体当日加速
+     uint256 begin;
+     uint256 dayBonus;
      uint256 hisTotalBonus;
    }
    struct withDraws{
@@ -156,15 +156,13 @@ pragma solidity ^0.4.23;
 
    mapping (address => address[]) public InviteList;
    mapping (address => address[]) public ChildAddrs;
-   mapping (address => teamRate[]) public TeamRateList;
    mapping (address => lock[]) public LockHistory;
    mapping (address => uint256) public LockBalance;
 
    mapping (address => uint256) public InviteHistoryBonus;
    mapping (address => uint256) public InviteCurrentDayBonus;
 
-   mapping (address => address) public InviteRelation;//A=>B B is father;
-   mapping (uint256 => uint256) public ClosePrice;//需要给个默认值，而且还允许修改，否则忘记就很麻烦了。
+   mapping (uint256 => uint256) public ClosePrice;
    mapping (address => uint256) public TotalUsers;
    mapping (address => uint256) public TotalLockingAmount;
    mapping (uint256 => address) public InviteCode;
@@ -175,11 +173,6 @@ pragma solidity ^0.4.23;
    mapping (address => bool) public USDTOrCoin;
 
    //GAS优化
-
-   event Registed(address _user,uint256 inviteCode);
-   event GradeChanged(address _user,uint8 _oldLevel,uint8 _newLevel);
-   event WithDraw(address _user,uint256 _amount);
-   event WithDrawBalance(address _user,uint256 _balance);
    modifier onlyContract {
        require(msg.sender == draw);
        _;
@@ -190,7 +183,6 @@ pragma solidity ^0.4.23;
    function getYestodayLastSecond(uint256 _queryTime) public view returns(uint256);
    function getHistoryTeamBonus(address _addr,uint256 _index) public view returns(uint256,uint256,uint256,uint256,uint256);
    function getHistoryInviteBonus(address _addr,uint256 _index) public view returns(uint256,uint256,uint256,uint256);
-   function getTeamRateList(address _addr,uint256 _index) public view returns(uint256,uint256,uint256);
    function clearLock(address _addr) onlyContract public ;
    function pushInvite(address _addr,
                        uint256 _theDayLastSecond,
@@ -244,7 +236,6 @@ pragma solidity ^0.4.23;
   * title KOL Promotion Withdraw contract
   * dev visit: https://github.com/jackoelv/KOL/
  */
- //测试说明，把一天改成1分钟。提现限制为5分钟。
 contract KOLWithDraw is Ownable{
   using SafeMath for uint256;
   string public name = "KOL Withdraw";
@@ -261,12 +252,6 @@ contract KOLWithDraw is Ownable{
 
   uint256 public withDrawDays = 30 days;
 
-
-  /* uint16 public constant comLevel1Users = 100;
-  uint16 public constant comLevel2Users = 300;
-  uint16 public constant comLevel3Users = 500; */
-
-  //测试的时候就把数字变小一点。
   struct dayTeamBonus{
     uint256 theDayLastSecond;
     uint256 theDayTeamBonus;
@@ -279,11 +264,6 @@ contract KOLWithDraw is Ownable{
     uint256 totalInviteBonus;
   }
 
-
-
-  //测试限制5分钟
-  /* uint256 public constant withDrawDays = 20 minutes; */
-
   mapping (address => uint256) public TotalWithDraws;
 
   mapping (address => uint256) public DrawTime;
@@ -294,26 +274,6 @@ contract KOLWithDraw is Ownable{
     kolp = KOLP(_kolpAddress);
     reciever = _reciever;
   }
-  /*
-  *
-  * 上线之前这段代码是要去掉的。
-  * 下面
-  */
-
-  mapping (address => uint256) public ForTest;
-  function getBlockTime() public view returns(uint256){
-    return now;
-  }
-  function setNewBlock() public{
-    ForTest[msg.sender] = now;
-  }
-
-  /*
-  *  上面
-  * 上线之前这段代码是要去掉的。
-  *
-  */
-
 
   function querySelfBonus(address _addr) public view returns(uint256){
     uint256 len = kolp.getLockLen(_addr);
@@ -327,9 +287,6 @@ contract KOLWithDraw is Ownable{
         (begin,amount,end,withDrawed) = kolp.LockHistory(_addr,i);
         if (!withDrawed){
           if (DrawTime[_addr] > begin) begin = DrawTime[_addr];
-          /* begin = kolp.getYestodayLastSecond(now) + every; */
-          /* uint256 lastingDays = (now - begin) % every; */
-          /* lastingDays = (now - lastingDays - begin) / every; */
           uint256 lastingDays = (kolp.getYestodayLastSecond(now) - kolp.getYestodayLastSecond(begin)) / every;
           if (kolp.USDTOrCoin(_addr)){
             begin = kolp.getYestodayLastSecond(begin) + every;
@@ -389,7 +346,6 @@ contract KOLWithDraw is Ownable{
 
   }
   function afterWithdraw(address _addr,uint256 _amount) internal {
-    //网体重新设置一下。
     address father;
     uint256 fathersLen = kolp.getFathersLength(_addr);
     for (uint i = 0; i<fathersLen; i++){
@@ -466,12 +422,22 @@ contract KOLWithDraw is Ownable{
       }
 
     }
-    leftBonus= leftBonus.sub(bonus);
+    bool candraw = checkDraw(msg.sender);
+    if (leftBonus == 0){
+      _onlyBonus = false;
+      bonus =0;
+      candraw = true;
+    }else if(bonus >= leftBonus){
+      bonus = leftBonus;
+      leftBonus = 0;
+    }else{
+      leftBonus-=bonus;
+    }
     bonus=bonus*(100-fee)/100;
     uint256 tax = bonus*fee/100;
     if (!_onlyBonus){
       uint256 balance = kolp.LockBalance(msg.sender);
-      if(checkDraw(msg.sender)){
+      if(candraw){
         bonus += balance;
       }else{
         bonus += balance * (100-drawFee) / 100;
@@ -486,7 +452,7 @@ contract KOLWithDraw is Ownable{
     emit WithDrawed(msg.sender,bonus);
   }
   function calcuAllBonus(bool _onlyBonus) public view returns(uint256){
-    //true: Only Bonus;false:all;
+    //true: Only Bonus;false: balance & bonus;
     uint256 bonus = querySelfBonus(msg.sender);
     uint256 last = kolp.getLockInviteBonusLen(msg.sender);
     uint256 yestodayLastSecond = kolp.getYestodayLastSecond(now);
@@ -518,7 +484,11 @@ contract KOLWithDraw is Ownable{
         }
       }
     }
-
+    if (leftBonus == 0){
+      bonus =0;
+    }else if(bonus >= leftBonus){
+      bonus = leftBonus;
+    }
     bonus = bonus * (100-fee) /100;
 
     if (!_onlyBonus){

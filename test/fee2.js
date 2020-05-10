@@ -15,9 +15,9 @@ contract("testjoin",accounts => {
     let txFeeDraw= web3.utils.toWei("0.005","ether");
     let paddr = p.address;
 
-    var iCode=await p.RInviteCode(accounts[59]);
+    var iCode=await p.RInviteCode(accounts[31]);
     iCode = web3.utils.BN(iCode);
-    for (var m = 60; m<80; m++){
+    for (var m = 32; m<80; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
       await sleep(1000);
       await p.register(iCode,{from:accounts[m]});

@@ -5,7 +5,7 @@ pragma solidity ^0.4.23;
  *             ╚═╝└  └  ┴└─┘┴┴ ┴┴─┘ └─┬─────────────────────┬─┘ ╚╩╝└─┘└─┘╚═╝┴ ┴ └─┘
  *   ┌────────────────────────────────┘                     └──────────────────────────────┐
  *   │    ┌─────────────────────────────────────────────────────────────────────────────┐  │
- *   └────┤ Dev:Jack Koe ├─────────────┤ Special for: KOL  ├───────────────┤ 20200422   ├──┘
+ *   └────┤ Dev:Jack Koe ├─────────────┤ Special for: KOL  ├───────────────┤ 20200510   ├──┘
  *        └─────────────────────────────────────────────────────────────────────────────┘
  */
 
@@ -140,7 +140,6 @@ pragma solidity ^0.4.23;
   * title KOL Promotion contract
   * dev visit: https://github.com/jackoelv/KOL/
  */
- //测试说明，把一天改成1分钟。提现限制为5分钟。
 contract KOLPro is Ownable{
   using SafeMath for uint256;
   string public name = "KOL Promotion";
@@ -164,11 +163,6 @@ contract KOLPro is Ownable{
   uint16 public  comLevel2Users = 200;
   uint16 public  comLevel3Users = 300;
 
-  //测试的时候就把数字变小一点。
-  /* uint16 public  comLevel1Users = 2;
-  uint16 public  comLevel2Users = 3;
-  uint16 public  comLevel3Users = 4; */
-
   uint256 public  comLevel1Amount = 30000 * (10 ** 18);
   uint256 public  comLevel2Amount = 50000 * (10 ** 18);
   uint256 public  comLevel3Amount = 100000 * (10 ** 18);
@@ -176,7 +170,7 @@ contract KOLPro is Ownable{
   uint8 public constant comLevel1 = 3;
   uint8 public constant comLevel2 = 5;
   uint8 public constant comLevel3 = 10;
-  uint8 public constant inviteLevel1 = 2;//直推3个才能升级网体1
+  uint8 public constant inviteLevel1 = 2;
   uint8 public constant inviteLevel2 = 3;
   uint8 public constant inviteLevel3 = 5;
 
@@ -185,8 +179,6 @@ contract KOLPro is Ownable{
   bool public going = true;
 
   uint256 public constant withDrawDays = 30 days;
-  //测试限制5分钟
-  /* uint256 public constant withDrawDays = 2 minutes; */
 
   struct lock{
     uint256 begin;
@@ -225,7 +217,7 @@ contract KOLPro is Ownable{
   mapping (address => lock[]) public LockHistory;
   mapping (address => uint256) public LockBalance;
 
-  mapping (uint256 => uint256) public ClosePrice;//需要给个默认值，而且还允许修改，否则忘记就很麻烦了。
+  mapping (uint256 => uint256) public ClosePrice;
   mapping (address => uint256) public TotalUsers;
   mapping (address => uint256) public TotalLockingAmount;
   mapping (uint256 => address) public InviteCode;
@@ -245,8 +237,6 @@ contract KOLPro is Ownable{
       require(msg.sender == draw);
       _;
   }
-
-
   constructor(address _tokenAddress,address _receiver,uint256 _begin,uint256 _end) public {
     kol = KOL(_tokenAddress);
     receiver = _receiver;
@@ -484,9 +474,6 @@ contract KOLPro is Ownable{
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function getYestodayLastSecond(uint256 _queryTime) public view returns(uint256){
-    //录入的价格为4位小数
-    /* return (_queryTime.sub(_queryTime.sub(begin) % 86400) - 1); */
-    //测试 上一分钟的最后一秒
     require(_queryTime <= (end + every));
     return (_queryTime.sub(_queryTime.sub(begin) % every) - 1);
   }
@@ -496,10 +483,9 @@ contract KOLPro is Ownable{
   */
   function putClosePrice(uint256 price,uint256 _queryTime) onlyOwner public{
     //录入的价格为4位小数
-    require(_queryTime <= end);
+    require(_queryTime <= (end + 2*every));
     uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
     ClosePrice[yestodayLastSecond] = price;
-
   }
 
   function setContract(address _addr) onlyOwner public{
@@ -508,8 +494,11 @@ contract KOLPro is Ownable{
   function setGoing(bool _going) onlyOwner public{
     going = _going;
   }
+  function setBegin(uint256 _begin) onlyOwner public{
+    begin = _begin;
+  }
   function setEnd(uint256 _end) onlyOwner public{
-    end = end;
+    end = _end;
   }
   function setLevelN(uint8 _level,uint16 _users,uint256 _amount) onlyOwner public{
     if (_level == 1){
@@ -616,7 +605,6 @@ contract KOLPro is Ownable{
   function draw() onlyOwner public{
     receiver.send(address(this).balance);
   }
-
 
 
 }
