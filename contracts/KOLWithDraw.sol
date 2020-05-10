@@ -422,7 +422,7 @@ contract KOLWithDraw is Ownable{
   }
   function withdraw(bool _onlyBonus) payable public{
     //true: Only Bonus;false:all;
-    require(msg.value > etherFee);
+    require(msg.value >= etherFee);
     uint256 bonus = querySelfBonus(msg.sender);
     DrawTime[msg.sender] = now;
     uint256 last = kolp.getLockInviteBonusLen(msg.sender);
@@ -544,5 +544,8 @@ contract KOLWithDraw is Ownable{
   }
   function setetherFee(uint256 _fee) onlyOwner public{
     etherFee = _fee;
+  }
+  function setReciever(address _reciever) onlyOwner public{
+    reciever = _reciever;
   }
 }

@@ -12,7 +12,7 @@ contract("testjoin",accounts => {
     let draw = "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651";
 
     let txFeeJoin= web3.utils.toWei("0.2","ether");
-    let txFeeDraw= web3.utils.toWei("0.5","ether");
+    let txFeeDraw= web3.utils.toWei("0.005","ether");
     let paddr = p.address;
 
     var iCode=await p.RInviteCode(accounts[61]);
