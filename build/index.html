@@ -1,254 +1,277 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>KOL</title>
-  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-   <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0, initial-scale=1.0, user-scalable=no">
-  <link rel="stylesheet" href="https://i.gtimg.cn/vipstyle/frozenui/2.0.0/css/frozen.css">
-  <link rel="Shortcut Icon" href="./images/KOL128.ico" type="image/x-icon" />
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+        <title>KOL共识裂变</title>
+        <!-- 引入 WeUI -->
+        <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/2.0.1/weui.min.css"/>
 
-</head>
-<body style = "margin-left: 1%;margin-right: 1%;margin-top: 2%;font-family: 'Open Sans', 'sans-serif';">
-  <h1><p class="ui-txt-highlight">工资锁仓发行合约V2-社区KOL联盟</p></h1>
+    </head>
+    <script type="text/javascript" src="https://res.wx.qq.com/open/libs/weuijs/1.2.1/weui.min.js"></script>
 
+    <body>
 
-  <div class="ui-tooltips">
-    <div class="ui-tooltips-cnt ui-border-b">
-        <p class="startup">加载链上数据进行中......</p><a class="ui-icon-close"></a>
-    </div>
-  </div>
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>请输入任务ID，默认是当期任务：
+        <!-- 使用 -->
+        <div class="container" id="container"></div>
+        <div class="page" style="background-color:#F26322">
+            <div class="page__hd" style="padding:40px">
+                <h1 class="page__title" style="color:rgb(255, 255, 255);text-align: center">KOL共识裂变计划</h1>
+                <p class="page__desc" style="color:rgb(255, 255, 255);text-align: center;font-size:16px">KOL持币生息--社区KOL联盟出品</p>
             </div>
+            <div class="page__bd">
+
+                <div class="weui-cells__title" style="color:rgb(255, 255, 255);text-align: center;font-size:26px">KOL大舞台，有梦你就来</div>
+                <div id="firstHide" >
+                    <div class="weui-cells weui-cells_form" style="color:#181B46">
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">我的钱包</label></div>
+                      </div>
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__bd">
+                              <input class="weui-input"  type="text" name="addr" style="font-size: 14px" placeholder="0x0000000000000000000000000000000000000000" readonly/>
+                          </div>
+                      </div>
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">余额</label></div>
+                          <div class="weui-cell__bd">
+                              <input class="weui-input"  type="text" name="balance" placeholder="0" readonly/>
+                          </div>
+                      </div>
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">现在</label></div>
+                          <div class="weui-cell__bd">
+                              <input class="weui-input"  type="text" name="current" id="current" placeholder="0" readonly/>
+                          </div>
+                      </div>
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">周期</label></div>
+                          <div class="weui-cell__bd">
+                              <input class="weui-input"  type="text" name="lastingDays" placeholder="0" readonly/>
+                          </div>
+                      </div>
+
+                      <div class="weui-flex" style="text-align: center;background-color:#F26322;">
+                          <div class="weui-flex__item"><div id="joinTop" class="placeholder" style="background-color:rgb(242, 242, 242);color:rgb(88, 189, 107)">入金</div></div>
+                          <div class="weui-flex__item"><div id="drawTop" class="placeholder" style="background-color:rgb(88, 189, 107);color:rgb(242, 242, 242)">提现</div></div>
+                          <div class="weui-flex__item"><div id="inviteTop" class="placeholder" onclick="App.invite()" style="background-color:#181B46;color:rgb(255, 255, 255)">邀请</div></div>
+                      </div>
+
+                      <div class="weui-cells__title" style="background-color:#FEC804;color:rgb(255, 255, 255)">DASHBOARD</div>
+                        <div class="weui-cell weui-cell_readonly">
+                            <div class="weui-cell__hd"><label class="weui-label" style="width:88px">本金</label></div>
+                            <div class="weui-cell__bd">
+                                <input class="weui-input"  type="text" name="lock"  value = "0" placeholder="0" readonly/>
+                            </div>
+                            <div class="weui-cell__hd"><label class="weui-label" style="width:46px">收益</label></div>
+                            <div class="weui-cell__bd">
+                                <input class="weui-input"  type="text" name="bonus"  value = "0" placeholder="0" readonly/>
+                            </div>
+                        </div>
+                        <div class="weui-cell weui-cell_readonly">
+                            <div class="weui-cell__hd"><label class="weui-label" style="width:46px">生息</label></div>
+                            <div class="weui-cell__bd">
+                                <input class="weui-input"  type="text" name="self"  value = "0" placeholder="0" readonly/>
+                            </div>
+                            <div class="weui-cell__hd"><label class="weui-label" style="width:46px">推广</label></div>
+                            <div class="weui-cell__bd">
+                                <input class="weui-input"  type="text" name="invite"  value = "0" placeholder="0" readonly/>
+                            </div>
+                            <div class="weui-cell__hd"><label class="weui-label" style="width:46px">网体</label></div>
+                            <div class="weui-cell__bd">
+                                <input class="weui-input"  type="text" name="team"  value = "0" placeholder="0" readonly/>
+                            </div>
+                        </div>
+                        <div class="weui-cells__title" style="background-color:#FEC804;color:#FFFFFF">TEAM</div>
+                        <div class="weui-cell weui-cell_readonly">
+                            <div class="weui-cell__hd"><label class="weui-label" style="width:88px">直推</label></div>
+                            <div class="weui-cell__bd">
+                                <input class="weui-input"  type="text" name="childs"  value = "0" placeholder="0" readonly/>
+                            </div>
+                            <div class="weui-cell__hd"><label class="weui-label" style="width:88px">团队</label></div>
+                            <div class="weui-cell__bd">
+                                <input class="weui-input"  type="text" name="teamusers"  value = "0" placeholder="0" readonly/>
+                            </div>
+                        </div>
+                        <div class="weui-cell weui-cell_readonly">
+                            <div class="weui-cell__hd"><label class="weui-label" style="width:88px">级别</label></div>
+                            <div class="weui-cell__bd">
+                                <input class="weui-input"  type="text" name="level"  value = "0" placeholder="0" readonly/>
+                            </div>
+                            <div class="weui-cell__hd"><label class="weui-label" style="width:88px">网体</label></div>
+                            <div class="weui-cell__bd">
+                                <input class="weui-input"  type="text" name="teamamount"  value = "0" placeholder="0" readonly/>
+                            </div>
+                        </div>
+
+
+
+                </div><!-- end -->
+          </div><!-- firstHide -->
+          <div id="firstRegister" style="background-color:#FFFFFF;display:none">
+                <div class="weui-cells__title" style="color:#7A2D59;font-size:28px">欢迎加入KOL共识裂变计划</div>
+                <div class="weui-cells weui-cells_form" style="background-color:#7A2D59;color:#FFFFFF">
+                <div class="weui-cell">
+                    <div class="weui-cell__hd"><label class="weui-label" style="width:128px">请输入邀请码</label></div>
+                    <div class="weui-cell__bd">
+                        <input class="weui-input"  type="text" name="iCodeRegister"  value = "0" placeholder="0"/>
+                    </div>
+                </div>
+                <div class="weui-btn-area">
+                    <a class="weui-btn weui-btn_primary" id="Register" onclick="App.reg()" style="background-color:#F26322">注册</a>
+                </div>
+              </div>
+
+          </div><!-- firstRegister-->
+          <div id="joindrawpanel" >
+              <div class="weui-cells weui-cells_form" style="background-color:#7A2D59;color:#FFFFFF">
+                  <div class="weui-cell">
+                      <div class="weui-cell__hd"><label class="weui-label" style="width:108px">请输入数量</label></div>
+                      <div class="weui-cell__bd">
+                          <input class="weui-input"  type="text" name="joinAmount"  value = "100" placeholder="100"/>
+                      </div>
+                      <div class="weui-cell__bd">
+                      </div>
+                  </div>
+                  <div id="ucfirst">
+                    <div class="weui-cell weui-cell_switch">
+                      <div class="weui-cell__bd">选择金本位</div>
+                      <div class="weui-cell__ft">
+                          <input class="weui-switch" id="usdtcoin" type="checkbox" />
+                      </div>
+                    </div>
+                  </div>
+                  <div id="uc">
+                    <div class="weui-cell weui-cell_readonly">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:108px">您当前处于：</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="ucflag"  value = "0" placeholder="币本位" readonly/>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="weui-btn-area">
+                      <a class="weui-btn weui-btn_default" id="Join" onclick="App.approve()">立刻参与</a>
+                  </div>
+
+              </div>
+              <div class="weui-cells weui-cells_form" style="background-color:#181B46;color:#FFFFFF">
+                <div class="weui-cell weui-cell_readonly">
+                    <div class="weui-cell__hd"><label class="weui-label" style="width:108px">已提现收益：</label></div>
+                    <div class="weui-cell__bd">
+                        <input class="weui-input"  type="text" name="totaldraws"  value = "0" placeholder="0" readonly/>
+                    </div>
+                </div>
+                  <div class="weui-cell weui-cell_switch">
+                      <div class="weui-cell__bd" id="bonustip">只提收益</div>
+                      <div class="weui-cell__ft">
+                          <input class="weui-switch" id="allbonus" type="checkbox" checked="true" />
+                      </div>
+                  </div>
+                  <div class="weui-btn-area">
+                      <a class="weui-btn weui-btn_primary" id="Draw" onclick="App.draw()">提现</a>
+                  </div>
+                </div>
+                <div class="weui-cells weui-cells_form" style="background-color:#F26322;color:#FFFFFF">
+                  <div class="weui-cell weui-cell_readonly">
+                      <div class="weui-cell__hd"><label class="weui-label" style="width:108px">我的邀请码：</label></div>
+                      <div class="weui-cell__bd">
+                          <input class="weui-input"  type="text" name="iCode"  value = "0" placeholder="0" readonly/>
+                      </div>
+                  </div>
+                  <div class="weui-btn-area scroll">
+                      <a class="weui-btn weui-btn_default" id="invite" onclick="App.invite()" style="background-color:#181B46;color:#FFFFFF">邀请</a>
+                  </div>
+                  <div id="qr" style="display:none;height:660px">
+                    <div class="weui-cell weui-cell_readonly">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:300px;text-align: center">邀请好友用imtoken扫码参与</label></div>
+                    </div>
+                    <div id="qrcode" style="text-align: center"></div>
+                    <div class="weui-btn-area">
+                        <a class="weui-btn weui-btn_default" id="top">返回顶部</a>
+                    </div>
+                  </div>
+                </div>
+
+
+          </div><!-- joindrawpanel-->
+        </div><!-- page__hd -->
         </div>
-
-      <form action="">
-      <section class="ui-input-wrap ui-border-t">
-          <div class="ui-input ui-border-radius ui-input-text">
-              <input type="text" name="MissionId" value="" placeholder="等待加载当期任务ID...">
-          </div>
-      </section>
-
-          <div class="ui-form-item ui-form-item-radio ui-border-b">
-              <label class="ui-radio" for="radio">
-                  <input type="radio" checked="true" name="Agree" value="true">
-              </label>
-              <p>同意</p>
-          </div>
-          <div class="ui-form-item ui-form-item-radio ui-border-b">
-
-              <label class="ui-radio" for="radio">
-                  <input type="radio" name="Agree" value="false">
-              </label>
-              <p>反对</p>
-          </div>
-      </form>
-
-      <div class="ui-tooltips ui-tooltips-guide">
-          <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-              <i class="ui-icon-talk"></i>投票结果是
-          </div>
-      </div>
-      <div class="ui-tooltips">
-          <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <p class="status">请选择正确身份点击参与投票...</p>
-          </div>
-      </div>
-
-      <div class="ui-btn-wrap">
-              <button class="ui-btn-lg ui-btn-danger" onclick="App.voteKol(1)">超级节点投票按这里</button>
-      </div>
-
-      <div class="ui-btn-wrap">
-              <button class="ui-btn-lg ui-btn-primary" onclick="App.voteKol(2)">社区节点投票按这里</button>
-      </div>
-
-
-
-
-<button class="ui-btn-lg" onclick="App.refreshBalance()">点击这里获取详情</button>
-
-<div class="ui-tooltips">
-    <div class="ui-tooltips-cnt ui-border-b">
-        <strong class="getDetail">准备中...</strong><a class="ui-icon-close"></a>
-    </div>
-</div>
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>我的钱包地址是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <strong class="myAddress">准备中...</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>我的ETH余额是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <strong class="ethBalance">准备中...</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>我的KOL工资余额是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <strong class="balance">准备中...</strong>
-            </div>
-        </div>
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>我的KOL可释放余额是：
-            </div>
-        </div>
-
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <strong class="freeBalance">准备中...</strong>
-            </div>
-        </div>
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>我的KOL已释放金额是：
-            </div>
-        </div>
-
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <strong class="releasedKOL">准备中...</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-          <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-              <i class="ui-icon-talk"></i>目前工资释放比例为：
-          </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="nodeRate">请点击获取详情</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>我是超级节点吗？
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="supernode">准备中...</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>我是节点吗？
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="node">准备中...</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>近期任务我已经投票了吗？
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="voted">准备中...</strong>
-            </div>
-        </div>
-
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>当前查询的任务编号是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="missionid">请点击获取详情</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>当前查询的任务名称是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="missionName">请点击获取详情</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>当前查询的任务发行数量是：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="missionAmount">请点击获取详情</strong>
-            </div>
-        </div>
-
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>同意的超级节点数量：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="superVotedNum">请点击获取详情</strong>
-            </div>
-        </div>
-        <div class="ui-tooltips ui-tooltips-guide">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                <i class="ui-icon-talk"></i>同意的节点数量：
-            </div>
-        </div>
-        <div class="ui-tooltips">
-            <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-                 <strong class="nodeVotedNum">请点击获取详情</strong>
-            </div>
-        </div>
-
-      <div class="ui-tooltips ui-tooltips-guide">
-          <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-              <i class="ui-icon-talk"></i>当前查询的任务投票截止时间是：
-          </div>
-      </div>
-      <div class="ui-tooltips">
-          <div class="ui-tooltips-cnt ui-tooltips-cnt-link ui-border-b">
-               <strong class="missionEndTime">请点击获取详情</strong>
-          </div>
-      </div>
-
-      <div class="ui-btn-wrap">
-              <button class="ui-btn-lg ui-btn-danger" id="releaseBtn" style="display:none" onclick="App.getKOL()">释放我的KOL</button>
-      </div>
-
-
-
-
-</body>
-<script src="https://code.jquery.com/jquery-3.1.1.slim.min.js"></script>
-<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/applock3.js"></script>
-<script src="number.js"></script>
+    </body>
+<!-- <script src="jquery-3.1.1.slim.min.js"></script>
+<script src="jquery.autocomplete.js"></script> -->
 <!-- <script src="app.js"></script> -->
+<!-- <script src="jquery.qrcode.min.js"></script>
+<script src="number.js"></script> -->
+<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/jquery-3.1.1.slim.min.js"></script>
+<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/jquery.autocomplete.js"></script>
+<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/bapp.js"></script>
+<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/jquery.qrcode.min.js.js"></script>
+<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/number.js"></script>
+
+<script type="text/javascript">
+var countries = [
+    { value: 'Andorra', data: 'AD' },
+    // ...
+    { value: 'Zimbabwe', data: 'ZZ' }
+];
+window.setInterval(function(){
+    var _date = App.dateFtt(0,0);
+    $("input[name='current']").val(_date);
+}, 1000);
+$('#autocomplete').autocomplete({
+    lookup: countries,
+    onSelect: function (suggestion) {
+        console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+    }
+});
+$(function(){
+    var $allbonus =$('#allbonus');
+
+    $('#allbonus').on('click', function(){
+        if ($('#allbonus').prop("checked")){
+          $('#bonustip').html('只提收益');
+        }else{
+          $('#bonustip').html('全部提现');
+        }
+    });
+});
+
+$('#invite').click(function(){
+    window.scrollTo({
+      top: 3000,
+      behavior: "smooth"
+    });
+ });
+
+ $('#top').click(function(){
+     window.scrollTo({
+       top: 0,
+       behavior: "smooth"
+     });
+  });
+
+  $('#joinTop').click(function(){
+      window.scrollTo({
+        top: 700,
+        behavior: "smooth"
+      });
+   });
+
+   $('#drawTop').click(function(){
+       window.scrollTo({
+         top: 1060,
+         behavior: "smooth"
+       });
+    });
+
+    $('#inviteTop').click(function(){
+        window.scrollTo({
+          top: 3000,
+          behavior: "smooth"
+        });
+
+     });
+
+
+</script>
 </html>

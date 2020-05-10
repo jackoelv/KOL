@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+        <title>WeUI</title>
+        <!-- 引入 WeUI -->
+        <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.3/weui.min.css"/>
+    </head>
+    <body>
+        <!-- 使用 -->
+        <div class="container" id="container"></div>
+        <div class="page">
+          <div class="weui-msg">
+              <div class="weui-msg__text-area">
+                  <h2 class="weui-msg__title">操作成功</h2>
+                  <p class="weui-msg__desc">内容详情，可根据实际需要安排，如果换行则不超过规定长度，居中展现<a href="javascript:void(0);">文字链接</a></p>
+              </div>
+              <div class="weui-cells"  id="list">
+                <div class="weui-cell weui-cell_access">
+
+                    <div class="weui-cell__bd" style="text-align:left">单行列表</div>
+                    <div class="weui-cell__ft" style="font-size: 0">
+                        <span style="vertical-align:middle; font-size: 17px;text-align:right">详细信息</span>
+                    </div>
+                </div>
+            </div>
+                          <div class="weui-msg__opr-area">
+                  <p class="weui-btn-area">
+                      <a href="javascript:history.back();" class="weui-btn weui-btn_primary">确认执行</a>
+                      <a href="javascript:history.back();" class="weui-btn weui-btn_primary">返回修改</a>
+                  </p>
+              </div>
+          </div>
+        </div>
+    </body>
+</html>
