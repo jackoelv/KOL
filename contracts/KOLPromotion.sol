@@ -161,24 +161,24 @@ contract KOLPro is Ownable{
   uint8 public maxlevel = 9;
 
   uint16 public  comLevel1Users = 100;
-  uint16 public  comLevel2Users = 300;
-  uint16 public  comLevel3Users = 500;
+  uint16 public  comLevel2Users = 200;
+  uint16 public  comLevel3Users = 300;
 
   //测试的时候就把数字变小一点。
   /* uint16 public  comLevel1Users = 2;
   uint16 public  comLevel2Users = 3;
   uint16 public  comLevel3Users = 4; */
 
-  uint256 public  comLevel1Amount = 10000 * (10 ** 18);
-  uint256 public  comLevel2Amount = 30000 * (10 ** 18);
-  uint256 public  comLevel3Amount = 50000 * (10 ** 18);
+  uint256 public  comLevel1Amount = 30000 * (10 ** 18);
+  uint256 public  comLevel2Amount = 50000 * (10 ** 18);
+  uint256 public  comLevel3Amount = 100000 * (10 ** 18);
 
   uint8 public constant comLevel1 = 3;
   uint8 public constant comLevel2 = 5;
   uint8 public constant comLevel3 = 10;
-  uint8 public constant inviteLevel1 = 3;//直推3个才能升级网体1
-  uint8 public constant inviteLevel2 = 5;
-  uint8 public constant inviteLevel3 = 10;
+  uint8 public constant inviteLevel1 = 2;//直推3个才能升级网体1
+  uint8 public constant inviteLevel2 = 3;
+  uint8 public constant inviteLevel3 = 5;
 
 
   uint8 public constant fee = 5;

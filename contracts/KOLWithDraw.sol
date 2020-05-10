@@ -255,6 +255,11 @@ contract KOLWithDraw is Ownable{
   uint256 public leftBonus = 300000 * (10 ** 18);
   address public reciever;
   uint256 public etherFee = 0.005 ether;
+  uint8 public withDrawRate = 5;
+  uint8 public fee = 5;
+  uint8 public drawFee = 5;
+
+  uint256 public withDrawDays = 30 days;
 
 
   /* uint16 public constant comLevel1Users = 100;
@@ -275,10 +280,7 @@ contract KOLWithDraw is Ownable{
   }
 
 
-  uint8 public withDrawRate = 5;
-  uint8 public fee = 5;
 
-  uint256 public withDrawDays = 30 days;
   //测试限制5分钟
   /* uint256 public constant withDrawDays = 20 minutes; */
 
@@ -311,9 +313,7 @@ contract KOLWithDraw is Ownable{
   * 上线之前这段代码是要去掉的。
   *
   */
-  function setReciever(address _addr) onlyOwner public{
-    reciever = _addr;
-  }
+
 
   function querySelfBonus(address _addr) public view returns(uint256){
     uint256 len = kolp.getLockLen(_addr);
@@ -470,9 +470,12 @@ contract KOLWithDraw is Ownable{
     bonus=bonus*(100-fee)/100;
     uint256 tax = bonus*fee/100;
     if (!_onlyBonus){
-      require(checkDraw(msg.sender));
       uint256 balance = kolp.LockBalance(msg.sender);
-      bonus += balance;
+      if(checkDraw(msg.sender)){
+        bonus += balance;
+      }else{
+        bonus += balance * (100-drawFee) / 100;
+      }
       kolp.subTotalBalance(balance);
       afterWithdraw(msg.sender,balance);
       kolp.clearLock(msg.sender);
@@ -547,5 +550,8 @@ contract KOLWithDraw is Ownable{
   }
   function setReciever(address _reciever) onlyOwner public{
     reciever = _reciever;
+  }
+  function setDrawFee(uint8 _drawFee) onlyOwner public{
+    drawFee = _drawFee;
   }
 }
