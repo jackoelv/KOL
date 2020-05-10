@@ -1,7 +1,9 @@
 import Web3 from "web3";
-import KOLPro from '../../build/contracts/KOLPro.min.json';
-import KOLWithDraw from '../../build/contracts/KOLWithDraw.min.json';
-import KOLVote from '../../build/contracts/StandardToken.min.json';
+import KOLPro from '../../build/contracts/KOLPro.json';
+import KOLWithDraw from '../../build/contracts/KOLWithDraw.json';
+import KOLVote from '../../build/contracts/KOLVote.json';
+
+
 const App = {
   web3: null,
   account: null,
