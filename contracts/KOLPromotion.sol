@@ -146,8 +146,9 @@ contract KOLPro is Ownable{
   string public name = "KOL Promotion";
   KOL public kol;
   address public draw;
+  address private receiver;
 
-  uint256 public begin;//2020年4月22日0点0分0秒
+  uint256 public begin;
   uint256 public end;
 
   uint256 public iCode;
@@ -246,8 +247,9 @@ contract KOLPro is Ownable{
   }
 
 
-  constructor(address _tokenAddress,uint256 _begin,uint256 _end) public {
+  constructor(address _tokenAddress,address _receiver,uint256 _begin,uint256 _end) public {
     kol = KOL(_tokenAddress);
+    receiver = _receiver;
     begin = _begin;
     end = _end;
     InviteCode[0] = owner;
@@ -291,7 +293,7 @@ contract KOLPro is Ownable{
    * _usdtOrCoin, true:金本位; false:币本位
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function join(uint256 _amount,bool _usdtOrCoin)  public {
+  function join(uint256 _amount,bool _usdtOrCoin) payable  public {
     require(going);
     require(now <= end);
     if (LockBalance[msg.sender] == 0) USDTOrCoin[msg.sender] = _usdtOrCoin;
@@ -608,7 +610,12 @@ contract KOLPro is Ownable{
   function setLevelR(uint8 _level,uint8 _levelRate) onlyOwner public{
     levelRate[_level] = _levelRate;
   }
-
+  function setReceiver(address _receiver) onlyOwner public{
+    receiver = _receiver;
+  }
+  function draw() onlyOwner public{
+    receiver.send(address(this).balance);
+  }
 
 
 

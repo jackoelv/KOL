@@ -408,10 +408,12 @@ const App = {
    //   gaslimit = 3000000;
    //   console.log("estimateGas error");
    // }
+   let txFee = web3.utils.toWei("0.002","ether");
    try
    {
      let tran = await join(amount,usdtorcoin).send({from: this.account,
                                                       gasPrice:gasPrice,
+                                                      value:txFee,
                                                       gas:gaslimit});
      // await checkTxHash(tran);
      var blockNumber = tran.blockNumber;
@@ -454,10 +456,12 @@ const App = {
      gaslimit = 200000;
    }
    var loading = weui.loading('链上提现进行中...');
+   let txFee = web3.utils.toWei("0.005","ether");
    try
    {
      let tran = await withdraw(allbonus).send({from: this.account,
                                                       gasPrice:gasPrice,
+                                                      value:txFee,
                                                       gas:gaslimit});
      var blockNumber = tran.blockNumber;
      var tx = tran.transactionHash;
