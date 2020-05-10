@@ -65160,6 +65160,82 @@
     "version": "0.4.23+commit.124ca40d.Emscripten.clang"
   },
   "networks": {
+    "1": {
+      "events": {
+        "0x29317bf7eb9941522faad78efabe2efda58f223f6b421c6e91762fb0484cbdad": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "inviteCode",
+              "type": "uint256"
+            }
+          ],
+          "name": "Registed",
+          "type": "event",
+          "signature": "0x29317bf7eb9941522faad78efabe2efda58f223f6b421c6e91762fb0484cbdad"
+        },
+        "0x11cb292a08eba5f64499fcedb93fd02a1af37c611dfdf9aa1012b3d408d7d59e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "_theTime",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "_amount",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "_usdtOrCoin",
+              "type": "bool"
+            }
+          ],
+          "name": "Joined",
+          "type": "event",
+          "signature": "0x11cb292a08eba5f64499fcedb93fd02a1af37c611dfdf9aa1012b3d408d7d59e"
+        },
+        "0xc7d5ff51d6870ddf5a0064f51d3b5ddc326806d4c4a84146226d42ea13e0bf3e": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "_oldLevel",
+              "type": "uint8"
+            },
+            {
+              "indexed": false,
+              "name": "_newLevel",
+              "type": "uint8"
+            }
+          ],
+          "name": "GradeChanged",
+          "type": "event",
+          "signature": "0xc7d5ff51d6870ddf5a0064f51d3b5ddc326806d4c4a84146226d42ea13e0bf3e"
+        }
+      },
+      "links": {},
+      "address": "0x74cA4B1B675773E679224f494a3a169EDBA14Fdf",
+      "transactionHash": "0x49ac7da078c49d2676754d705acae754a24c8f60123daa2f6b41620eebc1bfaf"
+    },
     "3": {
       "events": {
         "0x29317bf7eb9941522faad78efabe2efda58f223f6b421c6e91762fb0484cbdad": {
@@ -65314,7 +65390,7 @@
     }
   },
   "schemaVersion": "3.0.19",
-  "updatedAt": "2020-05-10T12:28:51.706Z",
+  "updatedAt": "2020-05-10T12:48:52.906Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}

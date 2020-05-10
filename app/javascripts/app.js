@@ -10,14 +10,12 @@ const App = {
   metaP: null,
   metaD: null,
   metaK:null,
-  // paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
-  // daddr: "0xa874BF09C7b7d573B7f84f653cFEA6E0F707D157",
-  kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
-  paddr: "0x3779B8EEbAf4737681007E88C2a99cc99043A590",
-  daddr: "0x4d361603fF0485F5CC935431027488FC67E0178D",
+  kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
+  paddr: "0x74cA4B1B675773E679224f494a3a169EDBA14Fdf",
+  daddr: "0x076B7197E9f23Cce5B116dF5D971574E9D74E2b7",
 
   load: null,
-  withDrawDays: 1200000,//线上改成30天。
+  withDrawDays: 2592000,
   canDraw:false,
   diff: function(a,b){
     var begin =1589022299+1;
@@ -267,7 +265,7 @@ const App = {
     }
 
 
-    var url = "https://bonus.kols.club?iCode=" + iCode;
+    var url = "https://b.kols.club?iCode=" + iCode;
     $('#qrcode').html('').qrcode({
                         text: url});
 
@@ -401,13 +399,6 @@ const App = {
 
    let gasPrice = await this.getGasPrice();
    var gaslimit = 3000000;
-   // try{
-   //   gaslimit = await join(amount,usdtorcoin).estimateGas();
-   //   gaslimit = this.addGasLimit(gaslimit);
-   // }catch(e){
-   //   gaslimit = 3000000;
-   //   console.log("estimateGas error");
-   // }
    let txFee = web3.utils.toWei("0.002","ether");
    try
    {
@@ -443,9 +434,24 @@ const App = {
    var ck=document.getElementById("allbonus");
    let allbonus = ck.checked;//$("input[name='usdtcoin']:checked").val();
    if((!this.canDraw)&&(!allbonus)){
-     weui.topTips('不符合提现本金的条件');
-     return;
+     weui.topTips('未达标自由提现，将扣除5%本金解约');
+     weui.dialog({
+          title: '将扣除5%手续费',
+          content: '时间不足30天且网体未达自身5倍',
+          className: 'custom-classname',
+          buttons: [{
+              label: '放弃',
+              type: 'default',
+              onClick: function () { return; }
+          }, {
+              label: '确认',
+              type: 'primary',
+              onClick: function () { alert('确定') }
+          }]
+      });
+
    }
+
    console.log(allbonus);
    let gasPrice = await this.getGasPrice();
    var gaslimit;
@@ -487,12 +493,6 @@ const App = {
  sleep: async function(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 },
-/**
-2  * [通过参数名获取url中的参数值]
-3  * 示例URL:http://htmlJsTest/getrequest.html?uid=admin&rid=1&fid=2&name=小明
-4  * @param  {[string]} queryName [参数名]
-5  * @return {[string]}           [参数值]
-6  */
 GetQueryValue: function(queryName) {
     var query = decodeURI(window.location.search.substring(1));
     var vars = query.split("&");
