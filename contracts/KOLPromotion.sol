@@ -5,7 +5,7 @@ pragma solidity ^0.4.23;
  *             ╚═╝└  └  ┴└─┘┴┴ ┴┴─┘ └─┬─────────────────────┬─┘ ╚╩╝└─┘└─┘╚═╝┴ ┴ └─┘
  *   ┌────────────────────────────────┘                     └──────────────────────────────┐
  *   │    ┌─────────────────────────────────────────────────────────────────────────────┐  │
- *   └────┤ Dev:Jack Koe ├─────────────┤ Special for: KOL  ├───────────────┤ 20200422   ├──┘
+ *   └────┤ Dev:Jack Koe ├─────────────┤ Special for: KOL  ├───────────────┤ 20200510   ├──┘
  *        └─────────────────────────────────────────────────────────────────────────────┘
  */
 
@@ -140,52 +140,45 @@ pragma solidity ^0.4.23;
   * title KOL Promotion contract
   * dev visit: https://github.com/jackoelv/KOL/
  */
- //测试说明，把一天改成1分钟。提现限制为5分钟。
 contract KOLPro is Ownable{
   using SafeMath for uint256;
   string public name = "KOL Promotion";
   KOL public kol;
   address public draw;
+  address private receiver;
 
-  uint256 public begin;//2020年4月22日0点0分0秒
+  uint256 public begin;
   uint256 public end;
 
   uint256 public iCode;
-  uint256 public every = 5 minutes;//1 days;
+  uint256 public every = 1 minutes; //1 days;
   uint256 public totalRegister;
   uint256 public totalBalance;
 
-  uint8 public constant userLevel1 = 20;
-  uint8 public constant userLevel2 = 10;
+  uint8 public  userLevel1 = 20;
+  uint8 public  userLevel2 = 10;
   uint8 public maxlevel = 9;
 
-  /* uint16 public constant comLevel1Users = 100;
-  uint16 public constant comLevel2Users = 300;
-  uint16 public constant comLevel3Users = 500; */
+  uint16 public  comLevel1Users = 100;
+  uint16 public  comLevel2Users = 200;
+  uint16 public  comLevel3Users = 300;
 
-  //测试的时候就把数字变小一点。
-  uint16 public constant comLevel1Users = 2;
-  uint16 public constant comLevel2Users = 3;
-  uint16 public constant comLevel3Users = 4;
-
-  uint256 public constant comLevel1Amount = 10000 * (10 ** 18);
-  uint256 public constant comLevel2Amount = 30000 * (10 ** 18);
-  uint256 public constant comLevel3Amount = 50000 * (10 ** 18);
+  uint256 public  comLevel1Amount = 30000 * (10 ** 18);
+  uint256 public  comLevel2Amount = 50000 * (10 ** 18);
+  uint256 public  comLevel3Amount = 100000 * (10 ** 18);
 
   uint8 public constant comLevel1 = 3;
   uint8 public constant comLevel2 = 5;
   uint8 public constant comLevel3 = 10;
-  uint8 public constant inviteLevel1 = 3;//直推3个才能升级网体1
-  uint8 public constant inviteLevel2 = 5;
-  uint8 public constant inviteLevel3 = 10;
+  uint8 public constant inviteLevel1 = 2;
+  uint8 public constant inviteLevel2 = 3;
+  uint8 public constant inviteLevel3 = 5;
 
 
   uint8 public constant fee = 5;
   bool public going = true;
 
-  /* uint256 public constant withDrawDays = 30 days; */
-  //测试限制5分钟
-  uint256 public constant withDrawDays = 2 minutes;
+  uint256 public constant withDrawDays = 30 days;
 
   struct lock{
     uint256 begin;
@@ -224,8 +217,7 @@ contract KOLPro is Ownable{
   mapping (address => lock[]) public LockHistory;
   mapping (address => uint256) public LockBalance;
 
-  mapping (address => address) public InviteRelation;//A=>B B is father;
-  mapping (uint256 => uint256) public ClosePrice;//需要给个默认值，而且还允许修改，否则忘记就很麻烦了。
+  mapping (uint256 => uint256) public ClosePrice;
   mapping (address => uint256) public TotalUsers;
   mapping (address => uint256) public TotalLockingAmount;
   mapping (uint256 => address) public InviteCode;
@@ -234,9 +226,6 @@ contract KOLPro is Ownable{
   mapping (address => uint8) public isLevelN;
   mapping (uint8 => uint8) public levelRate;
   mapping (address => bool) public USDTOrCoin;
-
-
-
 
   //GAS优化
 
@@ -248,10 +237,9 @@ contract KOLPro is Ownable{
       require(msg.sender == draw);
       _;
   }
-
-
-  constructor(address _tokenAddress,uint256 _begin,uint256 _end) public {
+  constructor(address _tokenAddress,address _receiver,uint256 _begin,uint256 _end) public {
     kol = KOL(_tokenAddress);
+    receiver = _receiver;
     begin = _begin;
     end = _end;
     InviteCode[0] = owner;
@@ -276,8 +264,6 @@ contract KOLPro is Ownable{
     emit Registed(msg.sender,iCode);
     totalRegister ++;
     address father = InviteCode[_fInviteCode];
-    /* InviteRelation[msg.sender] = father; */
-
     ChildAddrs[father].push(msg.sender);
     if (InviteList[msg.sender].length < 9){
       InviteList[msg.sender].push(father);
@@ -297,7 +283,7 @@ contract KOLPro is Ownable{
    * _usdtOrCoin, true:金本位; false:币本位
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function join(uint256 _amount,bool _usdtOrCoin) public {
+  function join(uint256 _amount,bool _usdtOrCoin) payable  public {
     require(going);
     require(now <= end);
     if (LockBalance[msg.sender] == 0) USDTOrCoin[msg.sender] = _usdtOrCoin;
@@ -488,9 +474,6 @@ contract KOLPro is Ownable{
    * dev visit: https://github.com/jackoelv/KOL/
   */
   function getYestodayLastSecond(uint256 _queryTime) public view returns(uint256){
-    //录入的价格为4位小数
-    /* return (_queryTime.sub(_queryTime.sub(begin) % 86400) - 1); */
-    //测试 上一分钟的最后一秒
     require(_queryTime <= (end + every));
     return (_queryTime.sub(_queryTime.sub(begin) % every) - 1);
   }
@@ -500,10 +483,9 @@ contract KOLPro is Ownable{
   */
   function putClosePrice(uint256 price,uint256 _queryTime) onlyOwner public{
     //录入的价格为4位小数
-    require(_queryTime <= end);
+    require(_queryTime <= (end + 2*every));
     uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
     ClosePrice[yestodayLastSecond] = price;
-
   }
 
   function setContract(address _addr) onlyOwner public{
@@ -512,9 +494,25 @@ contract KOLPro is Ownable{
   function setGoing(bool _going) onlyOwner public{
     going = _going;
   }
-  function setEnd(uint256 _end) onlyOwner public{
-    end = end;
+  function setBegin(uint256 _begin) onlyOwner public{
+    begin = _begin;
   }
+  function setEnd(uint256 _end) onlyOwner public{
+    end = _end;
+  }
+  function setLevelN(uint8 _level,uint16 _users,uint256 _amount) onlyOwner public{
+    if (_level == 1){
+      comLevel1Users = _users;
+      comLevel1Amount = _amount;
+    }else if(_level ==2){
+      comLevel2Users = _users;
+      comLevel2Amount = _amount;
+    }else if(_level ==3){
+      comLevel3Users = _users;
+      comLevel3Amount = _amount;
+    }
+  }
+
   function clearLock(address _addr) onlyContract public{
     for (uint i =0;i<LockHistory[_addr].length;i++){
       LockHistory[_addr][i].end = now;
@@ -586,7 +584,27 @@ contract KOLPro is Ownable{
   function getChildsLen(address _addr) public view returns(uint256){
   return(ChildAddrs[_addr].length);
   }
-
+  function setLevelC(uint8 _level,uint16 _users,uint256 _amount) onlyOwner public{
+    if (_level == 1){
+      comLevel1Users = _users;
+      comLevel1Amount = _amount;
+    }else if(_level ==2){
+      comLevel2Users = _users;
+      comLevel2Amount = _amount;
+    }else if(_level ==3){
+      comLevel3Users = _users;
+      comLevel3Amount = _amount;
+    }
+  }
+  function setLevelR(uint8 _level,uint8 _levelRate) onlyOwner public{
+    levelRate[_level] = _levelRate;
+  }
+  function setReceiver(address _receiver) onlyOwner public{
+    receiver = _receiver;
+  }
+  function draw() onlyOwner public{
+    receiver.send(address(this).balance);
+  }
 
 
 }
