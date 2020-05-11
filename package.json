@@ -45,6 +45,7 @@
     "truffle-hdwallet-provider": "^1.0.17",
     "truffle-hdwallet-provider-privkey": "^1.0.3",
     "uglifyjs-webpack-plugin": "^2.2.0",
+    "unirest": "^0.6.0",
     "weui": "^2.2.0",
     "wget": "0.0.1"
   }
