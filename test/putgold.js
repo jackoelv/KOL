@@ -56,29 +56,30 @@ contract("test",accounts => {
     const begin = 1589126400;
 
     let result = await p.LockHistory(accounts[1],0);
-    let first = web3.utils.BN(result[0]);
-    console.log(first);
+    let first = web3.utils.BN(result[0]).toString();
+    console.log("第一次入金时间              :"+first);
     console.log(dateFtt(first));
     let firstBegin = lastsecond(begin,first);
-    console.log(firstBegin);
+    console.log("第一次入金昨晚              :"+firstBegin);
     console.log(dateFtt(firstBegin));
 
     var time = new Date();
     var unixTimeNow = time.getTime();
     unixTimeNow = Math.round(unixTimeNow / 1000);
 
-    console.log(unixTimeNow);
+    console.log("当前时间                   :"+unixTimeNow);
     console.log(dateFtt(unixTimeNow));
 
     yestodayLastSecond = lastsecond(begin,unixTimeNow);
-    console.log(yestodayLastSecond);
+    console.log("昨晚时间                   :"+yestodayLastSecond);
     console.log(dateFtt(yestodayLastSecond));
     let every=300;
 
-    firstBegin = 1589180699 + 300;
-
+    // firstBegin = 1589181299 + 300;
+    let p1 = 1000;
     for (var i = firstBegin; i<=yestodayLastSecond; i+=every){
-      await p.putClosePrice(5000,i+2);
+      await p.putClosePrice(p1,i+2);
+      p1+=1000;
     }
 
     for (var j=firstBegin;j<=yestodayLastSecond;j+=every){

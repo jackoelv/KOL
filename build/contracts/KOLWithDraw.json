@@ -6012,10 +6012,10 @@
           }
         ],
         "contractDependencies": [
+          2877,
           2655,
           2691,
-          2752,
-          2877
+          2752
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -6223,10 +6223,10 @@
           }
         ],
         "contractDependencies": [
+          2877,
           2655,
           2691,
-          2752,
-          2877
+          2752
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -33903,10 +33903,10 @@
           }
         ],
         "contractDependencies": [
+          2877,
           2655,
           2691,
-          2752,
-          2877
+          2752
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -34114,10 +34114,10 @@
           }
         ],
         "contractDependencies": [
+          2877,
           2655,
           2691,
-          2752,
-          2877
+          2752
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -56315,7 +56315,7 @@
     }
   },
   "schemaVersion": "3.0.19",
-  "updatedAt": "2020-05-11T07:03:10.100Z",
+  "updatedAt": "2020-05-11T07:19:06.827Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}

@@ -6498,10 +6498,10 @@
           }
         ],
         "contractDependencies": [
+          2877,
           2655,
           2691,
-          2752,
-          2877
+          2752
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -6709,10 +6709,10 @@
           }
         ],
         "contractDependencies": [
+          2877,
           2655,
           2691,
-          2752,
-          2877
+          2752
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -34389,10 +34389,10 @@
           }
         ],
         "contractDependencies": [
+          2877,
           2655,
           2691,
-          2752,
-          2877
+          2752
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -34600,10 +34600,10 @@
           }
         ],
         "contractDependencies": [
+          2877,
           2655,
           2691,
-          2752,
-          2877
+          2752
         ],
         "contractKind": "contract",
         "documentation": null,
@@ -56750,7 +56750,7 @@
   },
   "networks": {},
   "schemaVersion": "3.0.19",
-  "updatedAt": "2020-05-11T06:42:23.265Z",
+  "updatedAt": "2020-05-11T07:10:34.646Z",
   "devdoc": {
     "methods": {}
   },

@@ -1,8 +1,7 @@
 import Web3 from "web3";
 import KOLPro from '../../build/contracts/KOLPro.json';
 import KOLWithDraw from '../../build/contracts/KOLWithDraw.json';
-import KOLVote from '../../build/contracts/KOLVote.json';
-
+import KOLVote from '../../build/contracts/StandardToken.json';
 
 const App = {
   web3: null,
@@ -10,14 +9,12 @@ const App = {
   metaP: null,
   metaD: null,
   metaK:null,
-  // paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
-  // daddr: "0xa874BF09C7b7d573B7f84f653cFEA6E0F707D157",
   kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
-  paddr: "0x3779B8EEbAf4737681007E88C2a99cc99043A590",
-  daddr: "0x4d361603fF0485F5CC935431027488FC67E0178D",
-
+  paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
+  daddr: "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
+  newUser: false,
   load: null,
-  withDrawDays: 1200000,//线上改成30天。
+  withDrawDays: 2592000,
   canDraw:false,
   diff: function(a,b){
     var begin =1589022299+1;
@@ -96,7 +93,7 @@ const App = {
       let accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
 
-      await this.initial();
+      await this.initial1();
       var iCode = this.GetQueryValue("iCode");
 
 
@@ -115,6 +112,25 @@ const App = {
     };
 
     console.log("finished");
+  },
+
+  initial1: async function(){
+    const { web3 } = this;
+    const { RInviteCode } = this.metaP.methods;
+    var iCode = await RInviteCode(this.account).call();
+    if (iCode == 0){
+      //首次注册
+      document.getElementById("firstRegister").style.display="block";
+      document.getElementById("firstHide").style.display="none";
+      document.getElementById("joindrawpanel").style.display="none";
+      this.newUser = true;
+    }else{
+      this.newUser = false;
+      this.load = weui.loading('数据加载进行中...');
+      this.initial();
+      this.load.hide();
+      document.getElementById("firstRegister").style.display="none";
+    }
   },
 
   initial: async function(){
@@ -267,7 +283,7 @@ const App = {
     }
 
 
-    var url = "https://bonus.kols.club?iCode=" + iCode;
+    var url = "https://b.kols.club?iCode=" + iCode;
     $('#qrcode').html('').qrcode({
                         text: url});
 
@@ -344,34 +360,51 @@ const App = {
  // 授权合约转账
  approve: async function(){
    const { web3 } = this;
+   const { allowance } = this.metaK.methods;
+   this.load = weui.loading('链上操作进行中...');
+   let allowed = await allowance(this.account,this.paddr).call();
+   this.load.hide();
+   console.log("allowed"+allowed);
+   if (allowed != 0){
+     allowed = web3.utils.fromWei(allowed,"ether");
+   }
    let amount = $("input[name='joinAmount']").val();
-   amount = web3.utils.toWei(amount,"ether");
-   let gasPrice = await this.getGasPrice();
-   const { approve } = this.metaK.methods;
-   var loading = weui.loading('链上授权进行中...');
-    try
-    {
-      let tran = await approve(this.paddr,amount).send({from: this.account,
-                                                       gasPrice:gasPrice,
-                                                       gas:80000});
-      var blockNumber = tran.blockNumber;
-      var tx = tran.transactionHash;
+   console.log("allowed"+allowed);
+   console.log("amount"+amount);
+   if (parseFloat(allowed) >= parseFloat(amount)){
+     this.join();
+   }else{
+     amount = web3.utils.toWei(amount,"ether");
 
-      var time = 300000;
-      while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
-        let result = await web3.eth.getTransaction(tx);
-        console.log(result);
-        console.log("waitting");
-        blockNumber = result.blockNumber;
-        await sleep(3000);
-        time -=3000;
+     let gasPrice = await this.getGasPrice();
+     const { approve } = this.metaK.methods;
+     this.load = weui.loading('链上操作进行中...');
+      try
+      {
+        let tran = await approve(this.paddr,amount).send({from: this.account,
+                                                         gasPrice:gasPrice,
+                                                         gas:80000});
+        var blockNumber = tran.blockNumber;
+        var tx = tran.transactionHash;
+
+        var time = 300000;
+        while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
+          let result = await web3.eth.getTransaction(tx);
+          console.log(result);
+          console.log("waitting");
+          blockNumber = result.blockNumber;
+          await sleep(3000);
+          time -=3000;
+        }
+        // loading.hide();
+        weui.topTips('继续下一步完成操作！');
+        this.join();
+      }catch(error){
+        weui.topTips('交易出现异常，请稍后重试');
       }
-      loading.hide();
-      weui.topTips('交易已确认');
-      this.join();
-    }catch(error){
-      weui.topTips('交易出现异常，请稍后重试');
-    }
+
+   }
+
  },
  join: async function(){
    const { web3 } = this;
@@ -380,21 +413,16 @@ const App = {
    amount = web3.utils.toWei(amount,"ether");
    var ck=document.getElementById("usdtcoin");
    let usdtorcoin = ck.checked;
-   var loading = weui.loading('链上入金进行中...');
+   this.load = weui.loading('链上入金进行中...');
 
    let gasPrice = await this.getGasPrice();
    var gaslimit = 3000000;
-   // try{
-   //   gaslimit = await join(amount,usdtorcoin).estimateGas();
-   //   gaslimit = this.addGasLimit(gaslimit);
-   // }catch(e){
-   //   gaslimit = 3000000;
-   //   console.log("estimateGas error");
-   // }
+   let txFee = web3.utils.toWei("0.002","ether");
    try
    {
      let tran = await join(amount,usdtorcoin).send({from: this.account,
                                                       gasPrice:gasPrice,
+                                                      value:txFee,
                                                       gas:gaslimit});
      // await checkTxHash(tran);
      var blockNumber = tran.blockNumber;
@@ -410,7 +438,7 @@ const App = {
        await sleep(5000);
        time -=5000;
      }
-     loading.hide();
+     this.load.hide();
      weui.topTips('交易已确认');
      location.reload();
    }catch(e){
@@ -424,9 +452,24 @@ const App = {
    var ck=document.getElementById("allbonus");
    let allbonus = ck.checked;//$("input[name='usdtcoin']:checked").val();
    if((!this.canDraw)&&(!allbonus)){
-     weui.topTips('不符合提现本金的条件');
-     return;
+     weui.topTips('未达标自由提现，将扣除5%本金解约');
+     weui.dialog({
+          title: '将扣除5%手续费',
+          content: '时间不足30天且网体未达自身5倍',
+          className: 'custom-classname',
+          buttons: [{
+              label: '放弃',
+              type: 'default',
+              onClick: function () { return; }
+          }, {
+              label: '确认',
+              type: 'primary',
+              onClick: function () { alert('确定') }
+          }]
+      });
+
    }
+
    console.log(allbonus);
    let gasPrice = await this.getGasPrice();
    var gaslimit;
@@ -437,10 +480,12 @@ const App = {
      gaslimit = 200000;
    }
    var loading = weui.loading('链上提现进行中...');
+   let txFee = web3.utils.toWei("0.005","ether");
    try
    {
      let tran = await withdraw(allbonus).send({from: this.account,
                                                       gasPrice:gasPrice,
+                                                      value:txFee,
                                                       gas:gaslimit});
      var blockNumber = tran.blockNumber;
      var tx = tran.transactionHash;
@@ -466,12 +511,6 @@ const App = {
  sleep: async function(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 },
-/**
-2  * [通过参数名获取url中的参数值]
-3  * 示例URL:http://htmlJsTest/getrequest.html?uid=admin&rid=1&fid=2&name=小明
-4  * @param  {[string]} queryName [参数名]
-5  * @return {[string]}           [参数值]
-6  */
 GetQueryValue: function(queryName) {
     var query = decodeURI(window.location.search.substring(1));
     var vars = query.split("&");
