@@ -242,7 +242,7 @@ contract KOLWithDraw is Ownable{
   KOL public kol;
   KOLP public kolp;
 
-  uint256 public every = 1 minutes;//1 days;
+  uint256 public every = 5 minutes;//1 days;
   uint256 public leftBonus = 300000 * (10 ** 18);
   address public reciever;
   uint256 public etherFee = 0.005 ether;

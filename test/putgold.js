@@ -1,6 +1,7 @@
 const KK= artifacts.require("KOLVote");
 var KOLP = artifacts.require("KOLPro");
 /**************************************时间格式化处理************************************/
+
 function dateFtt(dd)
 { //author: meizz
    dd = dd +"000";
@@ -52,26 +53,57 @@ contract("test",accounts => {
     //01
     let k = await KK.at("0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154");
     let p = await KOLP.at("0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2");
+    const begin = 1589126400;
+
+    let result = await p.LockHistory(accounts[1],0);
+    let first = web3.utils.BN(result[0]);
+    console.log(first);
+    console.log(dateFtt(first));
+    let firstBegin = lastsecond(begin,first);
+    console.log(firstBegin);
+    console.log(dateFtt(firstBegin));
 
     var time = new Date();
     var unixTimeNow = time.getTime();
     unixTimeNow = Math.round(unixTimeNow / 1000);
 
-    let theSecond = unixTimeNow;
-    let target = accounts[7];
-    let every = 300;
-    for (var i = unixTimeNow; i > unixTimeNow - 3 *every; i = i-every){
-      await p.putClosePrice(5000,i);
+    console.log(unixTimeNow);
+    console.log(dateFtt(unixTimeNow));
 
+    yestodayLastSecond = lastsecond(begin,unixTimeNow);
+    console.log(yestodayLastSecond);
+    console.log(dateFtt(yestodayLastSecond));
+    let every=300;
+
+    firstBegin = 1589180699 + 300;
+
+    for (var i = firstBegin; i<=yestodayLastSecond; i+=every){
+      await p.putClosePrice(5000,i+2);
     }
 
+    for (var j=firstBegin;j<=yestodayLastSecond;j+=every){
+      let price = await p.ClosePrice(j);
+      console.log("j is :" + dateFtt(j) +",  "+ j +"price is :" + price);
+    }
 
-
-
-
-    console.log("****************查询一下第一个起息的时间****************");
-    let a1result = await p.LockHistory(target,0);
-    let begin = web3.utils.BN(a1result[0]);
+    //
+    // let theSecond = unixTimeNow;
+    // let target = accounts[7];
+    // let every = 300;
+    //
+    //
+    // for (var i = unixTimeNow; i > unixTimeNow - 3 *every; i = i-every){
+    //   await p.putClosePrice(5000,i);
+    //
+    // }
+    //
+    //
+    //
+    //
+    //
+    // console.log("****************查询一下第一个起息的时间****************");
+    // let a1result = await p.LockHistory(target,0);
+    // let begin = web3.utils.BN(a1result[0]);
     // console.log("开始时间是："+begin);
     // console.log("本地时间是：" + dateFtt(begin));
     // let price = 0;
@@ -84,15 +116,15 @@ contract("test",accounts => {
     //   await p.putClosePrice(10000,i+2);
     //   console.log("wokao");
     // }
-
-    console.log("begin is: " + dateFtt(begin));
-
-    var yestoday = 1588854899;
-    var price;
-    for (var j=1588855799;j>yestoday-10*300;j-=300){
-      price = await p.ClosePrice(j);
-      console.log("j is :" + dateFtt(j) +",  "+ j +"price is :" + price);
-    }
+    //
+    // console.log("begin is: " + dateFtt(begin));
+    //
+    // var yestoday = 1588854899;
+    // var price;
+    // for (var j=1588855799;j>yestoday-10*300;j-=300){
+    //   price = await p.ClosePrice(j);
+    //   console.log("j is :" + dateFtt(j) +",  "+ j +"price is :" + price);
+    // }
 
 
 
