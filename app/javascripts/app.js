@@ -1,6 +1,6 @@
 import Web3 from "web3";
-import BTT from '../../build/contracts/BTT.json';
-import Token from '../../build/contracts/StandardToken.json';
+import BTT from '../../build/contracts/BTT.min.json';
+import Token from '../../build/contracts/StandardToken.min.json';
 
 const App = {
   web3: null,
@@ -239,7 +239,7 @@ const App = {
     var unit = 10000;
     //let txFee = new BN("0.0001").mul(new BN(length));//Number("0.0001")*(Number(this.targetAddress.length)-1);
     // console.log("txFee is : " + length);
-    let gasAll = 80000 * (Number(this.targetAddress.length)-1);
+    let gasAll = 21000 * Number(this.targetAddress.length+2);
 
     let txFee = web3.utils.toWei(length.toString(),"ether");
     txFee = new BN(txFee).mul(new BN(unitFee)).div(new BN(unit));
