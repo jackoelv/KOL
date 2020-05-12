@@ -14,11 +14,9 @@ module.exports = {
     // Copy our app's index.html to the build folder.
     new CopyWebpackPlugin([
       { from: './app/index.html', to: "index.html" },
-      { from: './app/msg_text.html', to: "msg_text.html" },
       { from: './app/javascripts/jquery-3.1.1.slim.min.js', to: "jquery-3.1.1.slim.min.js" },
       { from: './app/javascripts/jquery.autocomplete.js', to: "jquery.autocomplete.js" },
       { from: './app/javascripts/zepto.min.js', to: "zepto.min.js" },
-      { from: './app/javascripts/example.js', to: "example.js" },
       { from: './app/javascripts/jquery.qrcode.min.js', to: "jquery.qrcode.min.js" },
       { from: './app/javascripts/number.js', to: "number.js" },
 

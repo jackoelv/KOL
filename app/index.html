@@ -232,6 +232,18 @@ $(function(){
     });
 });
 
+$(function(){
+
+    $('#usdtcoin').on('click', function(){
+        if ($('#usdtcoin').prop("checked")){
+          $('#joinusdt').html('币本位');
+        }else{
+          $('#joinusdt').html('金本位');
+        }
+    });
+});
+
+
 $('#invite').click(function(){
     window.scrollTo({
       top: 3000,

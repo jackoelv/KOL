@@ -8,23 +8,28 @@ const App = {
   metaP: null,
   metaD: null,
   metaK:null,
+  //线上环境
   kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
   paddr: "0x74cA4B1B675773E679224f494a3a169EDBA14Fdf",
   daddr: "0x076B7197E9f23Cce5B116dF5D971574E9D74E2b7",
+  //测试环境
+  // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+  // paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
+  // daddr: "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
   newUser: false,
   load: null,
   withDrawDays: 2592000,
   canDraw:false,
   diff: function(a,b){
-    var begin =1589022299+1;
+    var begin =1589126400;
     var aNum=parseInt(a);
     var bNum=parseInt(b);
-    var extra = (aNum-begin)% 300;
+    var extra = (aNum-begin)% 86400;
     var aNight= aNum-extra;
 
-    extra = (bNum-begin)% 300;
+    extra = (bNum-begin)% 86400;
     var bNight=bNum -extra;
-    return ((bNight-aNight)/300);
+    return ((bNight-aNight)/86400);
   },
   dateFtt: function(dd,current){ //author: meizz
      dd = dd +"000";
@@ -99,17 +104,11 @@ const App = {
       $("input[name='iCodeRegister']").val(iCode);
 
       this.load.hide();
-
       weui.toast('链上数据加载成功', 3000);
-
-      // weui.topTips('请填写正确ddd 的字段');
-      // this.setmStatus("链上数据加载成功！");
     } catch (error) {
-      // this.setmStatus("连接以太坊网络失败，请刷新重试");
       weui.topTips('连接以太坊网络失败，请刷新重试');
       console.log("error? : " +error);
     };
-
     console.log("finished");
   },
 
@@ -194,7 +193,6 @@ const App = {
       try{
         self = await querySelfBonus(this.account).call({from:this.account});
         self = web3.utils.fromWei(self,"ether") * 0.95;
-        // self = web3.utils.fromWei(self,"ether");
         self = NP.round(self,2);
       }catch(e){
         console.log("haha,jinbenwei");
@@ -282,7 +280,7 @@ const App = {
     }
 
 
-    var url = "https://b.kols.club?iCode=" + iCode;
+    var url = "https://b.kols.club/?iCode=" + iCode;
     $('#qrcode').html('').qrcode({
                         text: url});
 
