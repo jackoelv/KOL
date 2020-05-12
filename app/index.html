@@ -221,8 +221,6 @@ $('#autocomplete').autocomplete({
     }
 });
 $(function(){
-    var $allbonus =$('#allbonus');
-
     $('#allbonus').on('click', function(){
         if ($('#allbonus').prop("checked")){
           $('#bonustip').html('只提收益');
@@ -230,19 +228,14 @@ $(function(){
           $('#bonustip').html('全部提现');
         }
     });
-});
-
-$(function(){
-
     $('#usdtcoin').on('click', function(){
         if ($('#usdtcoin').prop("checked")){
-          $('#joinusdt').html('币本位');
-        }else{
           $('#joinusdt').html('金本位');
+        }else{
+          $('#joinusdt').html('币本位');
         }
     });
 });
-
 
 $('#invite').click(function(){
     window.scrollTo({
