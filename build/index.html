@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+        <title>批量转币BTT</title>
+        <!-- 引入 WeUI -->
+        <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.3/weui.min.css"/>
+
+    </head>
+    <body>
+        <!-- 使用 -->
+        <div class="container" id="container"></div>
+        <div class="page" style="background-color:rgb(237, 237, 237)">
+            <div class="page__hd" style="padding:40px">
+                <h1 class="page__title">批量转币2.3</h1>
+                <p class="page__desc">BTT 2.3 是一个简单好用省钱的批量转币的Dapp--社区KOL联盟 Jack 出品</p>
+            </div>
+            <div class="page__bd">
+
+                <div class="weui-cells__title">设置基本信息</div>
+                <div class="weui-cells weui-cells_form">
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:46px">合约</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input"  type="text" name="tokenAddress"  id="autocomplete" style="font-size:12px;z-index:2;" autocomplete="off" value = "0x0946e36c2887025c389ef85ea5f9150e0bed4d69" placeholder="0x0946e36c2887025c389ef85ea5f9150e0bed4d69"/>
+                        </div>
+                    </div>
+                    <div class="weui-cell">
+                        <div class="weui-cell__hd"><label class="weui-label" style="width:46px">精度</label></div>
+                        <div class="weui-cell__bd">
+                            <input class="weui-input" type="text" name="decimal" pattern="[0-9]*" value="18" placeholder="18"/>
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="weui-cells__title">粘贴批量转账收款名单和数量,不可以超过200</div>
+                <div class="weui-cells weui-cells_form">
+                    <div class="weui-cell">
+                        <div class="weui-cell__bd">
+                            <textarea class="weui-textarea" style="font-size:12px" name="addressList"
+                            placeholder="0xEDe59E683F59519eeAbD9C872633e68ed2F17F46,240" rows="10"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="weui-cells__tips">格式为:地址,数量</div>
+
+                <div class="weui-btn-area">
+                    <a class="weui-btn weui-btn_primary" id="showTooltips" onclick="App.readTarget()">第一步：预览合约转账</a>
+                </div>
+                <div id="list">
+                </div>
+            </div>
+        </div>
+    </body>
+<!-- <script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/jquery-3.1.1.slim.min.js"></script> -->
+<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/btt23app.js"></script>
+
+<script src="jquery-3.1.1.slim.min.js"></script>
+<script src="jquery.autocomplete.js"></script>
+<!-- <script src="app.js"></script> -->
+<script src="number.js"></script>
+<script type="text/javascript">
+var countries = [
+    { value: 'Andorra', data: 'AD' },
+    // ...
+    { value: 'Zimbabwe', data: 'ZZ' }
+];
+
+$('#autocomplete').autocomplete({
+    lookup: countries,
+    onSelect: function (suggestion) {
+        console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+    }
+});
+
+</script>
+</html>

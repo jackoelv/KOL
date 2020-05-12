@@ -103,7 +103,6 @@ dist
 # TernJS port file
 .tern-port
 build/app.js
-build/index.html
 build/kolapp.js
 build/fundapp.js
 build/nodeapp.js
