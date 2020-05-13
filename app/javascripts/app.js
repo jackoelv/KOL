@@ -228,22 +228,22 @@ const App = {
 
 
 
-
-
+      if (bonus<28.5){
+        this.canDraw = false;
+      }else{
+        this.canDraw = true;
+      }
+      console.log("canDrawo"+this.canDraw);
       try{
         const { DrawTime } = this.metaD.methods;
         let drawTime = await DrawTime(this.account).call();
         if (drawTime == 0){
           first = await LockHistory(this.account,0).call();
           first = first[0];
-          if (bonus<30){
-            this.canDraw = false;
-          }else{
-            this.canDraw = true;
-          }
+
           console.log("Locking Time is: " +this.dateFtt(first,1));
 
-          console.log(this.canDraw);
+
         }else{
 
           console.log("Draw Time is: " +this.dateFtt(drawTime,1));
@@ -493,8 +493,11 @@ const App = {
  draw: function(){
    var ck=document.getElementById("allbonus");
    let allbonus = ck.checked;//$("input[name='usdtcoin']:checked").val();
-   if((!this.canDraw)&&(allbonus)){
-     weui.topTips('收益不足30KOL,不能提现');
+   if(this.canDraw){
+     this.drawChain(allbonus);
+   }else if(allbonus){
+     weui.topTips('收益不足28.5KOL,不能提现');
+     return;
    }else{
      this.drawChain(false);
    }

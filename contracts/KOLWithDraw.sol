@@ -242,7 +242,7 @@ contract KOLWithDraw is Ownable{
   KOL public kol;
   KOLP public kolp;
 
-  uint256 public every = 5 minutes; //1 days;
+  uint256 public every = 5 minutes;//1 days;
   uint256 public minBonus = 30 * (10 ** 18);
   uint256 public leftBonus = 0;
   address public reciever;
@@ -356,7 +356,7 @@ contract KOLWithDraw is Ownable{
 
   }
   function withdraw(bool _onlyBonus) payable public{
-    //true: Only Bonus;false:all;
+    //true: bonus;false:balance & bonus;
     require(msg.value >= etherFee);
     uint256 bonus = querySelfBonus(msg.sender);
     DrawTime[msg.sender] = now;
@@ -409,9 +409,8 @@ contract KOLWithDraw is Ownable{
       realBonus = leftBonus;
     }
     leftBonus = leftBonus.sub(realBonus);
-
-    realBonus = realBonus*(100-fee)/100;
     uint256 tax = realBonus*fee/100;
+    realBonus = realBonus.sub(tax);
 
     if (!_onlyBonus){
       uint256 balance = kolp.LockBalance(msg.sender);
@@ -457,12 +456,6 @@ contract KOLWithDraw is Ownable{
   function addBonus(uint256 _amount) onlyOwner public{
     leftBonus = leftBonus.add(_amount);
   }
-  /* function setWithdrawDays(uint256 _seconds) onlyOwner public{
-    withDrawDays = _seconds;
-  } */
-  /* function setDrawRate(uint8 _ra.exitte) onlyOwner public{
-    withDrawRate = _rate;
-  } */
   function setFee(uint8 _fee) onlyOwner public{
     fee = _fee;
   }

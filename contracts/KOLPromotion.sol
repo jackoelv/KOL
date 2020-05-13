@@ -151,7 +151,7 @@ contract KOLPro is Ownable{
   uint256 public end;
 
   uint256 public iCode;
-  uint256 public every = 5 minutes; //1 days;
+  uint256 public every =5 minutes; //1 days;
   uint256 public totalRegister;
   uint256 public totalBalance;
 
@@ -325,6 +325,7 @@ contract KOLPro is Ownable{
     uint256 topDayLockBalance = queryLockBalance(_topAddr,now);
     uint256 selfDayLockBalance = queryLockBalance(_selfAddr,now);
     uint256 minAmount;
+    
     if (topDayLockBalance >= selfDayLockBalance){
       minAmount = _amount;
     }else{
