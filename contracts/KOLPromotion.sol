@@ -151,7 +151,7 @@ contract KOLPro is Ownable{
   uint256 public end;
 
   uint256 public iCode;
-  uint256 public every =2 minutes; //1 days;
+  uint256 public every = 1 days;
   uint256 public totalRegister;
   uint256 public totalBalance;
 
