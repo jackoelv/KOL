@@ -9,18 +9,18 @@ const App = {
   metaD: null,
   metaK:null,
   //线上环境
-  // kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
-  // paddr: "0x74cA4B1B675773E679224f494a3a169EDBA14Fdf",
-  // daddr: "0x076B7197E9f23Cce5B116dF5D971574E9D74E2b7",
+  kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
+  paddr: "0xbC664C8ECadbB9311325537DfA4609F877E04Ab6",
+  daddr: "0x9190d289E7054DaB91a2F5Ed77a7d57fE8381Def",
   //测试环境
-  kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
-  paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
-  daddr: "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
+  // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+  // paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
+  // daddr: "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
   newUser: false,
   load: null,
   canDraw:false,
   diff: function(a,b){
-    var every = 120;
+    var every = 86400;
     var begin =1589126400;
     var aNum=parseInt(a);
     var bNum=parseInt(b);

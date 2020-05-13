@@ -21,6 +21,7 @@
             <div class="page__bd">
 
                 <div class="weui-cells__title" style="color:rgb(255, 255, 255);text-align: center;font-size:26px">KOL大舞台，有梦你就来</div>
+                <div class="weui-cells__title" id="leftBonus" style="color:rgb(255, 255, 255);text-align: center;font-size:26px"></div>
                 <div id="firstHide" >
                     <div class="weui-cells weui-cells_form" style="color:#181B46">
                       <div class="weui-cell weui-cell_readonly">
@@ -221,8 +222,6 @@ $('#autocomplete').autocomplete({
     }
 });
 $(function(){
-    var $allbonus =$('#allbonus');
-
     $('#allbonus').on('click', function(){
         if ($('#allbonus').prop("checked")){
           $('#bonustip').html('只提收益');
@@ -230,19 +229,14 @@ $(function(){
           $('#bonustip').html('全部提现');
         }
     });
-});
-
-$(function(){
-
     $('#usdtcoin').on('click', function(){
         if ($('#usdtcoin').prop("checked")){
-          $('#joinusdt').html('币本位');
-        }else{
           $('#joinusdt').html('金本位');
+        }else{
+          $('#joinusdt').html('币本位');
         }
     });
 });
-
 
 $('#invite').click(function(){
     window.scrollTo({
