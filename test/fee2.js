@@ -15,22 +15,22 @@ contract("testjoin",accounts => {
     let txFeeDraw= web3.utils.toWei("0.005","ether");
     let paddr = p.address;
 
-    var iCode=await p.RInviteCode(accounts[31]);
+    var iCode=await p.RInviteCode(accounts[1]);
     iCode = web3.utils.BN(iCode);
-    for (var m = 32; m<80; m++){
+    for (var m = 12; m<15; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(1000);
       await p.register(iCode,{from:accounts[m]});
       iCode= await p.RInviteCode(accounts[m]);
       iCode = web3.utils.BN(iCode);
       await k.transfer(accounts[m],web3.utils.toWei('20000','ether'),{from:accounts[4]});
       await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[m]});
       if ((m % 2) == 1){
-        await p.join(web3.utils.toWei('5000','ether'),true,{from:accounts[m],value:txFeeJoin});
+        await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
       }
       else {
         await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
       }
+      await sleep(30000);
     }
 
 

@@ -1,5 +1,6 @@
 const KK= artifacts.require("KOLVote");
 var KOLP = artifacts.require("KOLPro");
+var KOLD= artifacts.require("KOLWithDraw");
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
@@ -9,6 +10,7 @@ contract("testjoin",accounts => {
     //01
     let k = await KK.at("0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154");
     let p = await KOLP.at("0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2");
+    let d = await KOLD.at("0x46Ba0c589c0E0531319809BcA37db878Eb4CC651");
     let draw = "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651";
 
 
@@ -27,6 +29,7 @@ contract("testjoin",accounts => {
 
     await k.transfer(paddr,web3.utils.toWei('1000000','ether'),{from:accounts[4]});
     await p.setContract(draw);
+    await d.addBonus(web3.utils.toWei('300000','ether'));
 
     let txFeeJoin= web3.utils.toWei("0.2","ether");
     let txFeeDraw= web3.utils.toWei("0.5","ether");
@@ -44,7 +47,7 @@ contract("testjoin",accounts => {
 
     for (var m = 2; m<12; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(1000);
+      await sleep(10000);
       await p.register(iCode,{from:accounts[m]});
       // iCode= await p.getCode({from:accounts[m]});
       // iCode = web3.utils.BN(iCode);
@@ -61,7 +64,7 @@ contract("testjoin",accounts => {
     iCode = web3.utils.BN(iCode);
     for (var m = 12; m<18; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(1000);
+      await sleep(10000);
       await p.register(iCode,{from:accounts[m]});
       // iCode= await p.getCode({from:accounts[m]});
       // iCode = web3.utils.BN(iCode);
@@ -79,7 +82,7 @@ contract("testjoin",accounts => {
     iCode = web3.utils.BN(iCode);
     for (var m = 18; m<22; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(1000);
+      await sleep(10000);
       await p.register(iCode,{from:accounts[m]});
       // iCode= await p.getCode({from:accounts[m]});
       // iCode = web3.utils.BN(iCode);
@@ -97,7 +100,7 @@ contract("testjoin",accounts => {
     iCode = web3.utils.BN(iCode);
     for (var m = 22; m<80; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(1000);
+      await sleep(10000);
       await p.register(iCode,{from:accounts[m]});
       iCode= await p.RInviteCode(accounts[m]);
       iCode = web3.utils.BN(iCode);

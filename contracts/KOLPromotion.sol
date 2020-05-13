@@ -151,7 +151,7 @@ contract KOLPro is Ownable{
   uint256 public end;
 
   uint256 public iCode;
-  uint256 public every = 1 days;
+  uint256 public every = 5 minutes; //1 days;
   uint256 public totalRegister;
   uint256 public totalBalance;
 
@@ -178,7 +178,6 @@ contract KOLPro is Ownable{
   uint8 public constant fee = 5;
   bool public going = true;
 
-  uint256 public constant withDrawDays = 30 days;
 
   struct lock{
     uint256 begin;
@@ -343,7 +342,7 @@ contract KOLPro is Ownable{
     }
     return minAmount.mul(3).div(1000);
   }
-  function setTopTeamBonus(address _topAddr,uint256 _minAmount) public returns(uint8){
+  function setTopTeamBonus(address _topAddr,uint256 _minAmount) private {
     uint8 newRate = levelRate[isLevelN[_topAddr]];
     dayTeamBonus memory theDayTB =dayTeamBonus(0,0,0,0);
     uint256 tomorrowLastSecond =getYestodayLastSecond(now) +  every;
@@ -373,7 +372,7 @@ contract KOLPro is Ownable{
       }
     }
   }
-  function setTopInviteBonus(address _topAddr,uint256 _minAmount,uint256 _index) internal {
+  function setTopInviteBonus(address _topAddr,uint256 _minAmount,uint256 _index) private {
     uint8 inviteRate;
     if (_index == 0){
       inviteRate = userLevel1;
@@ -413,7 +412,7 @@ contract KOLPro is Ownable{
    * title 查询并设置用户的身份级别
    * dev visit: https://github.com/jackoelv/KOL/
   */
-  function queryAndSetLevelN(address _addr) public{
+  function queryAndSetLevelN(address _addr) private{
     if ((TotalUsers[_addr] >= comLevel3Users) &&
               (TotalLockingAmount[_addr] >= comLevel3Amount) &&
               ChildAddrs[_addr].length>=inviteLevel3){
@@ -446,6 +445,7 @@ contract KOLPro is Ownable{
       }
     }
   }
+
   /**
    * title 查询指定时间用户的有效锁仓余额
    * dev visit: https://github.com/jackoelv/KOL/
@@ -477,48 +477,14 @@ contract KOLPro is Ownable{
     require(_queryTime <= (end + every));
     return (_queryTime.sub(_queryTime.sub(begin) % every) - 1);
   }
-  /**
-   * title 录入KOL的收盘价
-   * dev visit: https://github.com/jackoelv/KOL/
-  */
-  function putClosePrice(uint256 price,uint256 _queryTime) onlyOwner public{
-    //录入的价格为4位小数
-    require(_queryTime <= (end + 2*every));
-    uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
-    ClosePrice[yestodayLastSecond] = price;
-  }
 
-  function setContract(address _addr) onlyOwner public{
-    draw = _addr;
-  }
-  function setGoing(bool _going) onlyOwner public{
-    going = _going;
-  }
-  function setBegin(uint256 _begin) onlyOwner public{
-    begin = _begin;
-  }
-  function setEnd(uint256 _end) onlyOwner public{
-    end = _end;
-  }
-  function setLevelN(uint8 _level,uint16 _users,uint256 _amount) onlyOwner public{
-    if (_level == 1){
-      comLevel1Users = _users;
-      comLevel1Amount = _amount;
-    }else if(_level ==2){
-      comLevel2Users = _users;
-      comLevel2Amount = _amount;
-    }else if(_level ==3){
-      comLevel3Users = _users;
-      comLevel3Amount = _amount;
-    }
-  }
 
   function clearLock(address _addr) onlyContract public{
     for (uint i =0;i<LockHistory[_addr].length;i++){
       LockHistory[_addr][i].end = now;
       LockHistory[_addr][i].withDrawed = true;
     }
-    LockBalance[msg.sender] = 0;
+    LockBalance[_addr] = 0;
   }
   function pushInvite(address _addr,
                       uint256 _theDayLastSecond,
@@ -531,6 +497,7 @@ contract KOLPro is Ownable{
   function setLastInvite(address _addr,
                       uint256 _theDayInviteBonus,
                       uint256 _totalInviteBonus) onlyContract public{
+    /* require(LockInviteBonus[_addr].length > 0); */
     uint256 last = LockInviteBonus[_addr].length -1;
     LockInviteBonus[_addr][last].theDayInviteBonus = _theDayInviteBonus;
     LockInviteBonus[_addr][last].totalInviteBonus = _totalInviteBonus;
@@ -549,40 +516,47 @@ contract KOLPro is Ownable{
                       uint256 _theDayTeamBonus,
                       uint256 _totalTeamBonus,
                       uint8 _theDayRate) onlyContract public{
-    uint256 last = LockTeamBonus[_addr].length -1;
+    /* require(LockTeamBonus[_addr].length > 0); */
+    uint256 last = LockTeamBonus[_addr].length - 1;
     LockTeamBonus[_addr][last].theDayTeamBonus = _theDayTeamBonus;
     LockTeamBonus[_addr][last].totalTeamBonus = _totalTeamBonus;
     LockTeamBonus[_addr][last].theDayRate = _theDayRate;
 
   }
   function subTotalUsers(address _addr) onlyContract public{
-    if (TotalUsers[_addr] > 0){
-      TotalUsers[_addr] -=1;
-    }
+    TotalUsers[_addr] = TotalUsers[_addr].sub(1);
   }
   function subTotalLockingAmount(address _addr,uint256 _amount) onlyContract public{
-    if (TotalLockingAmount[_addr] >= _amount){
-      TotalUsers[_addr] -= _amount;
-    }
+    TotalUsers[_addr] = TotalUsers[_addr].sub(_amount);
   }
   function subTotalBalance(uint256 _amount) onlyContract public{
-    totalBalance-=_amount;
+    totalBalance=totalBalance.sub(_amount);
+  }
+  function qsLevel(address _addr) onlyContract public{
+    queryAndSetLevelN(_addr);
+  }
+  /**
+   * title 录入KOL的收盘价
+   * dev visit: https://github.com/jackoelv/KOL/
+  */
+  function putClosePrice(uint256 price,uint256 _queryTime) onlyOwner public{
+    //录入的价格为4位小数
+    require(_queryTime <= (end + 2*every));
+    uint256 yestodayLastSecond = getYestodayLastSecond(_queryTime);
+    ClosePrice[yestodayLastSecond] = price;
   }
 
-  function getLockLen(address _addr) public view returns(uint256) {
-    return(LockHistory[_addr].length);
-  }
-  function getFathersLength(address _addr) public view returns(uint256){
-    return InviteList[_addr].length;
-  }
-  function getLockTeamBonusLen(address _addr) public view returns(uint256){
-    return(LockTeamBonus[_addr].length);
-  }
-  function getLockInviteBonusLen(address _addr) public view returns(uint256){
-    return(LockInviteBonus[_addr].length);
-  }
-  function getChildsLen(address _addr) public view returns(uint256){
-  return(ChildAddrs[_addr].length);
+  function setLevelN(uint8 _level,uint16 _users,uint256 _amount) onlyOwner public{
+    if (_level == 1){
+      comLevel1Users = _users;
+      comLevel1Amount = _amount;
+    }else if(_level ==2){
+      comLevel2Users = _users;
+      comLevel2Amount = _amount;
+    }else if(_level ==3){
+      comLevel3Users = _users;
+      comLevel3Amount = _amount;
+    }
   }
   function setLevelC(uint8 _level,uint16 _users,uint256 _amount) onlyOwner public{
     if (_level == 1){
@@ -605,6 +579,33 @@ contract KOLPro is Ownable{
   function draw() onlyOwner public{
     receiver.send(address(this).balance);
   }
+  function setContract(address _addr) onlyOwner public{
+    draw = _addr;
+  }
+  function setGoing(bool _going) onlyOwner public{
+    going = _going;
+  }
+  function setBegin(uint256 _begin) onlyOwner public{
+    begin = _begin;
+  }
+  function setEnd(uint256 _end) onlyOwner public{
+    end = _end;
+  }
 
+  function getLockLen(address _addr) public view returns(uint256) {
+    return(LockHistory[_addr].length);
+  }
+  function getFathersLength(address _addr) public view returns(uint256){
+    return InviteList[_addr].length;
+  }
+  function getLockTeamBonusLen(address _addr) public view returns(uint256){
+    return(LockTeamBonus[_addr].length);
+  }
+  function getLockInviteBonusLen(address _addr) public view returns(uint256){
+    return(LockInviteBonus[_addr].length);
+  }
+  function getChildsLen(address _addr) public view returns(uint256){
+  return(ChildAddrs[_addr].length);
+  }
 
 }

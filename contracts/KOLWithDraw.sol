@@ -177,12 +177,10 @@ pragma solidity ^0.4.23;
        require(msg.sender == draw);
        _;
    }
-   function calcuDiffAmount(address _selfAddr,address _topAddr,uint256 _amount) public view returns(uint256);
-   function queryAndSetLevelN(address _addr) public;
+   function qsLevel(address _addr) onlyContract public;
+   /* function queryAndSetLevelN(address _addr) public; */
    function queryLockBalance(address _addr,uint256 _queryTime) public view returns(uint256);
    function getYestodayLastSecond(uint256 _queryTime) public view returns(uint256);
-   function getHistoryTeamBonus(address _addr,uint256 _index) public view returns(uint256,uint256,uint256,uint256,uint256);
-   function getHistoryInviteBonus(address _addr,uint256 _index) public view returns(uint256,uint256,uint256,uint256);
    function clearLock(address _addr) onlyContract public ;
    function pushInvite(address _addr,
                        uint256 _theDayLastSecond,
@@ -242,15 +240,13 @@ contract KOLWithDraw is Ownable{
   KOL public kol;
   KOLP public kolp;
 
-  uint256 public every = 1 days;
-  uint256 public leftBonus = 300000 * (10 ** 18);
+  uint256 public every = 5 minutes; //1 days;
+  uint256 public minBonus = 30 * (10 ** 18);
+  uint256 public leftBonus = 0;
   address public reciever;
   uint256 public etherFee = 0.005 ether;
-  uint8 public withDrawRate = 5;
   uint8 public fee = 5;
-  uint8 public drawFee = 5;
 
-  uint256 public withDrawDays = 30 days;
 
   struct dayTeamBonus{
     uint256 theDayLastSecond;
@@ -345,34 +341,14 @@ contract KOLWithDraw is Ownable{
       return 0;
 
   }
-  function afterWithdraw(address _addr,uint256 _amount) internal {
+  function afterWithdraw(address _addr,uint256 _amount) private {
     address father;
     uint256 fathersLen = kolp.getFathersLength(_addr);
     for (uint i = 0; i<fathersLen; i++){
       father = kolp.InviteList(_addr,i);
       kolp.subTotalUsers(father);
       kolp.subTotalLockingAmount(father,_amount);
-      kolp.queryAndSetLevelN(father);
-    }
-
-  }
-  function checkDraw(address _addr) private view returns(bool) {
-    if(!kolp.going()){
-      return true;
-    }
-    uint256 teamAmount = kolp.TotalLockingAmount(_addr) ;
-    uint256 myBalance = kolp.LockBalance(_addr) * withDrawRate;
-    if (myBalance == 0) return false;
-    uint256 myBegin;
-    uint256 amount;
-    uint256 end;
-    bool withDrawed;
-    ( myBegin, amount, end, withDrawed) = kolp.LockHistory(_addr,0);
-    uint256 diff = now - myBegin;
-    if ((myBalance <= teamAmount) || (diff > withDrawDays)) {
-      return true;
-    }else{
-      return false;
+      kolp.qsLevel(father);
     }
 
   }
@@ -422,34 +398,41 @@ contract KOLWithDraw is Ownable{
       }
 
     }
-    bool candraw = checkDraw(msg.sender);
+    //要做几个判断？
+    uint256 realBonus = bonus;
     if (leftBonus == 0){
       _onlyBonus = false;
-      bonus =0;
-      candraw = true;
+      realBonus =0;
     }else if(bonus >= leftBonus){
-      bonus = leftBonus;
-      leftBonus = 0;
-    }else{
-      leftBonus-=bonus;
+      realBonus = leftBonus;
     }
-    bonus=bonus*(100-fee)/100;
-    uint256 tax = bonus*fee/100;
+    leftBonus = leftBonus.sub(realBonus);
+
+    realBonus = realBonus*(100-fee)/100;
+    uint256 tax = realBonus*fee/100;
+
     if (!_onlyBonus){
       uint256 balance = kolp.LockBalance(msg.sender);
-      if(candraw){
-        bonus += balance;
+      if (bonus < minBonus){
+        realBonus = balance;
+        tax = 0;
       }else{
-        bonus += balance * (100-drawFee) / 100;
+        realBonus += balance;
       }
       kolp.subTotalBalance(balance);
-      afterWithdraw(msg.sender,balance);
       kolp.clearLock(msg.sender);
+      afterWithdraw(msg.sender,balance);
+
+    }else{
+      require(bonus >= minBonus);
     }
-    kol.transfer(msg.sender,bonus);
-    kol.transfer(reciever,tax);
-    TotalWithDraws[msg.sender] += bonus;
-    emit WithDrawed(msg.sender,bonus);
+    if (realBonus > 0) {
+      kol.transfer(msg.sender,realBonus);
+      TotalWithDraws[msg.sender] += realBonus;
+      emit WithDrawed(msg.sender,realBonus);
+    }
+    if (tax > 0) kol.transfer(reciever,tax);
+
   }
   function calcuAllBonus(bool _onlyBonus) public view returns(uint256){
     //true: Only Bonus;false: balance & bonus;
@@ -497,15 +480,15 @@ contract KOLWithDraw is Ownable{
     }
     return bonus;
   }
-  function setBonus(uint256 _amount) onlyOwner public{
-    leftBonus = _amount;
+  function addBonus(uint256 _amount) onlyOwner public{
+    leftBonus = leftBonus.add(_amount);
   }
-  function setWithdrawDays(uint256 _seconds) onlyOwner public{
+  /* function setWithdrawDays(uint256 _seconds) onlyOwner public{
     withDrawDays = _seconds;
-  }
-  function setDrawRate(uint8 _rate) onlyOwner public{
+  } */
+  /* function setDrawRate(uint8 _ra.exitte) onlyOwner public{
     withDrawRate = _rate;
-  }
+  } */
   function setFee(uint8 _fee) onlyOwner public{
     fee = _fee;
   }
@@ -520,8 +503,5 @@ contract KOLWithDraw is Ownable{
   }
   function setReciever(address _reciever) onlyOwner public{
     reciever = _reciever;
-  }
-  function setDrawFee(uint8 _drawFee) onlyOwner public{
-    drawFee = _drawFee;
   }
 }

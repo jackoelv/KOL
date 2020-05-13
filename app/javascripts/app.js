@@ -9,27 +9,27 @@ const App = {
   metaD: null,
   metaK:null,
   //线上环境
-  kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
-  paddr: "0x74cA4B1B675773E679224f494a3a169EDBA14Fdf",
-  daddr: "0x076B7197E9f23Cce5B116dF5D971574E9D74E2b7",
+  // kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
+  // paddr: "0x74cA4B1B675773E679224f494a3a169EDBA14Fdf",
+  // daddr: "0x076B7197E9f23Cce5B116dF5D971574E9D74E2b7",
   //测试环境
-  // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
-  // paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
-  // daddr: "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
+  kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+  paddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
+  daddr: "0x46Ba0c589c0E0531319809BcA37db878Eb4CC651",
   newUser: false,
   load: null,
-  withDrawDays: 2592000,
   canDraw:false,
   diff: function(a,b){
+    var every = 300;
     var begin =1589126400;
     var aNum=parseInt(a);
     var bNum=parseInt(b);
-    var extra = (aNum-begin)% 86400;
+    var extra = (aNum-begin)% every;
     var aNight= aNum-extra;
 
-    extra = (bNum-begin)% 86400;
+    extra = (bNum-begin)% every;
     var bNight=bNum -extra;
-    return ((bNight-aNight)/86400);
+    return ((bNight-aNight)/every);
   },
   dateFtt: function(dd,current){ //author: meizz
      dd = dd +"000";
@@ -204,7 +204,7 @@ const App = {
         invite = web3.utils.fromWei(invite,"ether") * 0.95;
         invite = NP.round(invite,2);
       }catch(e){
-
+        console.log("invite");
       }
 
       try{
@@ -212,6 +212,7 @@ const App = {
         team = web3.utils.fromWei(team,"ether") * 0.95;
         team = NP.round(team,2);
       }catch(e){
+        console.log("team");
 
       }
 
@@ -220,27 +221,14 @@ const App = {
         bonus = web3.utils.fromWei(bonus,"ether");
         bonus = NP.round(bonus,2);
       }catch(e){
-      }
-
-
-      childs = await getChildsLen(this.account).call();
-
-
-      teamusers = await TotalUsers(this.account).call();
-
-      teamamount = await TotalLockingAmount(this.account).call();
-      if (teamamount !=0 ){
-        teamamount = web3.utils.fromWei(teamamount,"ether");
+        console.log("bonus");
       }
 
 
 
-      level = await isLevelN(this.account).call();
 
-      totaldraws = await TotalWithDraws(this.account).call();
-      if (totaldraws !=0 ){
-        totaldraws = web3.utils.fromWei(totaldraws,"ether");
-      }
+
+
 
       try{
         const { DrawTime } = this.metaD.methods;
@@ -248,14 +236,12 @@ const App = {
         if (drawTime == 0){
           first = await LockHistory(this.account,0).call();
           first = first[0];
-
-          let myself = lock*5;
-          let diff = unixTime - first;
-          if((teamamount < myself) && (diff<this.withDrawDays)){
+          if (bonus<30){
             this.canDraw = false;
           }else{
             this.canDraw = true;
           }
+
           console.log(this.canDraw);
         }else{
           first = drawTime;
@@ -273,6 +259,22 @@ const App = {
     }else{
       document.getElementById("uc").style.display="none";
     }
+    childs = await getChildsLen(this.account).call();
+
+
+    teamusers = await TotalUsers(this.account).call();
+
+    teamamount = await TotalLockingAmount(this.account).call();
+    if (teamamount !=0 ){
+      teamamount = web3.utils.fromWei(teamamount,"ether");
+    }
+    level = await isLevelN(this.account).call();
+
+    totaldraws = await TotalWithDraws(this.account).call();
+    if (totaldraws !=0 ){
+      totaldraws = web3.utils.fromWei(totaldraws,"ether");
+    }
+
 
     var balance = await balanceOf(this.account).call();
     if (balance != 0){
@@ -442,67 +444,57 @@ const App = {
      weui.topTips('交易出现异常，请稍后重试');
    }
  },
- draw: async function(){
+ drawChain: async function(allbonus){
+      const { web3 } = this;
+      const { withdraw } = this.metaD.methods;
 
-   const { web3 } = this;
-   const { withdraw } = this.metaD.methods;
+      console.log(allbonus);
+      let gasPrice = await this.getGasPrice();
+      var gaslimit;
+      try{
+        gaslimit = await withdraw(allbonus).estimateGas();
+        gaslimit = this.addGasLimit(gaslimit);
+      }catch(e){
+        console.log("gas 计算错误");
+        gaslimit = 1000000;
+      }
+      var loading = weui.loading('链上提现进行中...');
+      let txFee = web3.utils.toWei("0.005","ether");
+      console.log("allbonus: " +allbonus);
+      try
+      {
+        let tran = await withdraw(allbonus).send({from: this.account,
+                                                         gasPrice:gasPrice,
+                                                         value:txFee,
+                                                         gas:gaslimit});
+        var blockNumber = tran.blockNumber;
+        var tx = tran.transactionHash;
+        var time = 600000;
+        while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
+          let result = await web3.eth.getTransaction(tx);
+          console.log(result);
+          console.log("waitting");
+          console.log(time);
+          blockNumber = result.blockNumber;
+          await sleep(5000);
+          time -=5000;
+        }
+        loading.hide();
+        weui.topTips('交易已确认');
+        location.reload();
+      }catch(error){
+        console.log("wokao");
+        weui.topTips('交易出现异常，请稍后重试');
+      }
+ },
+ draw: function(){
    var ck=document.getElementById("allbonus");
    let allbonus = ck.checked;//$("input[name='usdtcoin']:checked").val();
-   if((!this.canDraw)&&(!allbonus)){
-     weui.topTips('未达标自由提现，将扣除5%本金解约');
-     weui.dialog({
-          title: '将扣除5%手续费',
-          content: '时间不足30天且网体未达自身5倍',
-          className: 'custom-classname',
-          buttons: [{
-              label: '放弃',
-              type: 'default',
-              onClick: function () { return; }
-          }, {
-              label: '确认',
-              type: 'primary',
-              onClick: function () { alert('确定') }
-          }]
-      });
-
+   if((!this.canDraw)&&(allbonus)){
+     weui.topTips('收益不足30KOL,不能提现');
+   }else{
+     this.drawChain(false);
    }
-
-   console.log(allbonus);
-   let gasPrice = await this.getGasPrice();
-   var gaslimit;
-   try{
-     gaslimit = await withdraw(allbonus).estimateGas();
-     gaslimit = this.addGasLimit(gaslimit);
-   }catch(e){
-     gaslimit = 200000;
-   }
-   var loading = weui.loading('链上提现进行中...');
-   let txFee = web3.utils.toWei("0.005","ether");
-   try
-   {
-     let tran = await withdraw(allbonus).send({from: this.account,
-                                                      gasPrice:gasPrice,
-                                                      value:txFee,
-                                                      gas:gaslimit});
-     var blockNumber = tran.blockNumber;
-     var tx = tran.transactionHash;
-     var time = 600000;
-     while (((blockNumber == null)||(blockNumber == 0))&&(time>0)){
-       let result = await web3.eth.getTransaction(tx);
-       console.log(result);
-       console.log("waitting");
-       console.log(time);
-       blockNumber = result.blockNumber;
-       await sleep(5000);
-       time -=5000;
-     }
-     loading.hide();
-     weui.topTips('交易已确认');
-     location.reload();
-   }catch(error){
-     weui.topTips('交易出现异常，请稍后重试');
-   }
-
 
  },
  sleep: async function(ms) {
