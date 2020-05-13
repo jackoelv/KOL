@@ -241,14 +241,17 @@ const App = {
           }else{
             this.canDraw = true;
           }
+          console.log("Locking Time is: " +this.dateFtt(first,1));
 
           console.log(this.canDraw);
         }else{
+
+          console.log("Draw Time is: " +this.dateFtt(drawTime,1));
           first = drawTime;
         }
         lastingDays = this.diff(first,unixTime);
         console.log(first);
-        console.log("Locking Time is: " +this.dateFtt(first,1))
+
         first = this.dateFtt(first,1);
 
       }catch(e){

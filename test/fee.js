@@ -47,7 +47,7 @@ contract("testjoin",accounts => {
 
     for (var m = 2; m<12; m++){
       console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(10000);
+      await sleep(1000);
       await p.register(iCode,{from:accounts[m]});
       // iCode= await p.getCode({from:accounts[m]});
       // iCode = web3.utils.BN(iCode);
@@ -60,59 +60,59 @@ contract("testjoin",accounts => {
         await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
       }
     }
-    iCode=await p.RInviteCode(accounts[2]);
-    iCode = web3.utils.BN(iCode);
-    for (var m = 12; m<18; m++){
-      console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(10000);
-      await p.register(iCode,{from:accounts[m]});
-      // iCode= await p.getCode({from:accounts[m]});
-      // iCode = web3.utils.BN(iCode);
-      await k.transfer(accounts[m],web3.utils.toWei('20000','ether'),{from:accounts[4]});
-      await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[m]});
-      if ((m % 2) == 1){
-        await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
-      }
-      else {
-        await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
-      }
-    }
+    // iCode=await p.RInviteCode(accounts[2]);
+    // iCode = web3.utils.BN(iCode);
+    // for (var m = 12; m<18; m++){
+    //   console.log("m is: " + m + " iCode is: " + iCode);
+    //   await sleep(10000);
+    //   await p.register(iCode,{from:accounts[m]});
+    //   // iCode= await p.getCode({from:accounts[m]});
+    //   // iCode = web3.utils.BN(iCode);
+    //   await k.transfer(accounts[m],web3.utils.toWei('20000','ether'),{from:accounts[4]});
+    //   await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[m]});
+    //   if ((m % 2) == 1){
+    //     await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
+    //   }
+    //   else {
+    //     await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
+    //   }
+    // }
 
-    iCode=await p.RInviteCode(accounts[3]);
-    iCode = web3.utils.BN(iCode);
-    for (var m = 18; m<22; m++){
-      console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(10000);
-      await p.register(iCode,{from:accounts[m]});
-      // iCode= await p.getCode({from:accounts[m]});
-      // iCode = web3.utils.BN(iCode);
-      await k.transfer(accounts[m],web3.utils.toWei('20000','ether'),{from:accounts[4]});
-      await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[m]});
-      if ((m % 2) == 1){
-        await p.join(web3.utils.toWei('5000','ether'),true,{from:accounts[m],value:txFeeJoin});
-      }
-      else {
-        await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
-      }
-    }
+    // iCode=await p.RInviteCode(accounts[3]);
+    // iCode = web3.utils.BN(iCode);
+    // for (var m = 18; m<22; m++){
+    //   console.log("m is: " + m + " iCode is: " + iCode);
+    //   await sleep(10000);
+    //   await p.register(iCode,{from:accounts[m]});
+    //   // iCode= await p.getCode({from:accounts[m]});
+    //   // iCode = web3.utils.BN(iCode);
+    //   await k.transfer(accounts[m],web3.utils.toWei('20000','ether'),{from:accounts[4]});
+    //   await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[m]});
+    //   if ((m % 2) == 1){
+    //     await p.join(web3.utils.toWei('5000','ether'),true,{from:accounts[m],value:txFeeJoin});
+    //   }
+    //   else {
+    //     await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
+    //   }
+    // }
 
-    iCode=await p.RInviteCode(accounts[21]);
-    iCode = web3.utils.BN(iCode);
-    for (var m = 22; m<80; m++){
-      console.log("m is: " + m + " iCode is: " + iCode);
-      await sleep(10000);
-      await p.register(iCode,{from:accounts[m]});
-      iCode= await p.RInviteCode(accounts[m]);
-      iCode = web3.utils.BN(iCode);
-      await k.transfer(accounts[m],web3.utils.toWei('20000','ether'),{from:accounts[4]});
-      await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[m]});
-      if ((m % 2) == 1){
-        await p.join(web3.utils.toWei('5000','ether'),true,{from:accounts[m],value:txFeeJoin});
-      }
-      else {
-        await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
-      }
-    }
+    // iCode=await p.RInviteCode(accounts[21]);
+    // iCode = web3.utils.BN(iCode);
+    // for (var m = 22; m<80; m++){
+    //   console.log("m is: " + m + " iCode is: " + iCode);
+    //   await sleep(10000);
+    //   await p.register(iCode,{from:accounts[m]});
+    //   iCode= await p.RInviteCode(accounts[m]);
+    //   iCode = web3.utils.BN(iCode);
+    //   await k.transfer(accounts[m],web3.utils.toWei('20000','ether'),{from:accounts[4]});
+    //   await k.approve(paddr,web3.utils.toWei('5000','ether'),{from:accounts[m]});
+    //   if ((m % 2) == 1){
+    //     await p.join(web3.utils.toWei('5000','ether'),true,{from:accounts[m],value:txFeeJoin});
+    //   }
+    //   else {
+    //     await p.join(web3.utils.toWei('5000','ether'),false,{from:accounts[m],value:txFeeJoin});
+    //   }
+    // }
 
     // iCode=await p.getCode({from:accounts[17]});
     // iCode = web3.utils.BN(iCode);

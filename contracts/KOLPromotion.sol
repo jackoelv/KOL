@@ -497,7 +497,7 @@ contract KOLPro is Ownable{
   function setLastInvite(address _addr,
                       uint256 _theDayInviteBonus,
                       uint256 _totalInviteBonus) onlyContract public{
-    /* require(LockInviteBonus[_addr].length > 0); */
+    require(LockInviteBonus[_addr].length > 0);
     uint256 last = LockInviteBonus[_addr].length -1;
     LockInviteBonus[_addr][last].theDayInviteBonus = _theDayInviteBonus;
     LockInviteBonus[_addr][last].totalInviteBonus = _totalInviteBonus;
@@ -516,7 +516,7 @@ contract KOLPro is Ownable{
                       uint256 _theDayTeamBonus,
                       uint256 _totalTeamBonus,
                       uint8 _theDayRate) onlyContract public{
-    /* require(LockTeamBonus[_addr].length > 0); */
+    require(LockTeamBonus[_addr].length > 0);
     uint256 last = LockTeamBonus[_addr].length - 1;
     LockTeamBonus[_addr][last].theDayTeamBonus = _theDayTeamBonus;
     LockTeamBonus[_addr][last].totalTeamBonus = _totalTeamBonus;
@@ -527,13 +527,28 @@ contract KOLPro is Ownable{
     TotalUsers[_addr] = TotalUsers[_addr].sub(1);
   }
   function subTotalLockingAmount(address _addr,uint256 _amount) onlyContract public{
-    TotalUsers[_addr] = TotalUsers[_addr].sub(_amount);
+    TotalLockingAmount[_addr] = TotalLockingAmount[_addr].sub(_amount);
   }
   function subTotalBalance(uint256 _amount) onlyContract public{
     totalBalance=totalBalance.sub(_amount);
   }
   function qsLevel(address _addr) onlyContract public{
     queryAndSetLevelN(_addr);
+  }
+  function setInviteTeam(address _addr) onlyContract public{
+    uint256 yestodayLastSecond = getYestodayLastSecond(now);
+    uint256 last;
+    if (LockInviteBonus[_addr].length > 0){
+      last = LockInviteBonus[_addr].length - 1;
+      LockInviteBonus[_addr][last].theDayInviteBonus = 0;
+      LockInviteBonus[_addr][last].totalInviteBonus = 0;
+    }
+    if (LockInviteBonus[_addr].length > 0){
+      last = LockTeamBonus[_addr].length - 1;
+      LockTeamBonus[_addr][last].theDayTeamBonus = 0;
+      LockTeamBonus[_addr][last].totalTeamBonus = 0;
+      LockTeamBonus[_addr][last].theDayRate = 0;
+    }
   }
   /**
    * title 录入KOL的收盘价
@@ -546,33 +561,6 @@ contract KOLPro is Ownable{
     ClosePrice[yestodayLastSecond] = price;
   }
 
-  function setLevelN(uint8 _level,uint16 _users,uint256 _amount) onlyOwner public{
-    if (_level == 1){
-      comLevel1Users = _users;
-      comLevel1Amount = _amount;
-    }else if(_level ==2){
-      comLevel2Users = _users;
-      comLevel2Amount = _amount;
-    }else if(_level ==3){
-      comLevel3Users = _users;
-      comLevel3Amount = _amount;
-    }
-  }
-  function setLevelC(uint8 _level,uint16 _users,uint256 _amount) onlyOwner public{
-    if (_level == 1){
-      comLevel1Users = _users;
-      comLevel1Amount = _amount;
-    }else if(_level ==2){
-      comLevel2Users = _users;
-      comLevel2Amount = _amount;
-    }else if(_level ==3){
-      comLevel3Users = _users;
-      comLevel3Amount = _amount;
-    }
-  }
-  function setLevelR(uint8 _level,uint8 _levelRate) onlyOwner public{
-    levelRate[_level] = _levelRate;
-  }
   function setReceiver(address _receiver) onlyOwner public{
     receiver = _receiver;
   }
@@ -584,9 +572,6 @@ contract KOLPro is Ownable{
   }
   function setGoing(bool _going) onlyOwner public{
     going = _going;
-  }
-  function setBegin(uint256 _begin) onlyOwner public{
-    begin = _begin;
   }
   function setEnd(uint256 _end) onlyOwner public{
     end = _end;
