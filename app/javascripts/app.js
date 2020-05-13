@@ -20,7 +20,7 @@ const App = {
   load: null,
   canDraw:false,
   diff: function(a,b){
-    var every = 300;
+    var every = 120;
     var begin =1589126400;
     var aNum=parseInt(a);
     var bNum=parseInt(b);

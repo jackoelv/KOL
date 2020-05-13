@@ -242,7 +242,7 @@ contract KOLWithDraw is Ownable{
   KOL public kol;
   KOLP public kolp;
 
-  uint256 public every = 5 minutes;//1 days;
+  uint256 public every = 2 minutes;//1 days;
   uint256 public minBonus = 30 * (10 ** 18);
   uint256 public leftBonus = 0;
   address public reciever;
@@ -408,7 +408,8 @@ contract KOLWithDraw is Ownable{
     }else if(bonus >= leftBonus){
       realBonus = leftBonus;
     }
-    leftBonus = leftBonus.sub(realBonus);
+    uint256 subLeft = realBonus;
+    /* leftBonus = leftBonus.sub(realBonus); */
     uint256 tax = realBonus*fee/100;
     realBonus = realBonus.sub(tax);
 
@@ -417,6 +418,7 @@ contract KOLWithDraw is Ownable{
       if (bonus < minBonus){
         realBonus = balance;
         tax = 0;
+        subLeft = 0;
       }else{
         realBonus += balance;
       }
@@ -433,6 +435,7 @@ contract KOLWithDraw is Ownable{
       emit WithDrawed(msg.sender,realBonus);
     }
     if (tax > 0) kol.transfer(reciever,tax);
+    leftBonus = leftBonus.sub(subLeft);
 
   }
   function calcuAllBonus(bool _onlyBonus) public view returns(uint256){

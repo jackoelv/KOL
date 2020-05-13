@@ -43,7 +43,7 @@ function now()
    return fmt;
 }
 function lastsecond(begin,time){
-  return(time - (time-begin) % 300-1);
+  return(time - (time-begin) % 120-1);
 }
 
 contract("test",accounts => {
@@ -58,10 +58,16 @@ contract("test",accounts => {
     unixTimeNow = Math.round(unixTimeNow / 1000);
 
     let theSecond = unixTimeNow;
-    let target = accounts[7];
-    let every = 300;
-    for (var i = unixTimeNow; i > unixTimeNow - 3 *every; i = i-every){
-      await p.putClosePrice(5000,i);
+    // let target = accounts[7];
+    let every = 120;
+    // for (var i = unixTimeNow+3*every; i > unixTimeNow - 10 *every; i = i-every){
+    //   await p.putClosePrice(5000,i);
+    //   console.log(i);
+    //
+    // }
+    for (var i = 1589376599+every+2; i < 1589375999+10*every+2; i +=every){
+      await p.putClosePrice(10000,i);
+      console.log(i);
 
     }
 
@@ -69,9 +75,11 @@ contract("test",accounts => {
 
 
 
-    console.log("****************查询一下第一个起息的时间****************");
-    let a1result = await p.LockHistory(target,0);
-    let begin = web3.utils.BN(a1result[0]);
+
+
+    // console.log("****************查询一下第一个起息的时间****************");
+    // let a1result = await p.LockHistory(target,0);
+    // let begin = web3.utils.BN(a1result[0]);
     // console.log("开始时间是："+begin);
     // console.log("本地时间是：" + dateFtt(begin));
     // let price = 0;
@@ -84,12 +92,17 @@ contract("test",accounts => {
     //   await p.putClosePrice(10000,i+2);
     //   console.log("wokao");
     // }
+    //
+    // console.log("begin is: " + dateFtt(begin));
 
-    console.log("begin is: " + dateFtt(begin));
-
-    var yestoday = 1588854899;
+    var yestoday = 1589375159;
     var price;
-    for (var j=1588855799;j>yestoday-10*300;j-=300){
+    // for (var j=1589375999;j>=1589375999-20*every;j-=every){
+    //   price = await p.ClosePrice(j);
+    //   console.log("j is :" + dateFtt(j) +",  "+ j +"price is :" + price);
+    // }
+
+    for (var j=1589374199;j<=1589374199+20*every;j+=every){
       price = await p.ClosePrice(j);
       console.log("j is :" + dateFtt(j) +",  "+ j +"price is :" + price);
     }
