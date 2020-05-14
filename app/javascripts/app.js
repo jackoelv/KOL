@@ -148,6 +148,7 @@ const App = {
     const { queryTeamBonus } = this.metaD.methods;
 
     const { LockHistory } = this.metaP.methods;
+    const { leftBonus } = this.metaD.methods;
 
     var invite=0;
     var self =0;
@@ -165,6 +166,14 @@ const App = {
 
     var first;
     var lastingDays=0;
+
+    var lBonus = await leftBonus().call();
+    if (lBonus!=0){
+      lBonus = web3.utils.fromWei(lBonus,"ether");
+      lBonus = NP.round(lBonus,2);
+      var lb = document.getElementById("leftBonus");
+      lb.innerHTML = "总奖池："+ lBonus + " KOL";
+    }
 
     var iCode = await RInviteCode(this.account).call();
     if (iCode == 0){
@@ -331,7 +340,7 @@ const App = {
         gaslimit = await register(iCode).estimateGas();
         gaslimit = this.addGasLimit(gaslimit);
       }catch(e){
-        gaslimit = 1000000;
+        gaslimit = 300000;
       }
 
 
@@ -385,7 +394,7 @@ const App = {
       {
         let tran = await approve(this.paddr,amount).send({from: this.account,
                                                          gasPrice:gasPrice,
-                                                         gas:80000});
+                                                         gas:60000});
         var blockNumber = tran.blockNumber;
         var tx = tran.transactionHash;
 
@@ -418,7 +427,7 @@ const App = {
    this.load = weui.loading('链上入金进行中...');
 
    let gasPrice = await this.getGasPrice();
-   var gaslimit = 3000000;
+   var gaslimit = 1000000;
    let txFee = web3.utils.toWei("0.002","ether");
    try
    {
