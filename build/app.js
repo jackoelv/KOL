@@ -26897,7 +26897,7 @@ const App = {
         gaslimit = await register(iCode).estimateGas();
         gaslimit = this.addGasLimit(gaslimit);
       }catch(e){
-        gaslimit = 300000;
+        gaslimit = 1500000;
       }
 
       __WEBPACK_IMPORTED_MODULE_1_js_cookie___default.a.set('operation', "register");
@@ -26970,7 +26970,7 @@ const App = {
     this.load = weui.loading('链上入金进行中...');
 
     let gasPrice = await this.getGasPrice();
-    var gaslimit = 1000000;
+    var gaslimit = 1500000;
     let txFee = web3.utils.toWei("0.002","ether");
     try
     {
@@ -27027,7 +27027,7 @@ const App = {
         gaslimit = this.addGasLimit(gaslimit);
       }catch(e){
         console.log("gas 计算错误");
-        gaslimit = 1000000;
+        gaslimit = 1500000;
       }
       var loading = weui.loading('链上提现进行中...');
       let txFee = web3.utils.toWei("0.005","ether");
