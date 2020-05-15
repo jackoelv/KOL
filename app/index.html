@@ -24,7 +24,9 @@
                 <div class="weui-cells__title" id="leftBonus" style="color:rgb(255, 255, 255);text-align: center;font-size:26px"></div>
                 <div id="firstHide" >
                     <div class="weui-cells weui-cells_form" style="color:#181B46">
+                      <div class="weui-cells__title" id="msg" style="background-color:#F26322;color:rgb(255, 255, 255);"></div>
                       <div class="weui-cell weui-cell_readonly">
+
                           <div class="weui-cell__hd"><label class="weui-label" style="width:88px">我的钱包</label></div>
                       </div>
                       <div class="weui-cell weui-cell_readonly">
@@ -33,9 +35,15 @@
                           </div>
                       </div>
                       <div class="weui-cell weui-cell_readonly">
-                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">余额</label></div>
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">KOL余额</label></div>
                           <div class="weui-cell__bd">
                               <input class="weui-input"  type="text" name="balance" placeholder="0" readonly/>
+                          </div>
+                      </div>
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">ETH余额</label></div>
+                          <div class="weui-cell__bd">
+                              <input class="weui-input"  type="text" name="ethBalance" placeholder="0" readonly/>
                           </div>
                       </div>
                       <div class="weui-cell weui-cell_readonly">
@@ -57,7 +65,7 @@
                           <div class="weui-flex__item"><div id="inviteTop" class="placeholder" onclick="App.invite()" style="background-color:#181B46;color:rgb(255, 255, 255)">邀请</div></div>
                       </div>
 
-                      <div class="weui-cells__title" style="background-color:#FEC804;color:rgb(255, 255, 255)">DASHBOARD</div>
+                      <div class="weui-cells__title" style="background-color:#FEC804;color:rgb(255, 255, 255);">DASHBOARD</div>
                         <div class="weui-cell weui-cell_readonly">
                             <div class="weui-cell__hd"><label class="weui-label" style="width:88px">本金</label></div>
                             <div class="weui-cell__bd">
@@ -150,7 +158,7 @@
                     </div>
                   </div>
                   <div class="weui-btn-area">
-                      <a class="weui-btn weui-btn_default" id="Join" onclick="App.approve()">立刻参与</a>
+                      <a class="weui-btn weui-btn_default" id="Join" onclick="App.joinClick()">等待加载...</a>
                   </div>
 
               </div>
@@ -202,7 +210,7 @@
 <script src="jquery.qrcode.min.js"></script>
 <script src="number.js"></script>
 <!-- <script src="app.js"></script> -->
-<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/b2app.js"></script>
+<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/b3app.js"></script>
 
 
 <script type="text/javascript">
