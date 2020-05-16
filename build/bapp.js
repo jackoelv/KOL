@@ -26670,7 +26670,7 @@ const App = {
   },
 
   start: async function() {
-    this.load = weui.loading("连接以太坊网络");
+    this.load = weui.loading("连接以太坊网络V2.0516");
     const { web3 } = this;
     try {
       this.metaK = new web3.eth.Contract(
