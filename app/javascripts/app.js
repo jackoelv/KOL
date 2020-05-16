@@ -204,7 +204,7 @@ const App = {
       weui.toast('以太坊连接成功',1000);
     } catch (error) {
       this.load.hide();
-      weui.topTips('连接以太坊网络失败，请刷新重试');
+      weui.topTips(error);
       console.log("error? : " +error);
     };
     console.log("finished");
