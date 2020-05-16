@@ -531,12 +531,18 @@ const App = {
    if (Number(allowed) >= Number(amount) ){
      await this.join();
    }else{
-     if ((operation == "approve") && (status == "pending")){
-        weui.topTips('等待授权完成...');
-        return;
-     }else{;
-       await this.approve();
-     }
+     // if ((operation == "approve") && (status == "pending")){
+     //      let appResult = await this.checkTx(tx);
+     //      if (appResult == "pending"){
+     //        weui.topTips('等待授权完成...');
+     //        return;
+     //      }else{
+     //        await this.approve();
+     //      }
+     // }else{;
+     //   await this.approve();
+     // }
+     await this.approve();
    }
  },
  drawChain: async function(allbonus){

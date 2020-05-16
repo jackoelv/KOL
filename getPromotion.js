@@ -12,6 +12,8 @@ var drawabi = drawResult.abi;
 var resultList = "result.csv";
 var content = {};
 var contentLen = 0;
+var totalAmount = 0;
+var totalUsers = 0;
 
 // var web3 = new Web3(new Web3.providers.HttpProvider("https://mainnet.infura.io/v3/b1fb153dd7e44bef9cb4d9b661071583"));
 var web3 = new Web3(new Web3.providers.HttpProvider("http://192.168.2.198:8545"));
@@ -89,6 +91,8 @@ async function getAllAddrs(addr){
   var lockBalance = await getLock(addr);
   if(lockBalance!=0){
     lockBalance = web3.utils.fromWei(lockBalance,"ether");
+    totalAmount +=parseFloat(lockBalance);
+    totalUsers++;
   }
   var childsLen = await getChildsLen(addr);
   var teamUsers = await getTeamUsers(addr);
@@ -106,10 +110,15 @@ function saveToFile()
 {
     console.log("file saving");
     var out = fs.createWriteStream(resultList);
+
+    out.write("总有效参与人数,"+ totalUsers +"\n");
+    out.write("总锁仓金额,"+ totalAmount +"\n");
     out.write("地址,上级,入金,邀请码,直推,网体,网体金额"+"\n");
     for (var i = 0;i < contentLen-1; i++){
       out.write(content[i]+"\n");
     }
+    console.log("总有效参与人数,"+ totalUsers);
+    console.log("总锁仓金额,"+ totalAmount);
     out.on("end", function() {
       out.end();
     });
