@@ -26697,7 +26697,7 @@ const App = {
     } catch (error) {
       this.load.hide();
       weui.topTips(error);
-      console.log("error? : " +error);
+      weui.toast('发生错误的版本号：V2.0.0516',5000);
     };
     console.log("finished");
   },
