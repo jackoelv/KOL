@@ -206,7 +206,6 @@ const App = {
       this.load.hide();
       weui.topTips(error);
       weui.toast('版本号V2.0.0516',1000);
-      console.log("error? : " +error);
     };
     console.log("finished");
   },
