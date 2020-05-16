@@ -26882,6 +26882,10 @@ const App = {
   },
   reg: async function(){
     var iCode = $("input[name='iCodeRegister']").val();
+    if (iCode == 0){
+      weui.topTips('邀请码错误');
+      return;
+    }
     const { web3 } = this;
     const { register } = this.metaP.methods;
     const { InviteCode } = this.metaP.methods;
