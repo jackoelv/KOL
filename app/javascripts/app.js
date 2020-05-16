@@ -220,7 +220,7 @@ const App = {
       var operation = Cookies.get('operation');
 
       if (operation == "register"){
-        let registerResult = checkTx(tx);
+        let registerResult = this.checkTx(tx);
         if (registerResult == "pending"){
           this.load = weui.loading('链上注册进行中...');
           this.iCode = "链上注册进行中...";
@@ -384,11 +384,11 @@ const App = {
     const { web3 } = this;
     this.setMsg("提取链上数据进行中...");
     await this.loadBalance();
-    this.setMsg("广告位招租");
+    this.setMsg("广告位招租未完待续...");
     await this.loadTop();
-    this.setMsg("做时间的朋友...");
+    this.setMsg("做时间的朋友未完待续......");
     await this.loadDashBoard();
-    this.setMsg("再来一个广告位招租");
+    this.setMsg("又一广告位招租未完待续...");
     await this.loadTeam();
     this.setMsg("马上就好...");
     var allowed = await this.checkAllowed();

@@ -3,9 +3,12 @@ var fs = require("fs");
 var FastCsv = require("fast-csv");
 var BigNumber = require("bignumber.js");
 var abifile = "./build/contracts/KOLPro.json";
+var drawfile = "./build/contracts/KOLWithDraw.json";
 var Tx = require('ethereumjs-tx');
 var result = JSON.parse(fs.readFileSync(abifile));
+var drawResult = JSON.parse(fs.readFileSync(drawfile));
 var abi = result.abi;
+var drawabi = drawResult.abi;
 var resultList = "result.csv";
 var content = {};
 var contentLen = 0;
@@ -15,18 +18,20 @@ var web3 = new Web3(new Web3.providers.HttpProvider("http://192.168.2.198:8545")
 
 var fromAddress = "0x451cD3eFB91d73Cdb1724547dB3bcd6be7bd1765";
 var contractAddr = "0xbC664C8ECadbB9311325537DfA4609F877E04Ab6";
+var drawAddr = "0x9190d289E7054DaB91a2F5Ed77a7d57fE8381Def";
 var token = new web3.eth.Contract(abi,contractAddr);
+var drawtoken = new web3.eth.Contract(drawabi,drawAddr);
 let addr = fromAddress;
 console.log("begin");
 // var number = 1118.907;
 // var n2 = formatDecimal(number,2);
 // console.log(n2);
 
-getEvents();
-// getAllAddrs(addr).then(() => {
-//   saveToFile();
-//   console.log("finished");
-// });
+// getEvents();
+getAllAddrs(addr).then(() => {
+  saveToFile();
+  console.log("finished");
+});
 
 
 async function getAddressFromiCode(iCode){
@@ -101,6 +106,7 @@ function saveToFile()
 {
     console.log("file saving");
     var out = fs.createWriteStream(resultList);
+    out.write("地址,上级,入金,邀请码,直推,网体,网体金额"+"\n");
     for (var i = 0;i < contentLen-1; i++){
       out.write(content[i]+"\n");
     }
@@ -140,8 +146,20 @@ async function getEvents(){
           // console.log(rr.returnValues[1]);10071095
           // console.log(web3.utils.BN(rr.returnValues[1]).toString());
         }
-
       }
+    }
+  );
+  drawtoken.getPastEvents('WithDrawed', {
+    fromBlock: 10058101,
+    toBlock: 'latest'
+    }, (error, events) => {
+      console.log("$$$$$$$$$$$$$$$$$$$$$$$$$");
+      console.log(events);
+      // for (var i = 0; i < events.length; i++){
+      //   let rr = events[i];
+      //   console.log("withDrawed");
+      //   console.log(rr);
+      // }
     }
   );
 };

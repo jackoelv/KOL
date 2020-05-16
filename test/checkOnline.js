@@ -22,7 +22,7 @@ contract("testjoin",accounts => {
     let p = await KOLP.at("0xbC664C8ECadbB9311325537DfA4609F877E04Ab6");
     let d = await KOLD.at("0x9190d289E7054DaB91a2F5Ed77a7d57fE8381Def");
     let paddr = p.address;
-    var addr = "0x6dbdbd41b107be0f1461b13a66528ea9659e9273";
+    var addr = "0x3551c688613331862408A361e0D3E3F14969221A";
 
     //检查授权。
     var number = 1118.907;
@@ -48,12 +48,17 @@ contract("testjoin",accounts => {
 
     var fathersLen = await p.getFathersLength(addr);
 
+    var father = await p.InviteList(addr,0);
+    var fatheriCode = await p.RInviteCode(father);
+
     console.log("ethBalance         :"+balance);
     console.log("kolBalance         :"+kolBalance);
     console.log("allow              :"+allow);
     console.log("iCode              :"+iCode);
     console.log("lock               :"+lock);
     console.log("fathersLen         :"+fathersLen);
+    console.log("father             :"+father);
+    console.log("fatheriCode        :"+fatheriCode);
 
     });
     it('Check whether the contract has been issued successfully', async () => {
