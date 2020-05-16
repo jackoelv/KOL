@@ -26874,15 +26874,15 @@ const App = {
   },
   loadData: async function(){
     const { web3 } = this;
-    this.setMsg("提取链上数据进行中，耐心等一会儿");
+    this.setMsg("提取链上数据进行中...");
     await this.loadBalance();
-    this.setMsg("嫌慢找V神理论去，再耐心等一会儿");
+    this.setMsg("广告位招租");
     await this.loadTop();
-    this.setMsg("广告位招租，再再耐心等一会儿");
+    this.setMsg("做时间的朋友...");
     await this.loadDashBoard();
-    this.setMsg("imtoken不给力，再再再耐心等一会儿");
+    this.setMsg("再来一个广告位招租");
     await this.loadTeam();
-    this.setMsg("终于接近尾声，马上就好...");
+    this.setMsg("马上就好...");
     var allowed = await this.checkAllowed();
     if(allowed > 0){
       this.setJoinBtn("开始入金");
