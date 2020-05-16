@@ -26598,6 +26598,17 @@ const App = {
     var bNight=bNum -extra;
     return ((bNight-aNight)/every);
   },
+  formatDecimal: function(num, decimal) {
+    num = num.toString();
+    var index = num.indexOf('.');
+    if (index !== -1) {
+      num = num.substring(0, decimal + index + 1);
+      console.log(decimal + index + 1);
+    } else {
+      num = num.substring(0);
+    }
+    return parseFloat(num).toFixed(decimal);
+  },
   dateFtt: function(dd,current){ //author: meizz
      dd = dd +"000";
      var fmt = "yyyy-MM-dd hh:mm:ss";
@@ -26685,7 +26696,7 @@ const App = {
       weui.toast('以太坊连接成功',1000);
     } catch (error) {
       this.load.hide();
-      weui.topTips('连接以太坊网络失败，请刷新重试');
+      weui.topTips(error);
       console.log("error? : " +error);
     };
     console.log("finished");
@@ -26726,13 +26737,13 @@ const App = {
     this.balance = await balanceOf(this.account).call();
     if (this.balance != 0){
       this.balance = web3.utils.fromWei(this.balance,"ether");
-      this.balance = NP.round(this.balance,2);
+      this.balance = formatDecimal(this.balance,2);
     }
     this.setInput();
     this.ethBalance = await web3.eth.getBalance(this.account);
     if (this.ethBalance != 0){
       this.ethBalance = web3.utils.fromWei(this.ethBalance,"ether");
-      this.ethBalance = NP.round(this.ethBalance,5);
+      this.ethBalance = formatDecimal(this.ethBalance,5);
     }
     this.setInput();
   },
@@ -26750,7 +26761,7 @@ const App = {
     this.lBonus = await leftBonus().call();
     if (this.lBonus!=0){
       this.lBonus = web3.utils.fromWei(this.lBonus,"ether");
-      this.lBonus = NP.round(this.lBonus,2);
+      this.lBonus = formatDecimal(this.lBonus,2);
 
     }
     try{
@@ -26789,7 +26800,7 @@ const App = {
     this.lock = await LockBalance(this.account).call();
     if (this.lock != 0){
       this.lock = web3.utils.fromWei(this.lock,"ether");
-      this.lock = NP.round(this.lock,2);
+      this.lock = formatDecimal(this.lock,2);
       const { USDTOrCoin } = this.metaP.methods;
       let usdtcoin = await USDTOrCoin(this.account).call();
       if(usdtcoin){
@@ -26801,14 +26812,14 @@ const App = {
       try{
         this.self = await querySelfBonus(this.account).call({from:this.account});
         this.self = web3.utils.fromWei(this.self,"ether");
-        this.self = NP.round(this.self,2);
+        this.self = formatDecimal(this.self,2);
       }catch(e){
         console.log("金本位抛出异常");
       }
       try{
         this.invite = await queryInviteBonus(this.account).call({from:this.account});
         this.invite = web3.utils.fromWei(this.invite,"ether");
-        this.invite = NP.round(this.invite,2);
+        this.invite = formatDecimal(this.invite,2);
       }catch(e){
         console.log("invite");
       }
@@ -26816,7 +26827,7 @@ const App = {
       try{
         this.team = await queryTeamBonus(this.account).call({from:this.account});
         this.team = web3.utils.fromWei(this.team,"ether");
-        this.team = NP.round(this.team,2);
+        this.team = formatDecimal(this.team,2);
       }catch(e){
         console.log("team");
 
@@ -26825,7 +26836,7 @@ const App = {
       try{
         this.bonus = await calcuAllBonus(true).call({from:this.account});
         this.bonus = web3.utils.fromWei(this.bonus,"ether") / 0.95;
-        this.bonus = NP.round(this.bonus,2);
+        this.bonus = formatDecimal(this.bonus,2);
       }catch(e){
         console.log("bonus");
       }
@@ -26856,7 +26867,7 @@ const App = {
     this.totaldraws = await TotalWithDraws(this.account).call();
     if (this.totaldraws !=0 ){
       this.totaldraws = web3.utils.fromWei(this.totaldraws,"ether");
-      this.totaldraws = NP.round(this.totaldraws,2);
+      this.totaldraws = formatDecimal(this.totaldraws,2);
     }
     this.setInput();
 
