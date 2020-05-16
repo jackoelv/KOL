@@ -26693,7 +26693,7 @@ const App = {
       $("input[name='iCodeRegister']").val(iCode);
 
       this.load.hide();
-      weui.toast('以太坊连接成功',1000);
+      weui.toast('以太坊连接成功V2.0516',2000);
     } catch (error) {
       this.load.hide();
       weui.topTips(error);
