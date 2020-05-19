@@ -395,7 +395,8 @@ const App = {
     if(allowed > 0){
       this.setJoinBtn("开始入金");
     }else{
-      this.setJoinBtn("立刻参与");
+      weui.topTips('首次参与前需要先进行合约授权');
+      this.setJoinBtn("首次授权");
     }
     this.setMsg("none");
   },

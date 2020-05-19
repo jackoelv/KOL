@@ -248,9 +248,9 @@ function loadScript(url, callback){
   script.src = url;
   document.getElementsByTagName("head")[0].appendChild(script);
 };
-weui.loading("测试一下页面脚本的加载");
-loadScript("app.js", function(){ //调用
- alert("脚本加载正常!");
+weui.loading("页面加载进行中");
+loadScript("https://kolvote.oss-cn-shenzhen.aliyuncs.com/bapp.js?v=11", function(){ //调用
+  weui.loading("页面加载完成");
 });
 $(function(){
     $('#allbonus').on('click', function(){
