@@ -109,10 +109,11 @@ console.log("begin");
 // console.log(n2);
 
 // getEvents();
-getAllAddrs(addr).then(() => {
-  saveToFile();
-  console.log("finished");
-});
+// getAllAddrs(addr).then(() => {
+//   saveToFile();
+//   console.log("finished");
+// });
+getClosePrice();
 
 
 async function getAddressFromiCode(iCode){
@@ -154,7 +155,26 @@ async function getTeamAmount(addr){
   const { TotalLockingAmount } = token.methods;
   var teamAmount = await TotalLockingAmount(addr).call();
   return teamAmount;
-}
+};
+function lastsecond(time){
+  var begin = 1589126400;
+  return(time - (time-begin) % 86400-1);
+};
+async function getClosePrice(){
+  const { ClosePrice } = token.methods;
+  var time = new Date();
+  var unixTimeNow = time.getTime();
+  unixTimeNow = Math.round(unixTimeNow / 1000);
+  var begin = 1589126400 + 2*86400;
+  let theDay = lastsecond(unixTimeNow);
+  for (var i = theDay;i>begin;i-=86400){
+    let price = await ClosePrice(i).call();
+    console.log("the day is       :" +dateFtt(i,1));
+    console.log("the price is     :" + price);
+  };
+
+
+};
 function writefs(addr,fatherAddr,lockBalance,iCode,childsLen,teamUsers,teamAmount){
   content[contentLen]=addr+","+fatherAddr+","+lockBalance+","+iCode+","+childsLen+","+teamUsers+","+teamAmount;
   contentLen ++;
