@@ -13,18 +13,18 @@
     <body>
         <!-- 使用 -->
         <div class="container" id="container"></div>
-        <div class="page" style="background-color:#F26322">
+        <div class="page" style="background-color:#416EB6">
             <div class="page__hd" style="padding:40px">
-                <h1 class="page__title" style="color:rgb(255, 255, 255);text-align: center">KOL共识裂变计划</h1>
-                <p class="page__desc" style="color:rgb(255, 255, 255);text-align: center;font-size:16px">KOL持币生息--社区KOL联盟出品</p>
-                <p class="page__desc" style="color:rgb(255, 255, 255);text-align: center;font-size:16px">v2.0516</p>
+                <h1 class="page__title" style="color:rgb(255, 255, 255);text-align: center">KOL链上广告系统</h1>
+                <p class="page__desc" style="color:rgb(255, 255, 255);text-align: center;font-size:16px">即将上线，敬请期待--社区KOL联盟出品</p>
+                <p class="page__desc" style="color:rgb(255, 255, 255);text-align: center;font-size:16px">v1.0523</p>
             </div>
             <div class="page__bd">
 
                 <div class="weui-cells__title" style="color:rgb(255, 255, 255);text-align: center;font-size:26px">KOL大舞台，有梦你就来</div>
                 <div class="weui-cells__title" id="leftBonus" style="color:rgb(255, 255, 255);text-align: center;font-size:26px"></div>
                 <div id="firstHide" >
-                    <div class="weui-cells weui-cells_form" style="color:#181B46">
+                    <div class="weui-cells weui-cells_form" style="color:#2B103B">
                       <div class="weui-cells__title" id="msg" style="background-color:#F26322;color:rgb(255, 255, 255);"></div>
                       <div class="weui-cell weui-cell_readonly">
 
@@ -38,7 +38,7 @@
                       <div class="weui-cell weui-cell_readonly">
                           <div class="weui-cell__hd"><label class="weui-label" style="width:88px">KOL余额</label></div>
                           <div class="weui-cell__bd">
-                              <input class="weui-input"  type="text" name="balance" placeholder="0" readonly/>
+                              <input class="weui-input"  type="text" name="kolBalance" placeholder="0" readonly/>
                           </div>
                       </div>
                       <div class="weui-cell weui-cell_readonly">
@@ -48,139 +48,99 @@
                           </div>
                       </div>
                       <div class="weui-cell weui-cell_readonly">
-                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">现在</label></div>
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">会员级别</label></div>
                           <div class="weui-cell__bd">
-                              <input class="weui-input"  type="text" name="current" id="current" placeholder="0" readonly/>
+                              <input class="weui-input"  type="text" name="userLevel2" placeholder="0" readonly/>
                           </div>
                       </div>
                       <div class="weui-cell weui-cell_readonly">
-                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">周期</label></div>
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">网体深度</label></div>
                           <div class="weui-cell__bd">
-                              <input class="weui-input"  type="text" name="lastingDays" placeholder="0" readonly/>
+                              <input class="weui-input"  type="text" name="maxDeep" placeholder="0" readonly/>
+                          </div>
+                      </div>
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">奖励总额</label></div>
+                          <div class="weui-cell__bd">
+                              <input class="weui-input"  type="text" name="totalBonus" placeholder="0" readonly/>
+                          </div>
+                      </div>
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">直推人数</label></div>
+                          <div class="weui-cell__bd">
+                              <input class="weui-input"  type="text" name="childs" placeholder="0" readonly/>
+                          </div>
+                      </div>
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">团队人数</label></div>
+                          <div class="weui-cell__bd">
+                              <input class="weui-input"  type="text" name="teamNum" placeholder="0" readonly/>
                           </div>
                       </div>
 
+
                       <div class="weui-flex" style="text-align: center;background-color:#F26322;">
-                          <div class="weui-flex__item"><div id="joinTop" class="placeholder" style="background-color:rgb(242, 242, 242);color:rgb(88, 189, 107)">入金</div></div>
-                          <div class="weui-flex__item"><div id="drawTop" class="placeholder" style="background-color:rgb(88, 189, 107);color:rgb(242, 242, 242)">提现</div></div>
-                          <div class="weui-flex__item"><div id="inviteTop" class="placeholder" onclick="App.invite()" style="background-color:#181B46;color:rgb(255, 255, 255)">邀请</div></div>
+                          <div class="weui-flex__item"><div id="joinTop" class="placeholder" style="background-color:#EFC638;color:rgb(255, 255, 255)">升级</div></div>
+                          <div class="weui-flex__item"><div id="drawTop" class="placeholder" style="background-color:#715CA8;color:rgb(255, 255, 255)">提现</div></div>
+                          <div class="weui-flex__item"><div id="inviteTop" class="placeholder" onclick="App.invite()" style="background-color:#2B103B;color:rgb(255, 255, 255)">邀请</div></div>
                       </div>
-
-                      <div class="weui-cells__title" style="background-color:#FEC804;color:rgb(255, 255, 255);">DASHBOARD</div>
-                        <div class="weui-cell weui-cell_readonly">
-                            <div class="weui-cell__hd"><label class="weui-label" style="width:88px">本金</label></div>
-                            <div class="weui-cell__bd">
-                                <input class="weui-input"  type="text" name="lock"  value = "0" placeholder="0" readonly/>
-                            </div>
-                            <div class="weui-cell__hd"><label class="weui-label" style="width:46px">收益</label></div>
-                            <div class="weui-cell__bd">
-                                <input class="weui-input"  type="text" name="bonus"  value = "0" placeholder="0" readonly/>
-                            </div>
-                        </div>
-                        <div class="weui-cell weui-cell_readonly">
-                            <div class="weui-cell__hd"><label class="weui-label" style="width:46px">生息</label></div>
-                            <div class="weui-cell__bd">
-                                <input class="weui-input"  type="text" name="self"  value = "0" placeholder="0" readonly/>
-                            </div>
-                            <div class="weui-cell__hd"><label class="weui-label" style="width:46px">推广</label></div>
-                            <div class="weui-cell__bd">
-                                <input class="weui-input"  type="text" name="invite"  value = "0" placeholder="0" readonly/>
-                            </div>
-                            <div class="weui-cell__hd"><label class="weui-label" style="width:46px">网体</label></div>
-                            <div class="weui-cell__bd">
-                                <input class="weui-input"  type="text" name="team"  value = "0" placeholder="0" readonly/>
-                            </div>
-                        </div>
-                        <div class="weui-cells__title" style="background-color:#FEC804;color:#FFFFFF">TEAM</div>
-                        <div class="weui-cell weui-cell_readonly">
-                            <div class="weui-cell__hd"><label class="weui-label" style="width:88px">直推</label></div>
-                            <div class="weui-cell__bd">
-                                <input class="weui-input"  type="text" name="childs"  value = "0" placeholder="0" readonly/>
-                            </div>
-                            <div class="weui-cell__hd"><label class="weui-label" style="width:88px">团队</label></div>
-                            <div class="weui-cell__bd">
-                                <input class="weui-input"  type="text" name="teamusers"  value = "0" placeholder="0" readonly/>
-                            </div>
-                        </div>
-                        <div class="weui-cell weui-cell_readonly">
-                            <div class="weui-cell__hd"><label class="weui-label" style="width:88px">级别</label></div>
-                            <div class="weui-cell__bd">
-                                <input class="weui-input"  type="text" name="level"  value = "0" placeholder="0" readonly/>
-                            </div>
-                            <div class="weui-cell__hd"><label class="weui-label" style="width:88px">网体</label></div>
-                            <div class="weui-cell__bd">
-                                <input class="weui-input"  type="text" name="teamamount"  value = "0" placeholder="0" readonly/>
-                            </div>
-                        </div>
-
-
 
                 </div><!-- end -->
           </div><!-- firstHide -->
           <div id="firstRegister" style="background-color:#FFFFFF;display:none">
-                <div class="weui-cells__title" style="color:#7A2D59;font-size:28px">欢迎加入KOL共识裂变计划</div>
-                <div class="weui-cells weui-cells_form" style="background-color:#7A2D59;color:#FFFFFF">
+                <div class="weui-cells__title" style="color:#715CA8;font-size:28px">欢迎加入KOL共识裂变计划</div>
+                <div class="weui-cells weui-cells_form" style="background-color:#715CA8;color:#FFFFFF">
                 <div class="weui-cell">
                     <div class="weui-cell__hd"><label class="weui-label" style="width:128px">请输入邀请码</label></div>
                     <div class="weui-cell__bd">
                         <input class="weui-input"  type="text" name="iCodeRegister"  value = "0" placeholder="0"/>
                     </div>
                 </div>
+                <div class="weui-cell weui-cell_switch">
+                  <div class="weui-cell__bd" id="joinusdt">一把梭哈到9级</div>
+                  <div class="weui-cell__ft">
+                      <input class="weui-switch" id="joinAll" type="checkbox" />
+                  </div>
+                </div>
                 <div class="weui-btn-area">
-                    <a class="weui-btn weui-btn_primary" id="Register" onclick="App.reg()" style="background-color:#F26322">注册</a>
+                    <a class="weui-btn weui-btn_primary" id="Register" onclick="App.regClick()" style="background-color:#EFC638;color:#715CA8">授权</a>
                 </div>
               </div>
 
           </div><!-- firstRegister-->
           <div id="joindrawpanel" >
-              <div class="weui-cells weui-cells_form" style="background-color:#7A2D59;color:#FFFFFF">
+              <div class="weui-cells weui-cells_form" style="background-color:#EFC638;color:#2B103B">
                   <div class="weui-cell">
-                      <div class="weui-cell__hd"><label class="weui-label" style="width:108px">请输入数量</label></div>
+                      <div class="weui-cell__hd"><label class="weui-label" style="width:188px">当前会员级别</label></div>
                       <div class="weui-cell__bd">
-                          <input class="weui-input"  type="text" name="joinAmount"  value = "100" placeholder="100"/>
+                          <input class="weui-input"  type="text" name="userLevel"  value = "0" placeholder="0"/>
                       </div>
                       <div class="weui-cell__bd">
                       </div>
-                  </div>
-                  <div id="ucfirst">
-                    <div class="weui-cell weui-cell_switch">
-                      <div class="weui-cell__bd" id="joinusdt">币本位</div>
-                      <div class="weui-cell__ft">
-                          <input class="weui-switch" id="usdtcoin" type="checkbox" />
-                      </div>
-                    </div>
-                  </div>
-                  <div id="uc">
-                    <div class="weui-cell weui-cell_readonly">
-                        <div class="weui-cell__hd"><label class="weui-label" style="width:108px">您当前处于：</label></div>
-                        <div class="weui-cell__bd">
-                            <input class="weui-input"  type="text" name="ucflag"  value = "0" placeholder="币本位" readonly/>
-                        </div>
-                    </div>
                   </div>
                   <div class="weui-btn-area">
-                      <a class="weui-btn weui-btn_default" id="Join" onclick="App.joinClick()">等待加载...</a>
+                      <a class="weui-btn weui-btn_default" id="Join" onclick="App.regClick()">等待加载...</a>
                   </div>
 
               </div>
-              <div class="weui-cells weui-cells_form" style="background-color:#181B46;color:#FFFFFF">
+              <div class="weui-cells weui-cells_form" style="background-color:#715CA8;color:#FFFFFF">
                 <div class="weui-cell weui-cell_readonly">
-                    <div class="weui-cell__hd"><label class="weui-label" style="width:108px">已提现收益：</label></div>
+                    <div class="weui-cell__hd"><label class="weui-label" style="width:188px">已提现收益</label></div>
                     <div class="weui-cell__bd">
                         <input class="weui-input"  type="text" name="totaldraws"  value = "0" placeholder="0" readonly/>
                     </div>
                 </div>
-                  <div class="weui-cell weui-cell_switch">
-                      <div class="weui-cell__bd" id="bonustip">只提收益</div>
-                      <div class="weui-cell__ft">
-                          <input class="weui-switch" id="allbonus" type="checkbox" checked="true" />
-                      </div>
-                  </div>
+                <div class="weui-cell weui-cell_readonly">
+                    <div class="weui-cell__hd"><label class="weui-label" style="width:188px">可提现收益</label></div>
+                    <div class="weui-cell__bd">
+                        <input class="weui-input"  type="text" name="canDrawAmount"  value = "0" placeholder="0" readonly/>
+                    </div>
+                </div>
                   <div class="weui-btn-area">
-                      <a class="weui-btn weui-btn_primary" id="Draw" onclick="App.draw()">提现</a>
+                      <a class="weui-btn weui-btn_primary" id="Draw" onclick="App.drawKol()">提现</a>
                   </div>
                 </div>
-                <div class="weui-cells weui-cells_form" style="background-color:#F26322;color:#FFFFFF">
+                <div class="weui-cells weui-cells_form" style="background-color:#2B103B;color:#FFFFFF">
                   <div class="weui-cell weui-cell_readonly">
                       <div class="weui-cell__hd"><label class="weui-label" style="width:108px">我的邀请码：</label></div>
                       <div class="weui-cell__bd">
@@ -188,7 +148,7 @@
                       </div>
                   </div>
                   <div class="weui-btn-area scroll">
-                      <a class="weui-btn weui-btn_default" id="invite" onclick="App.invite()" style="background-color:#181B46;color:#FFFFFF">邀请</a>
+                      <a class="weui-btn weui-btn_default" id="invite" onclick="App.invite()" style="background-color:#EFC638;color:#FFFFFF">邀请</a>
                   </div>
                   <div id="qr" style="display:none;height:660px">
                     <div class="weui-cell weui-cell_readonly">
@@ -249,26 +209,16 @@ function loadScript(url, callback){
   document.getElementsByTagName("head")[0].appendChild(script);
 };
 weui.loading("页面加载进行中");
-loadScript("https://kolvote.oss-cn-shenzhen.aliyuncs.com/bapp.js?v=11", function(){ //调用
+loadScript("app.js", function(){ //调用
   weui.loading("页面加载完成");
 });
-$(function(){
-    $('#allbonus').on('click', function(){
-        if ($('#allbonus').prop("checked")){
-          $('#bonustip').html('只提收益');
-        }else{
-          $('#bonustip').html('全部提现');
-        }
-    });
-    $('#usdtcoin').on('click', function(){
-        if ($('#usdtcoin').prop("checked")){
-          $('#joinusdt').html('金本位');
-        }else{
-          $('#joinusdt').html('币本位');
-        }
-    });
+$('#joinAll').on('click', function(){
+    if ($('#joinAll').prop("checked")){
+      App.joinAll = true;
+    }else{
+      App.joinAll = false;
+    }
 });
-
 $('#invite').click(function(){
     window.scrollTo({
       top: 3000,
@@ -276,34 +226,34 @@ $('#invite').click(function(){
     });
  });
 
- $('#top').click(function(){
-     window.scrollTo({
-       top: 0,
-       behavior: "smooth"
-     });
+$('#top').click(function(){
+   window.scrollTo({
+     top: 0,
+     behavior: "smooth"
+   });
+});
+
+$('#joinTop').click(function(){
+  window.scrollTo({
+    top: 700,
+    behavior: "smooth"
+  });
+});
+
+$('#drawTop').click(function(){
+   window.scrollTo({
+     top: 1060,
+     behavior: "smooth"
+   });
+});
+
+$('#inviteTop').click(function(){
+  window.scrollTo({
+    top: 3000,
+    behavior: "smooth"
   });
 
-  $('#joinTop').click(function(){
-      window.scrollTo({
-        top: 700,
-        behavior: "smooth"
-      });
-   });
-
-   $('#drawTop').click(function(){
-       window.scrollTo({
-         top: 1060,
-         behavior: "smooth"
-       });
-    });
-
-    $('#inviteTop').click(function(){
-        window.scrollTo({
-          top: 3000,
-          behavior: "smooth"
-        });
-
-     });
+});
 
 
 </script>
