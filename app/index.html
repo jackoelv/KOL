@@ -209,7 +209,7 @@ function loadScript(url, callback){
   document.getElementsByTagName("head")[0].appendChild(script);
 };
 weui.loading("页面加载进行中");
-loadScript("app.js", function(){ //调用
+loadScript("https://kolvote.oss-cn-shenzhen.aliyuncs.com/aapp.js?v=1", function(){ //调用
   weui.loading("页面加载完成");
 });
 

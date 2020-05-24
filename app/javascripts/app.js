@@ -11,19 +11,17 @@ const App = {
   unit:100,
 
   //线上环境
-  // kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
-  // paddr: "0xbC664C8ECadbB9311325537DfA4609F877E04Ab6",
-  // daddr: "0x9190d289E7054DaB91a2F5Ed77a7d57fE8381Def",
+  kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
+  aaddr: "0x6f9E56FD2DB80ba69C29a004576B59f088290255",
   //ROPSTEN网络环境
   // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
   // paddr: "0x294fEA742612eaDe03bA840c8dC98c32DAb5C9d2",
   // daddr: "0x6eC655cE7fc364D27Bb046627f37520A76775ed3",
   //本地测试环境
-  kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
-  aaddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
+  // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+  // aaddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
   // newUser: false,
   load: null,
-  canDraw:false,
   //变量都设置在这里好了。
 
   kolBalance:0,
@@ -264,14 +262,19 @@ const App = {
     await this.loadDashBoard();
     this.setMsg("马上就好...");
     var allowed = await this.checkAllowed();
-    if(allowed > 0){
-      this.setJoinBtn("升级");
-      this.setRegBtn("注册");
+    if(this.userLevel < 9){
+      if(allowed > 0){
+        this.setJoinBtn("升级");
+        this.setRegBtn("注册");
+      }else{
+        weui.topTips('首次参与前需要先进行合约授权');
+        this.setJoinBtn("首次授权");
+        this.setRegBtn("授权");
+      }
     }else{
-      weui.topTips('首次参与前需要先进行合约授权');
-      this.setJoinBtn("首次授权");
-      this.setRegBtn("授权");
+        this.setJoinBtn("已升级到最高级别");
     }
+
     this.setMsg("none");
   },
   go: async function(){
@@ -330,7 +333,7 @@ const App = {
   approve: async function(){
     const { web3 } = this;
     const { approve } = this.metaK.methods;
-    let approveAmount = web3.utils.toWei("5000","ether");
+    let approveAmount = web3.utils.toWei("500","ether");
     let gasPrice = await this.getGasPrice();
     this.loading = weui.loading('链上授权进行中...');
     try
@@ -350,11 +353,16 @@ const App = {
 
  regClick: async function(){
    var allowed = await this.checkAllowed();
-   if (Number(allowed) >= Number(this.unit)*2){
-     await this.go();
+   if(this.userLevel < 9){
+     if (Number(allowed) >= Number(this.unit)*2){
+       await this.go();
+     }else{
+       await this.approve();
+     }
    }else{
-     await this.approve();
+     weui.topTips('您已是最高级别');
    }
+
  },
  drawKol: async function(){
       const { web3 } = this;

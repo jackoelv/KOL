@@ -34353,6 +34353,166 @@
     "version": "0.4.23+commit.124ca40d.Emscripten.clang"
   },
   "networks": {
+    "1": {
+      "events": {
+        "0x29317bf7eb9941522faad78efabe2efda58f223f6b421c6e91762fb0484cbdad": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "inviteCode",
+              "type": "uint256"
+            }
+          ],
+          "name": "Registed",
+          "type": "event"
+        },
+        "0xebd0105c5d6cedbfc189cc72956b6ce545f8488fd66c697b26d98998aa6f91a7": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "_realUnit",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "_userLevel",
+              "type": "uint8"
+            }
+          ],
+          "name": "Joined",
+          "type": "event"
+        },
+        "0xc674231d2496906f0e8253e960f393e2857bda5ec7294f70264e9e8eb2db476f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "_amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "WithDrawed",
+          "type": "event"
+        },
+        "0x053068bd758c47002d8e5337e41e5400d60715b79cbd839069bd79ac3ad1d9bd": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "_newLevel",
+              "type": "uint8"
+            }
+          ],
+          "name": "GradeChanged",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x6f9E56FD2DB80ba69C29a004576B59f088290255",
+      "transactionHash": "0x5527539c3eda720a5ffa5d91e2b0581e2913eb1e1fcabc6bae09a85a1390ca8e"
+    },
+    "3": {
+      "events": {
+        "0x29317bf7eb9941522faad78efabe2efda58f223f6b421c6e91762fb0484cbdad": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": true,
+              "name": "inviteCode",
+              "type": "uint256"
+            }
+          ],
+          "name": "Registed",
+          "type": "event"
+        },
+        "0xebd0105c5d6cedbfc189cc72956b6ce545f8488fd66c697b26d98998aa6f91a7": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "_realUnit",
+              "type": "uint256"
+            },
+            {
+              "indexed": false,
+              "name": "_userLevel",
+              "type": "uint8"
+            }
+          ],
+          "name": "Joined",
+          "type": "event"
+        },
+        "0xc674231d2496906f0e8253e960f393e2857bda5ec7294f70264e9e8eb2db476f": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": true,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "_amount",
+              "type": "uint256"
+            }
+          ],
+          "name": "WithDrawed",
+          "type": "event"
+        },
+        "0x053068bd758c47002d8e5337e41e5400d60715b79cbd839069bd79ac3ad1d9bd": {
+          "anonymous": false,
+          "inputs": [
+            {
+              "indexed": false,
+              "name": "_user",
+              "type": "address"
+            },
+            {
+              "indexed": false,
+              "name": "_newLevel",
+              "type": "uint8"
+            }
+          ],
+          "name": "GradeChanged",
+          "type": "event"
+        }
+      },
+      "links": {},
+      "address": "0x5aDA52E9D4196B02E738132e50D9B8a0Ae968b6A",
+      "transactionHash": "0x705e32a87c73eb5ad5eccd20d17a68e055e58eb035e6739f648d46cbd2a7b84a"
+    },
     "5777": {
       "events": {
         "0x29317bf7eb9941522faad78efabe2efda58f223f6b421c6e91762fb0484cbdad": {
@@ -34430,12 +34590,12 @@
         }
       },
       "links": {},
-      "address": "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
-      "transactionHash": "0x0dedf473bb17bd45d787bfc57c8be220877f4267a4e6339bf111a44152c1e3d6"
+      "address": "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+      "transactionHash": "0x5015903a9e83d055dc4771fef1c100abb708c4e0a893e1b6d527ff36ef449f75"
     }
   },
   "schemaVersion": "3.1.0",
-  "updatedAt": "2020-05-24T02:01:58.425Z",
+  "updatedAt": "2020-05-24T03:47:51.539Z",
   "networkType": "ethereum",
   "devdoc": {
     "methods": {}
