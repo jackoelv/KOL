@@ -171,32 +171,10 @@
 <script src="jquery.qrcode.min.js"></script>
 <script src="number.js"></script>
 <!-- <script src="app.js"></script> -->
-<!-- <script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/bapp.js?v=9"></script> -->
+<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/aapp.js?v=7"></script>
 
 
 <script type="text/javascript">
-function loadScript(url, callback){
-  var script = document.createElement ("script") ;
-　 script.type = "text/javascript";
-
-   if (script.readyState){ //IE
-     script.onreadystatechange = function(){
-      if (script.readyState == "loaded" || script.readyState == "complete"){
-       script.onreadystatechange = null;
-       callback();
-      }
-     };
-    }
-    else { //Others
-     script.onload = function(){ callback();};
-   }
-  script.src = url;
-  document.getElementsByTagName("head")[0].appendChild(script);
-};
-weui.loading("页面加载进行中");
-loadScript("https://kolvote.oss-cn-shenzhen.aliyuncs.com/aapp.js?v=6", function(){ //调用
-  weui.loading("页面加载完成");
-});
 var countries = [
     { value: 'Andorra', data: 'AD' },
     // ...
