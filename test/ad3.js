@@ -14,9 +14,9 @@ contract("testjoin",accounts => {
     // for (var j = 1;j<8;j++){
     //   await a.go(0,{from:accounts[2],value:txFee});
     // }
-    // await a.go(0,{from:accounts[7],value:txFee});
+    await a.go(100,false,{from:accounts[4],value:txFee});
     // await a.drawKol({from:accounts[5],value:txFee});
-    for (var i=0;i<33;i++){
+    for (var i=0;i<11;i++){
       let balance = await a.UserBalance(accounts[i]);
       if (balance !=0){
         balance = web3.utils.fromWei(balance,"ether");

@@ -151,7 +151,12 @@ const App = {
       let accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
       this.inviteCode = this.GetQueryValue("iCode");
-      document.getElementById("joinAll").checked = this.joinAll;
+      var cookiejoinAll = Cookies.get('joinAll');
+      console.log("cookiejoinAll"+cookiejoinAll);
+      if (cookiejoinAll == "yes"){
+        console.log(document.getElementById("joinAll").checked);
+        document.getElementById("joinAll").checked = true;
+      }
       $("input[name='iCodeRegister']").val(this.inviteCode);
       await this.firstInitial();
 
@@ -273,6 +278,7 @@ const App = {
     const { web3 } = this;
     const { go } = this.metaA.methods;
     const { InviteCode } = this.metaA.methods;
+    this.joinAll=document.getElementById("joinAll").checked;
     var iCode = 0;
     if (this.iCode == 0){
       this.load = weui.loading('链上注册进行中...');
@@ -417,6 +423,12 @@ GetQueryValue: function(queryName) {
  },
  invite: function(){
    document.getElementById("qr").style.display="block";
+ },
+ getCookie: function(name){
+   return Cookies.get(name);
+ },
+ setCookie: function(name,content){
+   Cookies.set(name, content);
  },
 
 };

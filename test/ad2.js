@@ -14,14 +14,14 @@ contract("testjoin",accounts => {
     let txFee= web3.utils.toWei("0.002","ether");
 
     var iCode;
-    await k.approve(addr,web3.utils.toWei('550','ether'),{from:accounts[1]});
+    await k.approve(addr,web3.utils.toWei('500','ether'),{from:accounts[1]});
     await a.go(0,true,{from:accounts[1],value:txFee});
     iCode = await a.RInviteCode(accounts[1]);
     iCode = web3.utils.BN(iCode);
     console.log(iCode);
     for (var i=2;i<11;i++){
-      await k.approve(addr,web3.utils.toWei('550','ether'),{from:accounts[i]});
-      await a.go(iCode,true,{from:accounts[i],value:txFee});
+      await k.approve(addr,web3.utils.toWei('500','ether'),{from:accounts[i]});
+      await a.go(iCode,false,{from:accounts[i],value:txFee});
       // await sleep(3000);
       let balance = await a.UserBalance(accounts[i]);
       if (balance !=0){

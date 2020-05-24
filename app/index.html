@@ -88,7 +88,7 @@
                 </div><!-- end -->
           </div><!-- firstHide -->
           <div id="firstRegister" style="background-color:#FFFFFF;display:none">
-                <div class="weui-cells__title" style="color:#715CA8;font-size:28px">欢迎加入KOL共识裂变计划</div>
+                <div class="weui-cells__title" style="color:#715CA8;font-size:20px;text-align:center">欢迎加入KOL链上广告生态系统</div>
                 <div class="weui-cells weui-cells_form" style="background-color:#715CA8;color:#FFFFFF">
                 <div class="weui-cell">
                     <div class="weui-cell__hd"><label class="weui-label" style="width:128px">请输入邀请码</label></div>
@@ -97,7 +97,7 @@
                     </div>
                 </div>
                 <div class="weui-cell weui-cell_switch">
-                  <div class="weui-cell__bd" id="joinusdt">一把梭哈到9级</div>
+                  <div class="weui-cell__bd" id="joinAllTitle">捐赠100KOL获链上终身会员</div>
                   <div class="weui-cell__ft">
                       <input class="weui-switch" id="joinAll" type="checkbox" />
                   </div>
@@ -212,11 +212,14 @@ weui.loading("页面加载进行中");
 loadScript("app.js", function(){ //调用
   weui.loading("页面加载完成");
 });
+
 $('#joinAll').on('click', function(){
     if ($('#joinAll').prop("checked")){
-      App.joinAll = true;
+      $('#joinAllTitle').html('捐赠500KOL成为金牌代理商');
+      App.setCookie('joinAll','yes');
     }else{
-      App.joinAll = false;
+      $('#joinAllTitle').html('捐赠100KOL获链上终身会员');
+      App.setCookie('joinAll','no');
     }
 });
 $('#invite').click(function(){

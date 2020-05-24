@@ -16,12 +16,12 @@ contract("testjoin",accounts => {
     var iCode;
     // await k.approve(addr,web3.utils.toWei('550','ether'),{from:accounts[1]});
     // await a.go(0,{from:accounts[1],value:txFee});
-    iCode = await a.RInviteCode(accounts[30]);
+    iCode = await a.RInviteCode(accounts[8]);
     iCode = web3.utils.BN(iCode);
     // console.log(iCode);
-    for (var i=31;i<50;i++){
+    for (var i=9;i<11;i++){
       await k.approve(addr,web3.utils.toWei('550','ether'),{from:accounts[i]});
-      await a.go(iCode,true,{from:accounts[i],value:txFee});
+      await a.go(iCode,false,{from:accounts[i],value:txFee});
       await sleep(5000);
       // await sleep(3000);
       let balance = await a.UserBalance(accounts[i]);
@@ -43,10 +43,10 @@ contract("testjoin",accounts => {
       console.log("accounts "+i+" icode  is     :"+iCode);
       console.log("accounts "+i+" level  is     :"+level);
 
-      
-      
+
+
     }
-    
+
     });
     it('Check whether the contract has been issued successfully', async () => {
       console.log("测试合约的操作:");

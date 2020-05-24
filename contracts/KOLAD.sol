@@ -168,10 +168,6 @@ contract KOLADUSER is Ownable{
   mapping (address => uint256) public TotalUsers;
   mapping (address => uint8) public maxDeep;
 
-
-
-  //GAS优化
-
   event Registed(address indexed _user,uint256 indexed inviteCode);
   event Joined(address indexed _user,uint256 _realUnit,uint8 _userLevel);
   event WithDrawed(address indexed _user,uint256 _amount);
@@ -238,9 +234,6 @@ contract KOLADUSER is Ownable{
       }else{
         tokenR2 = receiver;
       }
-    }else if(UserLevel[_addr] == 8){
-      realUnit = 2 * unit;
-      tokenR2 = receiver;
     }else{
       realUnit = unit;
     }
@@ -264,17 +257,16 @@ contract KOLADUSER is Ownable{
     require(msg.value >= etherFee);
     if (RInviteCode[msg.sender] == 0){
       reg(msg.sender,_fInviteCode);
+      if (_joinAll){
+        joinAll(msg.sender);
+        return;
+      }
     }
-    if (_joinAll){
-      joinAll(msg.sender);
-    }else{
-      join(msg.sender);
-    }
-
+    join(msg.sender);
   }
   function joinAll(address _addr) private{
     require(UserLevel[_addr] == 0);
-    kol.transferFrom(_addr,address(this),unit*11);  
+    kol.transferFrom(_addr,address(this),unit*10);
     uint8 done;
     for (uint8 i=0;i<InviteList[_addr].length;i++){
       addUnit(_addr,InviteList[_addr][i]);
@@ -282,10 +274,9 @@ contract KOLADUSER is Ownable{
     }
     if (InviteList[_addr].length == 9){
       addUnit(_addr,InviteList[_addr][8]);
-      addUnit(_addr, receiver);
-      done+=2;
+      done++;
     }
-    UserBalance[receiver] += (11 - done) * unit;
+    UserBalance[receiver] += (10 - done) * unit;
     UserLevel[_addr] = 9;
   }
 
