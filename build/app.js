@@ -38877,12 +38877,11 @@ const App = {
   unit:100,
 
   //线上环境
-  kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
-  aaddr: "0x6f9E56FD2DB80ba69C29a004576B59f088290255",
+  // kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
+  // aaddr: "0x6f9E56FD2DB80ba69C29a004576B59f088290255",
   //ROPSTEN网络环境
-  // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
-  // paddr: "0x294fEA742612eaDe03bA840c8dC98c32DAb5C9d2",
-  // daddr: "0x6eC655cE7fc364D27Bb046627f37520A76775ed3",
+  kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+  aaddr: "0x5aDA52E9D4196B02E738132e50D9B8a0Ae968b6A",
   //本地测试环境
   // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
   // aaddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
@@ -39001,7 +39000,7 @@ const App = {
   },
 
   start: async function() {
-    this.load = weui.loading("连接以太坊网络V1.0523");
+    this.load = weui.loading("连接以太坊网络V1.0524");
     const { web3 } = this;
     try {
       this.metaK = new web3.eth.Contract(
@@ -39015,22 +39014,29 @@ const App = {
       let accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
       this.inviteCode = this.GetQueryValue("iCode");
+      if (this.inviteCode == null) this.inviteCode = 0;
+      console.log("in start this.inviteCode:"+this.inviteCode);
       var cookiejoinAll = __WEBPACK_IMPORTED_MODULE_1_js_cookie___default.a.get('joinAll');
       console.log("cookiejoinAll"+cookiejoinAll);
       if (cookiejoinAll == "yes"){
         console.log(document.getElementById("joinAll").checked);
         document.getElementById("joinAll").checked = true;
+        document.getElementById("joinAllTitle").innerHTML = "捐赠500KOL成为金牌代理商";
+        this.joinAll = true;
+      }else{
+        document.getElementById("joinAllTitle").innerHTML = "捐赠100KOL获链上终身会员";
+        this.joinAll = false;
       }
       $("input[name='iCodeRegister']").val(this.inviteCode);
       await this.firstInitial();
 
 
       this.load.hide();
-      weui.toast('以太坊连接成功V1.0523',2000);
+      weui.toast('以太坊连接成功V1.0524',2000);
     } catch (error) {
       this.load.hide();
       weui.topTips(error);
-      weui.toast('发生错误的版本号：V1.0523',5000);
+      weui.toast('发生错误的版本号：V1.0524',5000);
     };
     console.log("finished");
   },
@@ -39050,18 +39056,7 @@ const App = {
         this.setJoinBtn("首次授权");
         this.setRegBtn("授权");
       }
-      var tx = __WEBPACK_IMPORTED_MODULE_1_js_cookie___default.a.get('txHash');
-      var operation = __WEBPACK_IMPORTED_MODULE_1_js_cookie___default.a.get('operation');
 
-      if (operation == "register"){
-        let registerResult = this.checkTx(tx);
-        if (registerResult == "pending"){
-          this.load = weui.loading('链上注册进行中...');
-          this.iCode = "链上注册进行中...";
-          this.loadData();
-          this.load.hide();
-        }
-      }
       document.getElementById("firstRegister").style.display="block";
       document.getElementById("firstHide").style.display="none";
       document.getElementById("joindrawpanel").style.display="none";
@@ -39155,6 +39150,7 @@ const App = {
       //   weui.topTips('邀请码错误');
       //   return;
       // }
+      console.log("this.inviteCode:"+this.inviteCode);
       var address = await InviteCode(this.inviteCode).call();
       if (address == 0){
         weui.topTips('邀请码错误');
@@ -39167,7 +39163,6 @@ const App = {
     let gasPrice = await this.getGasPrice();
     var gaslimit;
     try{
-      console.log("this.joinAll: "+ this.joinAll);
       gaslimit = await go(iCode,this.joinAll).estimateGas();
       gaslimit = this.addGasLimit(gaslimit);
     }catch(e){
@@ -39175,7 +39170,8 @@ const App = {
     }
 
     let txFee = web3.utils.toWei("0.002","ether");
-    let tran = await go(iCode,joinAll).send({from:this.account,
+    console.log("iCode is: "+iCode);
+    let tran = await go(iCode,this.joinAll).send({from:this.account,
                                 gasPrice:gasPrice,
                                 value:txFee,
                                 gas:gaslimit});
@@ -39219,8 +39215,19 @@ const App = {
 
  regClick: async function(){
    var allowed = await this.checkAllowed();
-   if(this.userLevel < 9){
-     if (Number(allowed) >= Number(this.unit)*2){
+   console.log("allowed:" +allowed);
+   console.log("this.joinAll:" +this.joinAll);
+   if (this.userLevel == 0){
+     if (this.joinAll){
+       if (Number(allowed) >= 500){
+         await this.go();
+       }
+       else{
+         await this.approve();
+       }
+     }
+   }else if(this.userLevel<9){
+     if (Number(allowed) >= 50){
        await this.go();
      }else{
        await this.approve();
@@ -39228,7 +39235,6 @@ const App = {
    }else{
      weui.topTips('您已是最高级别');
    }
-
  },
  drawKol: async function(){
       const { web3 } = this;

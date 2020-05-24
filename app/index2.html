@@ -17,7 +17,7 @@
             <div class="page__hd" style="padding:40px">
                 <h1 class="page__title" style="color:rgb(255, 255, 255);text-align: center">KOL链上广告系统</h1>
                 <p class="page__desc" style="color:rgb(255, 255, 255);text-align: center;font-size:16px">即将上线，敬请期待--社区KOL联盟出品</p>
-                <p class="page__desc" style="color:rgb(255, 255, 255);text-align: center;font-size:16px">v1.0524</p>
+                <p class="page__desc" style="color:rgb(255, 255, 255);text-align: center;font-size:16px">v1.0523</p>
             </div>
             <div class="page__bd">
 
@@ -175,6 +175,21 @@
 
 
 <script type="text/javascript">
+var countries = [
+    { value: 'Andorra', data: 'AD' },
+    // ...
+    { value: 'Zimbabwe', data: 'ZZ' }
+];
+window.setInterval(function(){
+    var _date = App.dateFtt(0,0);
+    $("input[name='current']").val(_date);
+}, 1000);
+$('#autocomplete').autocomplete({
+    lookup: countries,
+    onSelect: function (suggestion) {
+        console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+    }
+});
 function loadScript(url, callback){
   var script = document.createElement ("script") ;
 　 script.type = "text/javascript";
@@ -194,25 +209,9 @@ function loadScript(url, callback){
   document.getElementsByTagName("head")[0].appendChild(script);
 };
 weui.loading("页面加载进行中");
-loadScript("https://kolvote.oss-cn-shenzhen.aliyuncs.com/aapp.js?v=6", function(){ //调用
+loadScript("https://kolvote.oss-cn-shenzhen.aliyuncs.com/aapp.js?v=1", function(){ //调用
   weui.loading("页面加载完成");
 });
-var countries = [
-    { value: 'Andorra', data: 'AD' },
-    // ...
-    { value: 'Zimbabwe', data: 'ZZ' }
-];
-window.setInterval(function(){
-    var _date = App.dateFtt(0,0);
-    $("input[name='current']").val(_date);
-}, 1000);
-$('#autocomplete').autocomplete({
-    lookup: countries,
-    onSelect: function (suggestion) {
-        console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
-    }
-});
-
 
 $('#joinAll').on('click', function(){
     if ($('#joinAll').prop("checked")){

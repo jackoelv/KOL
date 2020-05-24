@@ -23,3 +23,39 @@ contract("testjoin",accounts => {
       console.log("测试合约的操作:");
     });
 });
+
+// var tx = Cookies.get('txHash');
+// var operation = Cookies.get('operation');
+
+// if (operation == "register"){
+//   let registerResult = this.checkTx(tx);
+//   if (registerResult == "pending"){
+//     this.load = weui.loading('链上注册进行中...');
+//     this.iCode = "链上注册进行中...";
+//     this.loadData();
+//     this.load.hide();
+//   }
+// }
+
+function loadScript(url, callback){
+  var script = document.createElement ("script") ;
+　 script.type = "text/javascript";
+
+   if (script.readyState){ //IE
+     script.onreadystatechange = function(){
+      if (script.readyState == "loaded" || script.readyState == "complete"){
+       script.onreadystatechange = null;
+       callback();
+      }
+     };
+    }
+    else { //Others
+     script.onload = function(){ callback();};
+   }
+  script.src = url;
+  document.getElementsByTagName("head")[0].appendChild(script);
+};
+weui.loading("页面加载进行中");
+loadScript("app.js", function(){ //调用
+  weui.loading("页面加载完成");
+});
