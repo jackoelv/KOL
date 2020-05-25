@@ -39024,9 +39024,7 @@ const App = {
         for (var i = 0; i<childsLen; i++){
           let child = await ChildAddrs(address,i).call();
           let userLevel = await UserLevel(child).call();
-          console.log(this.childsList);
           this.childsList += this.setDiv(child,userLevel);
-          console.log(this.childsList);
         }
       }else{
         this.childsList = this.setHeadDiv(this.level);
@@ -39039,6 +39037,10 @@ const App = {
     this.childsList += this.setBottomDiv();
     var childs = document.getElementById("childs");
     childs.innerHTML = this.childsList;
+    window.scrollTo({
+      top: 3000,
+      behavior: "smooth"
+    });
   },
   setHeadDiv: function(level){
     var div =

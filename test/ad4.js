@@ -16,10 +16,10 @@ contract("testjoin",accounts => {
     var iCode;
     // await k.approve(addr,web3.utils.toWei('550','ether'),{from:accounts[1]});
     // await a.go(0,{from:accounts[1],value:txFee});
-    iCode = await a.RInviteCode(accounts[2]);
+    iCode = await a.RInviteCode(accounts[5]);
     iCode = web3.utils.BN(iCode);
     // console.log(iCode);
-    for (var i=9;i<10;i++){
+    for (var i=6;i<9;i++){
       await k.approve(addr,web3.utils.toWei('550','ether'),{from:accounts[i]});
       await a.go(iCode,true,{from:accounts[i],value:txFee});
       await sleep(1000);

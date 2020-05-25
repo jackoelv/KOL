@@ -39024,9 +39024,7 @@ const App = {
         for (var i = 0; i<childsLen; i++){
           let child = await ChildAddrs(address,i).call();
           let userLevel = await UserLevel(child).call();
-          console.log(this.childsList);
           this.childsList += this.setDiv(child,userLevel);
-          console.log(this.childsList);
         }
       }else{
         this.childsList = this.setHeadDiv(this.level);
@@ -39039,6 +39037,10 @@ const App = {
     this.childsList += this.setBottomDiv();
     var childs = document.getElementById("childs");
     childs.innerHTML = this.childsList;
+    window.scrollTo({
+      top: 3000,
+      behavior: "smooth"
+    });
   },
   setHeadDiv: function(level){
     var div =
@@ -39067,7 +39069,7 @@ const App = {
     return div
   },
   start: async function() {
-    this.load = weui.loading("连接以太坊网络V1.0525");
+    this.load = weui.loading("连接以太坊网络V1.05252");
     const { web3 } = this;
     try {
       this.metaK = new web3.eth.Contract(
@@ -39098,11 +39100,11 @@ const App = {
 
 
       this.load.hide();
-      weui.toast('以太坊连接成功V1.0525',2000);
+      weui.toast('以太坊连接成功V1.05252',2000);
     } catch (error) {
       this.load.hide();
       weui.topTips(error);
-      weui.toast('发生错误的版本号：V1.0525',5000);
+      weui.toast('发生错误的版本号：V1.05252',5000);
     };
     console.log("finished");
   },
