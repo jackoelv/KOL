@@ -19,7 +19,7 @@ contract("testjoin",accounts => {
     iCode = await a.RInviteCode(accounts[1]);
     iCode = web3.utils.BN(iCode);
     console.log(iCode);
-    for (var i=2;i<11;i++){
+    for (var i=2;i<5;i++){
       await k.approve(addr,web3.utils.toWei('500','ether'),{from:accounts[i]});
       await a.go(iCode,false,{from:accounts[i],value:txFee});
       // await sleep(3000);
@@ -27,12 +27,12 @@ contract("testjoin",accounts => {
       if (balance !=0){
         balance = web3.utils.fromWei(balance,"ether");
       }
-      iCode = await a.RInviteCode(accounts[i]);
-      // console.log("before     :"+iCode);
-      if (iCode!=0){
-        iCode = web3.utils.BN(iCode);
-        // console.log("after     :"+iCode);
-      }
+      // iCode = await a.RInviteCode(accounts[i]);
+      // // console.log("before     :"+iCode);
+      // if (iCode!=0){
+      //   iCode = web3.utils.BN(iCode);
+      //   // console.log("after     :"+iCode);
+      // }
       let level = await a.UserLevel(accounts[i]);
       if (level!=0){
         level = web3.utils.BN(level);

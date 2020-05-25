@@ -150,7 +150,7 @@
                   <div class="weui-btn-area scroll">
                       <a class="weui-btn weui-btn_default" id="invite" onclick="App.invite()" style="background-color:#EFC638;color:#FFFFFF">邀请</a>
                   </div>
-                  <div id="qr" style="display:none;height:660px">
+                  <div id="qr" style="display:none;">
                     <div class="weui-cell weui-cell_readonly">
                         <div class="weui-cell__hd"><label class="weui-label" style="width:300px;text-align: center">邀请好友用imtoken扫码参与</label></div>
                     </div>
@@ -175,8 +175,8 @@
 <script src="jquery.autocomplete.js"></script>
 <script src="jquery.qrcode.min.js"></script>
 <script src="number.js"></script>
-<!-- <script src="app.js"></script> -->
-<script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/aapp.js?v=13"></script>
+<script src="app.js"></script>
+<!-- <script src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/aapp.js?v=13"></script> -->
 
 
 <script type="text/javascript">
@@ -185,10 +185,6 @@ var countries = [
     // ...
     { value: 'Zimbabwe', data: 'ZZ' }
 ];
-window.setInterval(function(){
-    var _date = App.dateFtt(0,0);
-    $("input[name='current']").val(_date);
-}, 1000);
 $('#autocomplete').autocomplete({
     lookup: countries,
     onSelect: function (suggestion) {
