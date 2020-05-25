@@ -38900,6 +38900,8 @@ const App = {
   inviteCode:0,
   totaldraws:0,
   canDrawAmount:0,
+  childsList:null,
+  level:1,
 
   setInput: function(){
     $("input[name='addr']").val(this.account);
@@ -38996,9 +38998,76 @@ const App = {
       msgDiv.style = "background-color:#28103B;color:#EFC638;font-size:20px";
     }
   },
+  setChildsList:async function(address){
+    console.log("address:");
+    console.log(address);
+    if (address == this.account){
+      this.level = 1;
+    }else{
+      this.level++;
+    }
+    if (this.level == 10){
+      this.level = 1;
+      address = this.account;
+    }
+    if (address == "无"){
 
+    }else{
+      const { web3 } = this;
+      const { ChildAddrs } = this.metaA.methods;
+      const { getChildsLen } = this.metaA.methods;
+      const { UserLevel } = this.metaA.methods;
+      var childsLen = await getChildsLen(address).call();
+      console.log(childsLen);
+      this.childsList = this.setHeadDiv(this.level);
+      if(childsLen > 0){
+        for (var i = 0; i<childsLen; i++){
+          let child = await ChildAddrs(address,i).call();
+          let userLevel = await UserLevel(child).call();
+          console.log(this.childsList);
+          this.childsList += this.setDiv(child,userLevel);
+          console.log(this.childsList);
+        }
+      }else{
+        this.childsList = this.setHeadDiv(this.level);
+        this.childsList += this.setDiv(this.account,"下面没有了");
+        console.log("meiyou?");
+        // this.setDiv("无","无");
+      }
+    }
+
+    this.childsList += this.setBottomDiv();
+    var childs = document.getElementById("childs");
+    childs.innerHTML = this.childsList;
+  },
+  setHeadDiv: function(level){
+    var div =
+        '<div class="weui-cells__title">'
+        +level
+        +'代下级清单 地址：级别：</div>'
+        +'<div class="weui-cells">'
+    return div
+  },
+  setBottomDiv: function(){
+    var div = '</div>';
+    return div
+  },
+  setDiv:function(address,userLevel){
+    console.log("in set Div:"+address);
+    var div =
+        '<a class="weui-cell weui-cell_access" href="javascript:App.setChildsList(\''
+        +address
+        +'\');">'
+        +'<div class="weui-cell__bd"><p>'
+        +'0x***'+address.substring(36)
+        +'</p></div>'
+        +userLevel
+        +'<div class="weui-cell__ft">'
+        +'</div></a>';
+    return div
+  },
   start: async function() {
-    this.load = weui.loading("连接以太坊网络V1.0524");
+    this.load = weui.loading("连接以太坊网络V1.0525");
     const { web3 } = this;
     try {
       this.metaK = new web3.eth.Contract(
@@ -39029,11 +39098,11 @@ const App = {
 
 
       this.load.hide();
-      weui.toast('以太坊连接成功V1.0524',2000);
+      weui.toast('以太坊连接成功V1.0525',2000);
     } catch (error) {
       this.load.hide();
       weui.topTips(error);
-      weui.toast('发生错误的版本号：V1.0524',5000);
+      weui.toast('发生错误的版本号：V1.0525',5000);
     };
     console.log("finished");
   },
