@@ -2,7 +2,7 @@ import Web3 from "web3";
 import Cookies from 'js-cookie';
 import KOLA from '../../build/contracts/KOLADUSER.min.json';
 import KOLVote from '../../build/contracts/StandardToken.min.json';
-
+const axios = require("axios");
 const App = {
   web3: null,
   account: null,
@@ -10,14 +10,14 @@ const App = {
   metaK:null,
 
   //线上环境
-  kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
-  aaddr: "0x6f9E56FD2DB80ba69C29a004576B59f088290255",
+  // kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
+  // aaddr: "0x6f9E56FD2DB80ba69C29a004576B59f088290255",
   //ROPSTEN网络环境
   // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
   // aaddr: "0x5aDA52E9D4196B02E738132e50D9B8a0Ae968b6A",
   //本地测试环境
-  // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
-  // aaddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
+  kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+  aaddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
   // newUser: false,
   load: null,
   //变量都设置在这里好了。
@@ -26,6 +26,8 @@ const App = {
   ethBalance:0,
   userLevel:0,
   totalBonus:0,
+  promoteBonus:0,
+  adBonus:0,
 
   childs:0,
   teamNum:0,
@@ -46,6 +48,8 @@ const App = {
     $("input[name='userLevel2']").val(this.userLevel);
 
     $("input[name='totalBonus']").val(this.totalBonus);
+    $("input[name='promoteBonus']").val(this.promoteBonus);
+    $("input[name='adBonus']").val(this.adBonus);
     $("input[name='childs']").val(this.childs);
     $("input[name='teamNum']").val(this.teamNum);
 
@@ -204,6 +208,7 @@ const App = {
   },
   start: async function() {
     this.load = weui.loading("连接以太坊网络V1.05252");
+
     const { web3 } = this;
     try {
       this.metaK = new web3.eth.Contract(
@@ -216,6 +221,7 @@ const App = {
       );
       let accounts = await web3.eth.getAccounts();
       this.account = accounts[0];
+      await this.queryLeftBonus();
       this.inviteCode = this.GetQueryValue("iCode");
       if (this.inviteCode == null) this.inviteCode = 0;
       await this.loadBalance();
@@ -231,6 +237,9 @@ const App = {
       }
       $("input[name='iCodeRegister']").val(this.inviteCode);
       await this.firstInitial();
+      await this.setGetBonus();
+      await this.setLeftBonus();
+
 
 
       this.load.hide();
@@ -274,10 +283,12 @@ const App = {
     const { balanceOf } = this.metaK.methods;
     this.setInput();
     this.kolBalance = await balanceOf(this.account).call();
+    let myAdBonus = await this.getMyBonus(this.account);
     if (this.kolBalance != 0){
       this.kolBalance = web3.utils.fromWei(this.kolBalance,"ether");
       this.kolBalance = this.formatDecimal(this.kolBalance,2);
     }
+
     this.setInput();
     this.ethBalance = await web3.eth.getBalance(this.account);
     if (this.ethBalance != 0){
@@ -305,7 +316,14 @@ const App = {
     if(this.totaldraws!=0){
       this.totaldraws = web3.utils.fromWei(this.totaldraws,"ether");
     }
-    this.totalBonus = parseFloat(this.canDrawAmount) + parseFloat(this.totaldraws);
+    this.promoteBonus = parseFloat(this.canDrawAmount) + parseFloat(this.totaldraws);
+    this.promoteBonus = this.formatDecimal(this.promoteBonus,2);
+
+    this.adBonus = await this.getMyBonus(this.account);
+    if (this.adBonus == null) this.adBonus = 0;
+    this.adBonus = this.formatDecimal(this.adBonus,2);
+
+    this.totalBonus = parseFloat(this.promoteBonus) + parseFloat(this.adBonus);
 
     this.totalBonus = this.formatDecimal(this.totalBonus,2);
     this.totaldraws = this.formatDecimal(this.totaldraws,2);
@@ -545,6 +563,99 @@ GetQueryValue: function(queryName) {
  },
  setCookie: function(name,content){
    Cookies.set(name, content);
+ },
+ getMyBonus:async function(wallet){
+   let response = await axios({
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      url: "/api/user/getMyBonus",
+      params:{addr:wallet}
+   })
+   console.log(response.data[0].myBonus);
+   return response.data[0].myBonus;
+ },
+ query:async function(wallet){
+   console.log("in query");
+   let response = await axios({
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      url: "/api/user/getBonus",
+      params:{addr:wallet}
+   })
+   // console.log("response :"+JSON.stringify(response));
+   // console.log("query Result is:"+JSON.stringify(response.data));
+   console.log(response.data[0].total);
+
+   return response.data[0].total;
+ },
+ queryLeftBonus:async function(){
+   let response = await axios({
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      url: "/api/user/getLeftBonus",
+   });
+   console.log(500-response.data[0].leftBonus);
+   return 20-response.data[0].leftBonus;
+ },
+ insert:async function(wallet){
+   let response = await axios({
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      url: "/api/user/putBonus",
+      params:{addr:wallet}
+   })
+   console.log(response);
+ },
+ getBonusClick: async function(){
+
+   if (Number(this.kolBalance)<300){
+     weui.topTips('KOL持仓低于300，还不能撸');
+   }else if(this.iCode==0){
+     weui.topTips('加入链上会员才可以撸哦');
+   }else{
+     let resultLeft = await this.queryLeftBonus();
+     let result = await this.query(this.account);
+     if (Number(result) > 0){
+       weui.topTips('您已经撸过了，等下次再来');
+     }else if(resultLeft == 0){
+       weui.topTips('您来晚了，下次请早点哦');
+     }else{
+       await this.insert(this.account);
+       weui.topTips('恭喜您成功撸到10个KOL');
+       await this.setGetBonus();
+       location.reload();
+
+     }
+   }
+ },
+ setLeftBonus: async function(){
+   let resultLeft = await this.queryLeftBonus();
+   let result = await this.query(this.account);
+
+   var leftBonus = document.getElementById("leftBonus");
+   var getBonus = document.getElementById("getBonus");
+   if (Number(resultLeft)>0){
+     leftBonus.innerHTML = "还有"+result+"个KOL";
+   }else if(Number(result)>0){
+     getBonus.innerHTML = "您已经撸过了";
+   }else{
+     leftBonus.innerHTML = "撸完了^_^下次请早";
+     getBonus.innerHTML = "您来晚了";
+   }
+ },
+ setGetBonus:async function(){
+   var getBonus = document.getElementById("getBonus");
+   if (this.iCode > 0){
+     let result = await this.query(this.account);
+     if (Number(result)>0){
+       getBonus.innerHTML = "您已经撸过了";
+     }else{
+       getBonus.innerHTML = "点击立刻撸10KOL";
+     }
+   }else{
+     getBonus.innerHTML = "点击立刻撸10KOL";
+   }
+
  },
 
 };
