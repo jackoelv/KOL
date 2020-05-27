@@ -8,6 +8,7 @@ const App = {
   account: null,
   metaA: null,
   metaK:null,
+  adBonusBegin:false,
 
   //线上环境
   kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
@@ -603,26 +604,31 @@ GetQueryValue: function(queryName) {
    })
  },
  getBonusClick: async function(){
-
-   if (Number(this.kolBalance)<300){
-     weui.topTips('KOL持仓低于300，还不能撸');
-   }else if(this.iCode==0){
-     weui.topTips('加入链上会员才可以撸哦');
-   }else{
-     let resultLeft = await this.queryLeftBonus();
-     let result = await this.query(this.account);
-     if (Number(result) > 0){
-       weui.topTips('您已经撸过了，等下次再来');
-     }else if(resultLeft == 0){
-       weui.topTips('您来晚了，下次请早点哦');
+   if (this.adBonusBegin){
+     if (Number(this.kolBalance)<300){
+       weui.topTips('KOL持仓低于300，还不能撸');
+     }else if(this.iCode==0){
+       weui.topTips('加入链上会员才可以撸哦');
      }else{
-       await this.insert(this.account);
-       weui.topTips('恭喜您成功撸到10个KOL');
-       await this.setGetBonus();
-       location.reload();
+       let resultLeft = await this.queryLeftBonus();
+       let result = await this.query(this.account);
+       if (Number(result) > 0){
+         weui.topTips('您已经撸过了，等下次再来');
+       }else if(resultLeft == 0){
+         weui.topTips('您来晚了，下次请早点哦');
+       }else{
+         await this.insert(this.account);
+         weui.topTips('恭喜您成功撸到10个KOL');
+         await this.setGetBonus();
+         location.reload();
 
+       }
      }
+   }else{
+     weui.topTips('活动还未开始，请关注群内通知');
+
    }
+
  },
  setLeftBonus: async function(){
    let resultLeft = await this.queryLeftBonus();
