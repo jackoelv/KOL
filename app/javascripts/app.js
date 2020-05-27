@@ -10,14 +10,14 @@ const App = {
   metaK:null,
 
   //线上环境
-  // kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
-  // aaddr: "0x6f9E56FD2DB80ba69C29a004576B59f088290255",
+  kaddr: "0x0946e36C2887025c389EF85Ea5f9150E0BEd4D69",
+  aaddr: "0x6f9E56FD2DB80ba69C29a004576B59f088290255",
   //ROPSTEN网络环境
   // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
   // aaddr: "0x5aDA52E9D4196B02E738132e50D9B8a0Ae968b6A",
   //本地测试环境
-  kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
-  aaddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
+  // kaddr: "0xcb3aA0A1125f60cbb476eeF1daF17e49b9F3f154",
+  // aaddr: "0xd9E4B0CC779dE12871527Cb21d5F55d7D7e611E2",
   // newUser: false,
   load: null,
   //变量都设置在这里好了。
@@ -582,8 +582,6 @@ GetQueryValue: function(queryName) {
       url: "/api/user/getBonus",
       params:{addr:wallet}
    })
-   // console.log("response :"+JSON.stringify(response));
-   // console.log("query Result is:"+JSON.stringify(response.data));
    console.log(response.data[0].total);
 
    return response.data[0].total;
@@ -594,8 +592,7 @@ GetQueryValue: function(queryName) {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       url: "/api/user/getLeftBonus",
    });
-   console.log(500-response.data[0].leftBonus);
-   return 20-response.data[0].leftBonus;
+   return 500-response.data[0].leftBonus;
  },
  insert:async function(wallet){
    let response = await axios({
@@ -604,7 +601,6 @@ GetQueryValue: function(queryName) {
       url: "/api/user/putBonus",
       params:{addr:wallet}
    })
-   console.log(response);
  },
  getBonusClick: async function(){
 
