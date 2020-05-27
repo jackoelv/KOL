@@ -15,7 +15,7 @@
         <div class="container" id="container"></div>
         <div class="page" style="background-color:#416EB6">
             <div class="page__hd" style="padding:40px">
-                <h1 class="page__title" style="color:rgb(255, 255, 255);text-align: center">KOL链上广告系统</h1>
+                <h1 class="page__title" style="color:rgb(255, 255, 255);text-align: center">KOL链上广告系统Beta1.0</h1>
                 <p class="page__desc" style="color:rgb(255, 255, 255);text-align: left;font-size:16px">
                   ·GMS社区通行证<br><br>
                   ·社区群员注册50个账号，每个账号50U
@@ -27,7 +27,7 @@
 ·截图用微信扫码立刻参与<br><br></p>
 <div style="text-align: center"><img src="https://kolvote.oss-cn-shenzhen.aliyuncs.com/liao.jpg"></div>
 <p class="page__desc" id="leftBonus" style="color:#FFFFFF;text-align: center;font-size:16px">抢光了^_^下次请早</p>
-                <p class="page__desc" style="color:#EFC638;text-align: center;font-size:16px" onclick="App.getBonusClick()">点击领取广告收益</p>
+                <p class="page__desc" id="getBonus" style="color:#EFC638;text-align: center;font-size:16px" onclick="App.getBonusClick()">点击领取广告收益</p>
             </div>
             <div class="page__bd">
 
@@ -73,6 +73,18 @@
                           <div class="weui-cell__hd"><label class="weui-label" style="width:88px">奖励总额</label></div>
                           <div class="weui-cell__bd">
                               <input class="weui-input"  type="text" name="totalBonus" placeholder="0" readonly/>
+                          </div>
+                      </div>
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">推广收益</label></div>
+                          <div class="weui-cell__bd">
+                              <input class="weui-input"  type="text" name="promoteBonus" placeholder="0" readonly/>
+                          </div>
+                      </div>
+                      <div class="weui-cell weui-cell_readonly">
+                          <div class="weui-cell__hd"><label class="weui-label" style="width:88px">广告收益</label></div>
+                          <div class="weui-cell__bd">
+                              <input class="weui-input"  type="text" name="adBonus" placeholder="0" readonly/>
                           </div>
                       </div>
                       <div class="weui-cell weui-cell_readonly">
