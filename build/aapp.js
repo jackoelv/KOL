@@ -27944,18 +27944,19 @@ GetQueryValue: function(queryName) {
       url: "/api/user/getMyBonus",
       params:{addr:wallet}
    })
-   console.log(response.data[0].myBonus);
-   return response.data[0].myBonus;
+   var myBonus = response.data[0].myBonus;
+   if (myBonus == null) myBonus = 0;
+   console.log("in getMyBonus"+myBonus);
+   return myBonus;
  },
  query:async function(wallet){
-   console.log("in query");
    let response = await axios({
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       url: "/api/user/getBonus",
       params:{addr:wallet}
    })
-   console.log(response.data[0].total);
+   console.log("in query:"+response.data[0].total);
 
    return response.data[0].total;
  },
@@ -27965,7 +27966,10 @@ GetQueryValue: function(queryName) {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       url: "/api/user/getLeftBonus",
    });
-   return 500-response.data[0].leftBonus;
+   var usedBonus = response.data[0].leftBonus;
+   if (usedBonus == null) usedBonus = 0;
+      console.log("in queryLeftBonus: " + usedBonus);
+   return 500-usedBonus;
  },
  insert:async function(wallet){
    let response = await axios({
@@ -28009,7 +28013,7 @@ GetQueryValue: function(queryName) {
    var leftBonus = document.getElementById("leftBonus");
    var getBonus = document.getElementById("getBonus");
    if (Number(resultLeft)>0){
-     leftBonus.innerHTML = "还有"+result+"个KOL";
+     leftBonus.innerHTML = "还有"+resultLeft+"个KOL";
    }else if(Number(result)>0){
      getBonus.innerHTML = "您已经撸过了";
    }else{
